@@ -161,6 +161,7 @@ class LLM:
         self.n_calls = 0
         self.n_cached = 0
         self.n_reasoning_leaks = 0  # responses with reasoning tokens although reasoning was off
+        self._oai_clients: dict[str, AsyncOpenAI] = {}  # "oai:<base_url>|<model>" backends
 
     # ---- budget -------------------------------------------------------------------------
     def _worst_case(self, model: str, messages: list[dict], max_tokens: int) -> float:
@@ -211,6 +212,10 @@ class LLM:
             return await self._chat_adaption(model, messages, temperature=temperature,
                                              max_tokens=max_tokens, sample=sample,
                                              retries=retries)
+        if model.startswith("oai:"):
+            return await self._chat_oai(model, messages, temperature=temperature,
+                                        max_tokens=max_tokens, sample=sample,
+                                        json_mode=json_mode, retries=retries)
         request: dict = {
             "model": model,
             "messages": messages,
@@ -277,14 +282,16 @@ class LLM:
         self.n_calls += 1
         return ChatResult(**result, cached=False)
 
-    async def _send(self, request: dict, extra: dict, retries: int):
+    async def _send(self, request: dict, extra: dict, retries: int,
+                    client: AsyncOpenAI | None = None):
+        client = client or self._client
         delay = 1.0
         attempt, rate_hits = 0, 0
         while True:
             try:
                 async with self._sem:
                     t0 = time.time()
-                    resp = await self._client.chat.completions.create(**request, extra_body=extra)
+                    resp = await client.chat.completions.create(**request, extra_body=extra)
                     latency = time.time() - t0
                 if not resp.choices:
                     raise RuntimeError(f"empty choices: {getattr(resp, 'error', None)}")
@@ -379,6 +386,69 @@ class LLM:
                   "provider": "adaption"}
         self._store.put(key, result, (time.time(), key, model, "adaption", cost, pt, ct, rt,
                                       latency))
+        self._spent_cache = (0.0, 0.0)
+        self.spent_usd += cost
+        self.n_calls += 1
+        return ChatResult(**result, cached=False)
+
+    # ---- OpenAI-compatible endpoint named in the model string ---------------------------------
+    def _oai_client(self, base_url: str) -> AsyncOpenAI:
+        cli = self._oai_clients.get(base_url)
+        if cli is None:
+            cli = AsyncOpenAI(base_url=base_url, api_key=os.getenv("SWARM_OAI_API_KEY") or "EMPTY",
+                              max_retries=0, timeout=180)
+            self._oai_clients[base_url] = cli
+        return cli
+
+    @staticmethod
+    def parse_oai_model(model: str) -> tuple[str, str]:
+        """"oai:<base_url>|<model_name>" -> (base_url, model_name)."""
+        spec = model.removeprefix("oai:")
+        if "|" not in spec:
+            raise ValueError(f"expected 'oai:<base_url>|<model_name>', got {model!r}")
+        base_url, name = spec.rsplit("|", 1)
+        if not base_url.startswith(("http://", "https://")) or not name:
+            raise ValueError(f"expected 'oai:<base_url>|<model_name>', got {model!r}")
+        return base_url.rstrip("/"), name
+
+    async def _chat_oai(self, model: str, messages: list[dict], *, temperature: float,
+                        max_tokens: int, sample: int, json_mode: bool,
+                        retries: int) -> ChatResult:
+        """Self-hosted or third-party OpenAI-compatible server (vLLM, SGLang, TGI), e.g. a
+        fine-tuned model: "oai:http://host:8000/v1|my-model". Same cache, ledger and budget as
+        the other backends. Cost comes from SWARM_OAI_USD_PER_M_IN / _OUT (USD per million
+        tokens, default 0, e.g. for a GPU paid by the hour)."""
+        base_url, name = self.parse_oai_model(model)
+        request: dict = {"model": name, "messages": messages, "temperature": temperature,
+                         "max_tokens": max_tokens, "seed": int(sample) % 2_147_483_647}
+        if json_mode:
+            request["response_format"] = {"type": "json_object"}
+        key = hashlib.sha256(json.dumps({**request, "sample": sample, "endpoint": base_url,
+                                         "v": CACHE_VERSION}, sort_keys=True).encode()).hexdigest()
+        if (hit := self._store.get(key)) is not None:
+            self.n_cached += 1
+            return ChatResult(**{**hit, "cached": True})
+        p_in = float(os.getenv("SWARM_OAI_USD_PER_M_IN", "0")) / 1e6
+        p_out = float(os.getenv("SWARM_OAI_USD_PER_M_OUT", "0")) / 1e6
+        reserve = sum(len(m.get("content", "")) for m in messages) / 3.0 * p_in + max_tokens * p_out
+        if self.total_spent() + self._reserved + reserve > self.budget_usd:
+            raise BudgetExceeded(f"spend ${self.total_spent():.2f} would exceed "
+                                 f"${self.budget_usd:.2f}")
+        self._reserved += reserve
+        try:
+            resp, latency = await self._send(request, {}, retries, client=self._oai_client(base_url))
+        finally:
+            self._reserved -= reserve
+        usage = resp.usage
+        pt = usage.prompt_tokens if usage else 0
+        ct = usage.completion_tokens if usage else 0
+        details = getattr(usage, "completion_tokens_details", None) if usage else None
+        rt = int(getattr(details, "reasoning_tokens", 0) or 0)
+        cost = pt * p_in + ct * p_out
+        result = {"text": resp.choices[0].message.content or "", "model": model,
+                  "prompt_tokens": pt, "completion_tokens": ct, "cost_usd": cost,
+                  "reasoning_tokens": rt, "provider": "oai"}
+        self._store.put(key, result, (time.time(), key, model, "oai", cost, pt, ct, rt, latency))
         self._spent_cache = (0.0, 0.0)
         self.spent_usd += cost
         self.n_calls += 1
