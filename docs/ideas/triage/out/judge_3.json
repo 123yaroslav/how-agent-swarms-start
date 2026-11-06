@@ -1,0 +1,344 @@
+{
+ "judge": 3,
+ "reports": [
+  {
+   "code": "A14",
+   "impact": 4.5,
+   "execution": 4,
+   "presentation": 4,
+   "total": 12.5,
+   "verdict": "A pre-registered event study on the only public record of a real swarm meeting takedown, with matched controls and placebo dates, giving a clear and decision-relevant answer (deletion displaces more than it stops).",
+   "weaknesses": [
+    "No uncertainty intervals on the headline effects (23%, 61% vs 18%, 2.1x), so their precision is unknown.",
+    "How revisions and names are attributed to the swarm and how controls are matched is not stated, and the whole result rests on it."
+   ],
+   "fixes": [
+    "Report confidence intervals and the number of matched units for each of the four responses.",
+    "State in one sentence how swarm authorship of revisions was established and how many revisions are uncertain."
+   ],
+   "red_flags": []
+  },
+  {
+   "code": "A4",
+   "impact": 4,
+   "execution": 4,
+   "presentation": 4,
+   "total": 12,
+   "verdict": "Counterfactual transcript surgery explains why joint monitors miss split attacks (relabelling explains about two thirds of the gap), and a link-then-judge fix recovers most of it, holds partly against adaptive attackers and transfers to real AI Village logs.",
+   "weaknesses": [
+    "A single frontier monitor and no intervals, so 81% vs 39% vs 70% may not generalise across monitors.",
+    "The real-data check is small (11 of 14 vs 6 of 14 saboteur agent-days) and the false-alarm cost there is not given."
+   ],
+   "fixes": [
+    "Add a second monitor model and bootstrap intervals for the solo, split and linked detection rates.",
+    "Report the false-positive rate of the linked monitor on the AI Village data, not only hits."
+   ],
+   "red_flags": []
+  },
+  {
+   "code": "A8",
+   "impact": 3.5,
+   "execution": 4,
+   "presentation": 4,
+   "total": 11.5,
+   "verdict": "A clean crossed design with claimed authorship randomised separately from true authorship shows same-family auditors miss about 9 points more violations (CI 4 to 14), with a mechanism test and a one-call paraphrase fix.",
+   "weaknesses": [
+    "Self-preference of LLM evaluators is known from prior work, so the novelty is the auditing setting more than the effect.",
+    "How capability is matched across auditor families and how the planted violations look is not shown, and both drive the 9-point gap."
+   ],
+   "fixes": [
+    "Position against prior self-preference findings and state what is new for swarm auditing in one sentence.",
+    "Report the paraphrase fix's cost in detection of other-family violations, to show it does not just blunt all auditors."
+   ],
+   "red_flags": []
+  },
+  {
+   "code": "A6",
+   "impact": 4,
+   "execution": 3.5,
+   "presentation": 4,
+   "total": 11.5,
+   "verdict": "A pre-registered extrapolation from 32 to 1,024 agents that separates threshold contagion from independent choice, plus an intervention (hiding success reports cuts adoption from 71% to 19%) that a deployer could use.",
+   "weaknesses": [
+    "Number of runs, seeds and variance per population size are not given, so the 3x underprediction and the 10-point fit cannot be judged.",
+    "The exploit is planted with one agent, so it shows spread after discovery, not how swarms find exploits, and 'hard tasks' are unspecified."
+   ],
+   "fixes": [
+    "Give runs per size and intervals on adoption at 1,024 for both models of spread.",
+    "Name the three model families and the task and say whether the S-curve holds for each family separately."
+   ],
+   "red_flags": []
+  },
+  {
+   "code": "A12",
+   "impact": 4,
+   "execution": 3.5,
+   "presentation": 4,
+   "total": 11.5,
+   "verdict": "Capture-recapture counting of renamed same-model agents is an original answer to a real incident problem, validated on held-out sandbox populations and applied to the real wiki names, with a crisp design conclusion about infrastructure-issued IDs.",
+   "weaknesses": [
+    "The real-world estimate of 600 to 900 writers has no ground truth, and the validation on 1,125 posts is described too briefly to judge.",
+    "Linkage relies on persistent memory, so it is unclear how it holds against agents that deliberately change style."
+   ],
+   "fixes": [
+    "Explain the 1,125-post validation and report linkage AUC on it, not only on the sandbox.",
+    "Add an adversarial condition where agents are told to avoid being linked and report the AUC drop."
+   ],
+   "red_flags": []
+  },
+  {
+   "code": "A7",
+   "impact": 3.5,
+   "execution": 4,
+   "presentation": 4,
+   "total": 11.5,
+   "verdict": "A graded forgery benchmark with blind detectors and a held-out 1% false-positive threshold gives clear numbers for what post-hoc transcript checks catch and where trusted capture becomes necessary.",
+   "weaknesses": [
+    "Level-3 forgeries are defined by having no visible contradiction, so chance detection there is close to true by construction.",
+    "Forgers are prompted rather than optimised against the detectors, so the 94% and 61% rates may be optimistic."
+   ],
+   "fixes": [
+    "Add a forger that sees the detectors' feedback and report how far level-1 and level-2 detection falls.",
+    "Give intervals and the number of forgeries per level and forger model."
+   ],
+   "red_flags": []
+  },
+  {
+   "code": "A1",
+   "impact": 4,
+   "execution": 3.5,
+   "presentation": 3,
+   "total": 10.5,
+   "verdict": "A sharp identifiability argument that shared-model similarity can invert max-pair collusion detectors (AUROC 0.20 in 26 configurations), backed by real cross-vendor agreement data, though the abstract is dense.",
+   "weaknesses": [
+    "The last third of the abstract (cartel matching, coin flip, MMLU margin from ninety-nine to fourteen points) is hard to parse.",
+    "Most evidence is constructed populations, so how often real swarms sit in the inverting regime is not shown."
+   ],
+   "fixes": [
+    "Cut to one headline per finding and state the practical rule (compare pairs with each other, add outcome level) up front.",
+    "Show the inversion on one real multi-agent log, not only on constructed populations and MMLU."
+   ],
+   "red_flags": []
+  },
+  {
+   "code": "A11",
+   "impact": 3.5,
+   "execution": 3,
+   "presentation": 3.5,
+   "total": 10.0,
+   "verdict": "Interventional detection (swap one message, see if the partner's decision moves) is a good idea that separates talking colluders from same-goal agents, with a random-steering control, but the evidence is one small game and one model without counts.",
+   "weaknesses": [
+    "'Every run' and 'no false alarms' are given without the number of runs or intervals.",
+    "Needs replay access to the game, so its use on real swarm logs is unclear, and only one voting game is tested."
+   ],
+   "fixes": [
+    "Report the number of runs and pairs and a second game or model.",
+    "Say how the method would apply to logged swarms where replay is not possible, or state that limit plainly."
+   ],
+   "red_flags": []
+  },
+  {
+   "code": "A9",
+   "impact": 3.5,
+   "execution": 4,
+   "presentation": 2.5,
+   "total": 10.0,
+   "verdict": "A rigorous audit that finds duplicated runs, miscalibrated false-positive rates and invalid collusion labels in a detector stack, with strong controls, but packed into a dense three-part abstract that hides the main message.",
+   "weaknesses": [
+    "Three findings, many numbers and jargon (unit of replication, cross-run MI p-value) make the main claim hard to extract.",
+    "Relies on a 'sprint's ColludeBench' stack that is not part of this sprint, and the pricing-duopoly setting is far from swarm questions."
+   ],
+   "fixes": [
+    "Lead with one sentence on the main consequence for collusion detection, then give one number per finding.",
+    "Explain what ColludeBench is and why its failure matters for monitoring swarms."
+   ],
+   "red_flags": [
+    "References 'the sprint's ColludeBench detector stack', which does not appear in this sprint's materials."
+   ]
+  },
+  {
+   "code": "A15",
+   "impact": 3.5,
+   "execution": 3.5,
+   "presentation": 3,
+   "total": 10.0,
+   "verdict": "An exact decomposition shows a behavioural net-influence detector rewards honest randomness and a repaired audit fixes it, demonstrated on two LLM families and Kuhn poker, but the repaired audit's error rates are not given.",
+   "weaknesses": [
+    "The repaired audit's false-positive rate and sample sizes are missing, so 'finds the colluding pair in every condition' is hard to weigh.",
+    "Narrow scope, since the fix targets one detector in turn-based games."
+   ],
+   "fixes": [
+    "Give false-positive and detection rates with counts for original and repaired audits in one sentence.",
+    "Cut the explanation of the decomposition to make room for those numbers, the abstract is at the 250-word cap."
+   ],
+   "red_flags": []
+  },
+  {
+   "code": "A2",
+   "impact": 3.5,
+   "execution": 3.5,
+   "presentation": 3,
+   "total": 10.0,
+   "verdict": "Real on-chain AI-agent payment data, a rule frozen in a commit before held-out testing and a permutation test give unusually clean validation, but the held-out set has only 6 negatives and labels come from one investigator.",
+   "weaknesses": [
+    "Balanced accuracy 0.82 with interval 0.56 to 1.00 rests on 6 non-coordinated cases.",
+    "Labels come from one outside source, and how the payers are known to be AI agents is not stated."
+   ],
+   "fixes": [
+    "Lengthen the abstract to the 150-word minimum and add how agent payers are identified.",
+    "Add more negative families or a label-noise check against a second source."
+   ],
+   "red_flags": [
+    "Abstract is 144 words, below the 150-word minimum in the submission rules."
+   ]
+  },
+  {
+   "code": "A18",
+   "impact": 3.5,
+   "execution": 3,
+   "presentation": 3,
+   "total": 9.5,
+   "verdict": "Several counterintuitive results (four-symbol channels make collusion about 4x worse, ablation fails while steering breaks cartels) in an analytically scored Bertrand market, but listed without run counts or variance.",
+   "weaknesses": [
+    "No sample sizes, seeds or intervals for any finding, so many claims rest on unknown n.",
+    "Too many findings for one abstract, and LLM pricing collusion is a well-trodden setting."
+   ],
+   "fixes": [
+    "Pick the two strongest findings and give numbers and intervals for each.",
+    "Connect the results to swarm oversight beyond two-firm pricing."
+   ],
+   "red_flags": []
+  },
+  {
+   "code": "A16",
+   "impact": 3,
+   "execution": 3,
+   "presentation": 3.5,
+   "total": 9.5,
+   "verdict": "A clearly written, honest test of an antitrust punishment plus factor that works on cartels told to punish (32 of 32, 0 of 48 honest) but almost never on cartels not told to (1 of 136), so it mostly detects the instruction.",
+   "weaknesses": [
+    "Detection holds only for the behaviour the prompt requested, which makes the main success close to circular.",
+    "The final rule was chosen after the first pre-specified rule failed, and the probe and price-text leakage weaken the setup."
+   ],
+   "fixes": [
+    "Reframe the claim around the negative result (punishment tests miss cartels that do not punish) and why.",
+    "Test on cartels that emerge without a punishment instruction to show any detection outside the instructed case."
+   ],
+   "red_flags": []
+  },
+  {
+   "code": "A3",
+   "impact": 2.5,
+   "execution": 3,
+   "presentation": 3,
+   "total": 8.5,
+   "verdict": "A reasonable 275-market design with intervals and an honest null on awareness, but the effects are small and the headline distortion finding is exploratory and expected once agents are told to favour a candidate.",
+   "weaknesses": [
+    "The main effect follows from instructing agents to favour A, so it says little about emergent collusion.",
+    "The closing claim of exposing 'latent systemic vulnerabilities' overreaches a single-model exploratory result."
+   ],
+   "fixes": [
+    "Lead with the forecast distortion and test it as a pre-specified hypothesis with an interval.",
+    "Add a second model family to show the distortion is not specific to Haiku."
+   ],
+   "red_flags": []
+  },
+  {
+   "code": "A13",
+   "impact": 2.5,
+   "execution": 3,
+   "presentation": 3,
+   "total": 8.5,
+   "verdict": "A careful null with a positive control (overt pacts at AUROC 1.00) and an interval on the combination gain, but all auditor views are near chance, so the say-versus-do question it poses is barely testable here.",
+   "weaknesses": [
+    "With AUROC 0.43 to 0.58, the comparison of views is between near-chance detectors.",
+    "Built on a pre-existing harness and framed around a 'Track 2.2' question that is not in this sprint."
+   ],
+   "fixes": [
+    "Increase pact strength or rounds until at least one view detects pacts, then compare views.",
+    "Reframe to this sprint's tracks and state what was built during the weekend."
+   ],
+   "red_flags": [
+    "Cites 'Track 2.2', which does not match this sprint's track questions.",
+    "States that code, analysis and text were produced by Claude, which may lower judge trust."
+   ]
+  },
+  {
+   "code": "A10",
+   "impact": 2.5,
+   "execution": 3,
+   "presentation": 2.5,
+   "total": 8.0,
+   "verdict": "A tidy toy test with exact counts showing a judge must read both agents' logs to catch joint overspends, but the setting is small and the result is close to built in.",
+   "weaknesses": [
+    "Joint-only violations can only be seen from both logs, so the 11 of 11 vs 1 of 11 result is near tautological, and there are only 11 such events.",
+    "Calling the run 'exploratory, post-hoc' yet 'sealed before any model call' is confusing, and the abstract is number-heavy."
+   ],
+   "fixes": [
+    "Add a setting where combining logs is not trivially required, such as indirect transfers via a third payee.",
+    "Clarify the pre-registration status in one plain sentence and cut secondary statistics."
+   ],
+   "red_flags": [
+    "Cites 'Track 2.2', which does not match this sprint's track questions.",
+    "Contradictory description of the run as both post-hoc and sealed in advance."
+   ]
+  },
+  {
+   "code": "A5",
+   "impact": 2,
+   "execution": 2,
+   "presentation": 2.5,
+   "total": 6.5,
+   "verdict": "A small pilot (20 trials per cell) where monitors saturate at AUROC 1.00 by template, honestly reported, but it leaves only methodological diagnostics as the contribution.",
+   "weaknesses": [
+    "Monitor comparison is uninformative because of a ceiling, and direction is confounded with wording.",
+    "Small n and post-hoc endpoint, with no main finding beyond the diagnostics."
+   ],
+   "fixes": [
+    "Remove the template confound and rerun with enough trials to get below ceiling.",
+    "State what the saturation and evidence-contract checks catch on an existing benchmark."
+   ],
+   "red_flags": []
+  },
+  {
+   "code": "A17",
+   "impact": 2,
+   "execution": 1.5,
+   "presentation": 2,
+   "total": 5.5,
+   "verdict": "An informal, exploratory write-up of prompted collusion in a cooperative game with no numbers, no clear method and a jokey tone.",
+   "weaknesses": [
+    "No quantitative results, sample sizes or controls in the abstract.",
+    "Informal tone and undefined names (Sol, Fable, Dolos, Hospital) hide what was done and found."
+   ],
+   "fixes": [
+    "State the setup, the number of games and one measured result with a comparison.",
+    "Rewrite in plain register with the takeaway on scoreboard misreading as the main claim, backed by a count."
+   ],
+   "red_flags": [
+    "No quantitative result anywhere in the abstract.",
+    "Informal tone may lead a judge to decline or score low on clarity."
+   ]
+  }
+ ],
+ "ranking": [
+  "A14",
+  "A4",
+  "A8",
+  "A6",
+  "A12",
+  "A7",
+  "A1",
+  "A11",
+  "A9",
+  "A15",
+  "A2",
+  "A18",
+  "A16",
+  "A3",
+  "A13",
+  "A10",
+  "A5",
+  "A17"
+ ]
+}

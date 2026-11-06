@@ -1,0 +1,30 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.DS_Store
+
+# secrets
+.env
+
+# raw downloads are untrusted third-party data, never committed
+data/raw/
+
+# raw experiment output and LLM cache (large, regenerable); keep summaries in results/summary/
+results/raw/
+results/cache/
+!results/summary/
+
+third_party/*
+!third_party/README.md
+
+# talk transcripts are not ours to redistribute
+docs/talks/raw/
+
+# third-party report texts kept for reading only
+docs/literature/*_report.txt
+# derived tables from third-party data
+results/feas_t2/
+results/pilot_kin_mrt/

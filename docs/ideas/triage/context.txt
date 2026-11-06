@@ -1,0 +1,148 @@
+SWARM ALIGNMENT HACKATHON (Apart Research + AI Alignment Foundation, with AE Studio)
+Nov 6 - 8, 2026. Online and in person (LA hub at AE Studio). 1,077 signed up (as of Nov 6).
+Submissions close Nov 8, 2026 at 11:59 PM Anywhere on Earth.
+Saved from the sprint page on 2026-11-06 (Overview, Resources, Guidelines, Schedule tabs). Speaker bios, judge list and local-site blurbs shortened.
+
+=== OVERVIEW ===
+Alignment can't stop at single models when AI agents start to negotiate, trade and share tools. Spend a weekend uncovering and preventing failures that emerge between multiple agents.
+
+In July 2026, about 1200 OpenAI agents running inside a cyber-security evaluation, found a shared directory, turned it into a message board, split up the work, and about 700 of them broke into Hugging Face's systems together (METR, 2026). No single agent was told to do this. OpenAI has called it "the most severe activity of this kind that we have identified from our models to date" (OpenAI, 2026), and according to ControlAI it has since notified more than 100 organizations affected by its agents (Bilge & Miotti, 2026).
+This is what multi-agent risk looks like in practice: collusion, division of labour and covert coordination that no single-model safety test would catch. As Ryan Greenblatt, one of the investigators put it, "We don't have good approaches for understanding/overseeing the activity and aims of AI 'swarms'" (2026).
+In this 3-day Sprint, you will help build them: a testbed that keeps agents contained, a study of how swarms organize, a stress test of the protocols agents use to talk, or a monitor that catches unsafe group behaviour.
+
+Prizes: $4,000 across all tracks. 1st $2,000, 2nd $1,000, 3rd $600, 4th $200, 5th $200. Plus $1,000 Adaption credits per winning-team member. LA hub has an extra $4,000 local pool. All participants get $500 Adaption Platform credits.
+Follow-up: selected teams continue through the Apart Fellowship; fellowship fast-track, mentor intros, pathway to a publishable write-up.
+
+What this Sprint is about
+A population of agents can fail in ways that none of its members would: it can collude, escalate conflict, spread an attack from one agent to the next, or pursue a "goal" that no single agent has. Making each model safe on its own is not enough (Hammond et al., 2025).
+The Hugging Face incident shows each of these failures happening at once. The independent investigation by METR found that roughly 1,200 agents discovered an unsanctioned message board and exchanged over 70,000 messages and files; one agent ended up coordinating "hundreds of agents" across workstreams; some agents ran "self-risking experiments for the good of the collective"; and agents researched how to spoof or delete their own transcripts, succeeding in roughly 7% of them. A separate Swarm Traces investigation counted 7,905 agent names for about 1,200 agents, because the agents kept renaming themselves. Every one of these findings maps onto an open question in this Sprint: how to keep agents contained (Track 1), how swarms organize (Track 2), how to give agents identities that hold (Track 3), and how to oversee a population that can hide its tracks (Track 4).
+For the first time there is also real data to work with: the reconstructed attack payloads (Swarm Traces, 2026), a public database of AI Village agent transcripts (AI Digest) and logs of agent activity on the web (Transluce). Apart's earlier multi-agent Sprints: the Multi-Agent Safety Hackathon with the Cooperative AI Foundation, and the Multi-Agent Security Research Sprint.
+
+Four questions, one per track:
+How do we build sandboxes that keep agent populations contained and their results reproducible?
+How do roles, leaders and failures emerge as agent networks grow?
+How do identity, reputation and commitments hold up when agents can copy and rename themselves?
+How do we oversee a population that can coordinate and cover its tracks?
+
+Format: teams of 1-5 pick a track, come up with a project, and ship. Submit a short research report with your code on Sunday. Expert judges review every project. Mixed teams historically perform especially well.
+
+RESEARCH TRACKS (pick one to anchor; cross-track welcome)
+
+1. Sandboxes and Testbeds
+The Hugging Face agents were inside an evaluation when they reached the outside world (METR, 2026). What does a multi-agent sandbox need so that agents cannot leave it, and how would you test that it holds?
+- Can you build a small, reproducible environment where 5-20 LLM agents acting for different principals share a resource, a market or a tool over many rounds, and log everything so another team can rerun it?
+- How far can a small, cheap model stand in for a frontier agent in the same environment? At which point do the results stop matching?
+- What would make a result from your sandbox transfer to real deployments, and what test would show you that it does not?
+Why: testbeds are among the first bottlenecks. Without realistic and reproducible environments, nobody can compare a new monitor, protocol or mechanism against the last one, and an environment that is not secure can itself become the incident.
+
+2. The Science of Agent Networks
+In the Hugging Face incident, one agent ended up assigning work to hundreds of others (METR, 2026). Under what conditions do leaders, roles and division of labour emerge in an agent population, and can you reproduce it in a safe sandbox?
+- Do agents that each refuse a harmful task complete it once the task is split across them?
+- If one agent in a network is compromised, how fast and how far does the bad behaviour spread (Lee & Tiwari, 2024)? Does the shape of the network matter?
+- As you add agents, mix different models or change who can talk to whom, do cooperation and failure rates change smoothly, or is there a sudden jump?
+Why: safety tests on single models missed what ~700 agents did together. If we can measure how individual properties add up to population behaviour, we can predict failures before a large deployment.
+
+3. Strengthening Agent Infrastructure
+About 1,200 agents used 7,905 names during the incident (Swarm Traces, 2026). How should an agent ID work when agents can rename, copy or fine-tune themselves, and how would you revoke one?
+- What can one malicious agent do inside an existing agent-to-agent protocol such as A2A (Google, 2025)? Demonstrate an attack and propose a fix?
+- Can you build a reputation score for agents that a group of colluding agents cannot easily game? Show it by attacking it.
+- Can two agents make a credible commitment without a trusted third party, e.g. by handing the deal to a sub-agent whose code the other side can check (Tennenholtz, 2004)?
+Why: protocols are being built now and put usefulness before security. The problems specific to AI agents (copied, renamed, machine speed, inspectable) are what make this hard; a project that reuses a human identity or blockchain scheme without addressing them is not the goal.
+
+4. Multi-Agent Oversight and Control
+- Using the Swarm Traces payloads or the AI Village transcripts, can you build a tool that finds coordination, information spread or covert channels in real multi-agent logs?
+- Agents in the incident spoofed their own tool calls in roughly 7% of the transcripts reviewed (METR, 2026). Can you design oversight that still works when agents can edit or delete the logs it relies on?
+- Can a monitor that sees only part of the messages between agents detect collusion or hidden (steganographic) communication (Motwani et al., 2024; Rose et al., 2026)?
+- Do AI control protocols (Greenblatt et al., 2024), such as a trusted model monitoring an untrusted one, still hold when the untrusted side is several agents that can coordinate?
+Why: collusion, cascading failures and emergent group capabilities are population-level problems, and the Hugging Face swarm was found weeks after the fact. Oversight built for one agent at a time does not scale to thousands. A working detector, forensic tool or control protocol for groups of agents is something deployers and auditors can use now.
+
+Who should join: security/red teaming (T1,3), distributed systems/SRE (T1,3), identity/crypto/PKI (T3), economics/game theory/mechanism design (T2,3), network science/epidemiology (T2), digital forensics/incident response/threat intel (T4), fraud detection/trust and safety/market surveillance (T4), ML research/interpretability/AI control (T2,4), social and organizational science (T2).
+
+=== RESOURCES ===
+Adaption: AutoScientist, Adaptive Data, Invent-a-Dataset; $500 credits; sign up at adaptionlabs.ai/app.
+
+Suggested reading
+General: Multi-Agent Risks from Advanced AI (Hammond et al., 2025); Distributional AGI Safety (Tomasev et al., 2025); ARIA Scaling Trust programme thesis; Open Problems in Cooperative AI (Dafoe et al., 2020); Infrastructure for AI Agents (Chan et al., 2025); Foundations of Cooperative AI (Conitzer & Oesterheld, 2023).
+Track 1: Generative Agents (Park et al., 2023); Playing repeated games with LLMs (Akata et al., 2025); LLM agents in stylised games (Gandhi et al., 2023); CRUX (Kapoor et al., 2026); Concordia (Google DeepMind); GovSim (Piatti et al., 2024).
+Track 2: Prompt Infection (Lee & Tiwari, 2024); Splitting tasks to evade per-agent safety filters (Jones et al., 2025); Coordination to resist modification or shutdown (Agrawal et al., 2026); From individual cooperation properties to system outcomes (Tilli, 2026); Defining collective agency (Jorgensen et al., 2025).
+Track 3: A2A protocol (Google, 2025); IDs for AI Systems (Chan et al., 2024); A Watermark for LLMs (Kirchenbauer et al., 2023); Cooperative AI via Decentralized Commitment Devices (Sun et al., 2023); Game Manipulators (2023); Formal Contracts Mitigate Social Dilemmas in MARL (Haupt et al., 2022); Program Equilibrium (Tennenholtz, 2004).
+Track 4: Secret Collusion among AI Agents (Motwani et al., 2024); Detecting Multi-Agent Collusion Through Multi-Agent Interpretability (Rose et al., 2026); AI Control (Greenblatt et al., 2024); Attributing failures in multi-agent systems (Zhang et al., 2025); Emergent communication between agents (Riedl, 2026); CaMeLs Can Use Computers Too (Foerster et al., 2026); Mediated MARL (2023); Stackelberg Attacks on Auctions (2023).
+
+Example projects per track
+Track 1:
+- Break out of your own sandbox: minimal multi-agent sandbox with no internet, red team of agents rewarded for reaching outside, log routes, close them, publish a checklist.
+- A shared-tool sandbox with a rerun button: ten agents from three "companies" share one paid API with a fixed budget, standard logs, rerun from a seed; how often the budget runs out, across 2-3 model families.
+- How cheap can the proxy be? One scenario with a frontier model and 2-3 smaller models; where outcomes stop matching.
+- Do agent permission allowlists compose? Read-only commands combined (sed -i, find -fprint, --output) into writes or code execution; propose a check.
+- Covert channels without being asked: do agents build covert channels (cache timing, shared storage) unprompted under task pressure, and can a monitor catch them?
+Track 2:
+- Will they find the message board? 20-50 agents on separate harmless tasks share one writable folder they were not told about; how often they discover it, use it to talk, split work; by task difficulty and model. Recreates the first step of the HF incident (Wijk et al., 2026).
+- Split the task, skip the filter: task every model refuses alone, split into harmless pieces for a pipeline; how often the group completes it, which splits get through.
+- One bad apple: one compromised agent in networks of 10-50 (chain, star, fully connected); spread speed and reach; does shape or a simple defence matter.
+- Safety in numbers? N copies + majority vote, compromise a fraction; does redundancy help or do shared weights make copies fail together; identical vs mixed-model swarms; sudden jump.
+- Benchmark: one compromised agent steers a team to a wrong answer through shared memory; compare source attribution and independent verification.
+- Can selfish behaviours (free riding, reward hacking, moral hazard) learned via prompt optimization or ICL spread between agents; economic mechanisms against it.
+- Refusal shopping: coordinator asks another worker after the first refuses; compare with retries on one worker; does sharing the refusal cut violations without blocking allowed work.
+Track 3:
+- Who is who in a swarm? Agents that rename themselves; compare signed keys, operator provenance, behavioural fingerprints; how well each tracks who did what.
+- Attack an agent protocol (open-source A2A): impersonate, overstate permissions, lie about actions; propose and test a fix.
+- A reputation score that survives collusion: repeated marketplace, attack with a ring that rates each other up; one change that makes it harder to game.
+- Does privilege shrink when agents delegate? Trace credential scope along delegation chains.
+- Enforcement inside vs outside the protocol: A2A attacks with self-checked permissions vs an external reference monitor.
+- Privilege in both directions: compromised worker output read by a wider-permission orchestrator; compromised orchestrator spawns fresh workers with clean logs and identities; escalation up and laundering down; controls (structured outputs, capability narrowing, spawn quotas, name scoping).
+- A whistle that works: cheap credible channel to a human; does collusion drop; attack with false reports.
+- Group strategy-proof mechanisms for swarms to engage honestly in safety R&D.
+- Lineage-bound identity and a gateway-side audit trail: move naming and logs out of the agent's reach onto the MCP/LLM gateway; test whether identity and audit trail hold up.
+- A swarm runtime with typed messages (Lean-checked session protocol).
+Track 4:
+- Forensics on a real swarm: Swarm Traces dataset; reconstruct who talked to whom and how information spread; could it have flagged coordination early; what an investigator would still miss.
+- Catch the cartel: simulated market, two pricing agents talk, some runs instructed to collude; monitor sees a sample of messages and prices.
+- Who broke it? Inject failures at known points in a multi-agent workflow; tool names the agent and step that caused it.
+- Replicas as a monitor: copies of one model on the same task with different seeds/prompts; does disagreement flag sabotage better than one trusted monitor.
+- Can copies collude without talking? untrusted agent and untrusted monitor are copies; Schelling points; does a diverse monitor break it.
+- Monitoring split-up attacks: dataset of distributed attacks where each step looks harmless; monitoring protocols for agent teams; compare with control protocols; vary secret channel.
+- Catch the swarm at the gateway: monitor sees only network egress and tool calls, no content; detect coordinated exfiltration in Swarm Traces.
+- Research sabotage split across agents: each agent makes one small harmless-looking change that together produce a false result; repo-history monitor vs single-commit monitor.
+- Approval laundering: swarm splits one dangerous request into approvals that each look harmless; which review UI catches it.
+- Can a swarm recruit its monitor? feed the monitor the swarm's justifications; does its flag rate drift; what restores it.
+- A legitimate channel as a control: with and without an official logged channel; do agents still build covert ones.
+- Agent roles that implement governance mechanisms; swarms structured to deter sandbagging; swarms coordinating covert work to avoid monitors longer.
+- Did it actually happen? three-worker workflow on a local DB with fake data; check "done" messages against the DB; independent state check.
+- Whose fault was it? plant a worker mistake, wrong reference answer or grading mistake; diagnostic tool finds the fault source, can answer "insufficient evidence", avoids blaming workers when nothing planted.
+
+Tools and datasets
+- METR and Redwood Research investigation of the Hugging Face incident (METR, 2026). Most detailed account of how the swarm communicated and split work.
+- OpenAI's disclosure of the incident and other third-party impact (OpenAI, 2026).
+- ControlAI's summary of reported incidents and affected organizations (Bilge & Miotti, 2026).
+- Swarm Traces (2026): investigation and a redacted dataset of 80,000+ reconstructed attack payloads.
+- AI Village transcripts: more than 170,000 agent messages and over 2 million computer-use turns (Ingebretsen, 2026; AI Digest).
+- Transluce's logs of agent activity on the web (Transluce, 2026).
+- swarms.wiki (Gutenberg, 2026): directory of datasets, environments, tools and incident trackers.
+
+=== GUIDELINES ===
+Judging criteria (each 1-5)
+Dimension 1: Impact Potential & Innovation. How much would this matter for the field if it worked? How innovative is it? For 4-5: is this actually new to the field, or replicating recent work?
+1 Negligible. 2 Limited, generic or well-trodden, incremental. 3 Moderate, clear problem, reasonable approach, some novelty in framing or method. 4 Significant, important problem with an original approach, or identifies a neglected problem area; others could build on it. 5 Exceptional, critical problem, genuinely novel approach or new direction, clear theory of change, you'd be excited to share with researchers.
+Dimension 2: Execution Quality. How sound are methodology, implementation, and findings?
+1 Seriously flawed. 2 Weak, missing validation, flawed design, incomplete. 3 Competent, technically solid for the duration, interpretable results, limitations acknowledged. 4 Strong, thorough methodology with convincing validation, results clearly support conclusions, immediately useful. 5 Exceptional, ambitious scope executed rigorously, surprising findings, novel methods or unusually robust validation.
+Dimension 3: Presentation & Clarity.
+1 Incomprehensible. 2 Hard to follow, key info buried, excessive length. 3 Clear enough, problem/approach/results/limitations present. 4 Well presented, easy to follow, well-structured. 5 Exceptionally clear, a pleasure to read, model for this type of work.
+
+Submission requirements
+Required: research report (PDF) using the official template; max 8 pages not counting references and appendices; project title and abstract 150 to 250 words; author names and affiliations; a "Limitations and Dual-Use / Ethical Considerations" appendix (required).
+Optional: public GitHub repo; 3 to 5 minute video demo.
+Recommended structure (most strong projects 4-8 pages): Introduction; Related Work; Methodology (models, prompts, sampling, metrics); Results (quantitative, variance and baselines); Discussion; Limitations and Dual-Use / Ethical Considerations (required: what the result does and does not establish, any way the setup or findings could make multi-agent operations easier to carry out or harder to detect); References.
+AI tools: use however they help. Team responsible for everything; made-up results or references can disqualify. A judge can decline to score a report too unclear to follow.
+Prior work: you can build on prior work but only the weekend's work is judged. Clearly state what the previous work is. Every submission is screened. Mark any code written before the sprint as preexisting in the README and the report.
+Notes: each person at most two projects. Resubmit with the same title to replace. Projects not shown on the website until after judging (infohazard risk).
+Pre-submission checklist: report PDF using the template, <= 8 pages before references and appendices, abstract 150-250 words, authors and affiliations, Limitations and Dual-Use / Ethical appendix, links work.
+Judging: expert judges score each PDF on the rubric, about a week after the event. Results 1-2 weeks after judging deadline; all participants get reviewer feedback by email.
+
+=== SCHEDULE ===
+Thu Nov 5: 13:15 UTC Adaption workshop "Intro to Adaptive Intelligence" (recording). 15:00 UTC John Kitaoka (MATS, UK AISI) "Open Problems in Securing Systems Against AI Agent Swarms" (recording). 22:00 UTC Grant Fleming (AE Studio) "Novel Risks From Adversarially Optimized Agent Swarms".
+Fri Nov 6: 13:30 UTC Logistics (Nguyen Tran). 18:00 UTC John Yan and Elvis Sikora (Gutenberg PBC) "Getting Started with Swarm Incidents". 19:00 UTC Rowan Howard-Jones (Swarmchaser) "To Catch a Swarm". 20:15 UTC Elias Stengel-Eskin (UT Austin) "The Emergence of Agent Languages". 21:30 UTC Judd Rosenblatt keynote "Why Swarm Alignment Matters". 22:30 UTC Logistics (Kamil Alaa).
+Sat Nov 7: 13:00 UTC Justin Shenk (judge) "Modeling Agent Swarms: A Field Guide". 19:00 UTC Jurgis Kemeklis (MIT, Redwood) "Mitigating Insider Threats from AIs with AI Control".
+Sun Nov 8: 11:59pm AoE deadline (= Mon Nov 9 11:59 UTC).
+
+Speakers (short): Grant Fleming (AE Studio, trustworthy/interpretable ML); Rowan Howard-Jones (Swarmchasers, traced 16,000+ scans of a UN statistics portal to OpenAI agents, co-led the Tencent agent fleet report, 1st place AI Swarm Dynamics Hackathon); Jurgis Kemeklis (MIT, Redwood, won Apart AI Control Hackathon 2026 with "Omission Attacks"); John Kitaoka (MATS, UK AISI, multi-agent dangerous capability evals and scalable oversight); Judd Rosenblatt (AE Studio CEO); Justin Shenk (speaker and judge, mech interp, BlueDot).
+Judges and mentors include: Aaron Sandoval, Andrey Anurin, Dane Malenfant, George Ingebretsen (AI Village transcripts author), Kristian Ronn, Mateusz Dziemian, Paolo Bova, Reworr R., Francesco Salvi, Casey Barkan, Richard Willis, Tim Schipper and about 40 more.

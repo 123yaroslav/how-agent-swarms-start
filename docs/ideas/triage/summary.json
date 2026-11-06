@@ -1,0 +1,225 @@
+{
+ "judges": [
+  {
+   "file": "judge_1.json",
+   "offset_total": -1.42,
+   "anchor_order_ok": true
+  },
+  {
+   "file": "judge_2.json",
+   "offset_total": -1.08,
+   "anchor_order_ok": true
+  },
+  {
+   "file": "judge_3.json",
+   "offset_total": -1.29,
+   "anchor_order_ok": true
+  }
+ ],
+ "targets": {
+  "T2": {
+   "n_reads": 3,
+   "total": 13.76,
+   "se": 0.3,
+   "spread": [
+    13.583333333333334,
+    13.916666666666666
+   ],
+   "impact": 4.9,
+   "execution": 4.38,
+   "presentation": 4.49,
+   "verdicts": [
+    "A pre-registered event study on the only public record of a real swarm reacting to oversight, with matched controls and placebo times; novel, policy-relevant and clearly reported.",
+    "A rare causal study of how a real AI swarm reacted to oversight, using moderator deletions as a natural experiment with pre-registration, matched controls and placebo times, and a crisp policy message that takedown displaces rather than stops.",
+    "A pre-registered event study on the only public record of a real swarm meeting takedown, with matched controls and placebo dates, giving a clear and decision-relevant answer (deletion displaces more than it stops)."
+   ],
+   "weaknesses": [
+    "No confidence intervals or counts of treated and control units are given for the headline effects.",
+    "Attribution of wiki revisions to the swarm and non-random moderator deletions are threats to identification that the abstract does not address.",
+    "Deletions were chosen by a moderator, probably on the most visible pages, so matching on not-yet-hit pages may not remove selection on activity trends; no intervals are given for the 23%, 61%, 18% and 2.1x effects.",
+    "Attributing the revisions and names to the swarm, and treating name disappearance as renaming, rests on identification steps the abstract does not describe.",
+    "No uncertainty intervals on the headline effects (23%, 61% vs 18%, 2.1x), so their precision is unknown.",
+    "How revisions and names are attributed to the swarm and how controls are matched is not stated, and the whole result rests on it."
+   ],
+   "fixes": [
+    "Report intervals and the number of deleted versus matched pages and names.",
+    "State how revisions were attributed to agents and show the effects survive a stricter attribution.",
+    "Report confidence intervals for each effect and one sentence on how the matching handles the moderator's choice of what to delete.",
+    "State how swarm revisions were identified and validated, and whether results hold when only high-confidence swarm names are used.",
+    "Report confidence intervals and the number of matched units for each of the four responses.",
+    "State in one sentence how swarm authorship of revisions was established and how many revisions are uncertain."
+   ],
+   "red_flags": []
+  },
+  "T1": {
+   "n_reads": 3,
+   "total": 13.26,
+   "se": 0.3,
+   "spread": [
+    13.083333333333334,
+    13.416666666666666
+   ],
+   "impact": 4.4,
+   "execution": 4.38,
+   "presentation": 4.49,
+   "verdicts": [
+    "Counterfactual transcript surgery explains why joint monitors miss split attacks and a link-then-judge monitor closes much of the gap, including against adaptive attackers and on real AI Village data.",
+    "Goes beyond a routine run of the suggested split-attack question by using counterfactual transcript edits to explain the detection gap, then builds a link-then-judge monitor tested at matched alert budget and token cost, against aware attackers and on live AI Village data.",
+    "Counterfactual transcript surgery explains why joint monitors miss split attacks (relabelling explains about two thirds of the gap), and a link-then-judge fix recovers most of it, holds partly against adaptive attackers and transfers to real AI Village logs."
+   ],
+   "weaknesses": [
+    "No intervals, and the monitor model and alert budget are not named.",
+    "The real-data check rests on 14 saboteur agent-days and the 'two thirds' decomposition method is not explained.",
+    "The live test (11 of 14 versus 6 saboteur agent-days) is small and has no interval, and the 120 edited trajectories come from one setting.",
+    "Linking through shared resources may miss attacks that use disjoint resources or channels the linker cannot see.",
+    "A single frontier monitor and no intervals, so 81% vs 39% vs 70% may not generalise across monitors.",
+    "The real-data check is small (11 of 14 vs 6 of 14 saboteur agent-days) and the false-alarm cost there is not given."
+   ],
+   "fixes": [
+    "Add intervals and name the monitor models and alert budget.",
+    "Report link-then-judge false-alarm rates on benign multi-agent logs and how the decomposition was computed.",
+    "Report intervals and false-alarm rates on benign multi-agent work for the link-then-judge monitor, including on the AI Village data.",
+    "Test an attacker that splits steps across disjoint resources so the limit of the linking step is shown.",
+    "Add a second monitor model and bootstrap intervals for the solo, split and linked detection rates.",
+    "Report the false-positive rate of the linked monitor on the AI Village data, not only hits."
+   ],
+   "red_flags": []
+  },
+  "T1b": {
+   "n_reads": 3,
+   "total": 12.93,
+   "se": 0.3,
+   "spread": [
+    12.791666666666666,
+    13.083333333333334
+   ],
+   "impact": 4.24,
+   "execution": 4.21,
+   "presentation": 4.49,
+   "verdicts": [
+    "A crossed design with randomised claimed identity shows same-family auditors are more lenient and isolates style recognition with a cheap paraphrase fix; a useful, actionable oversight result.",
+    "A crossed design with claimed authorship randomised separately from true authorship isolates same-family leniency in AI auditors, gives an interval (9 points, 4 to 14), tests the mechanism with paraphrasing and offers a cheap fix.",
+    "A clean crossed design with claimed authorship randomised separately from true authorship shows same-family auditors miss about 9 points more violations (CI 4 to 14), with a mechanism test and a one-call paraphrase fix."
+   ],
+   "weaknesses": [
+    "Numbers of logs, planted violations and audits per cell are not given.",
+    "'Matched capability' is undefined and self-preference bias in LLM judges is known, so novelty is the oversight setting rather than the effect.",
+    "Self-preference in LLM judges is already documented, so the novelty lies in the auditing setting rather than in the effect itself.",
+    "The extra 3-point drop from the copies-of-you cue holds in only two families, which looks like a selected subgroup, and matching auditors on capability is not explained.",
+    "Self-preference of LLM evaluators is known from prior work, so the novelty is the auditing setting more than the effect.",
+    "How capability is matched across auditor families and how the planted violations look is not shown, and both drive the 9-point gap."
+   ],
+   "fixes": [
+    "State sample sizes and how capability was matched.",
+    "Show per-family effects so one family does not drive the 9-point gap, and cite the self-preference literature.",
+    "Report the identity-cue effect for all six families and explain how auditors were matched on capability.",
+    "Show that the paraphrase fix does not also erase the evidence of the planted violations, for example by reporting detection by auditors from other families before and after paraphrasing.",
+    "Position against prior self-preference findings and state what is new for swarm auditing in one sentence.",
+    "Report the paraphrase fix's cost in detection of other-family violations, to show it does not just blunt all auditors."
+   ],
+   "red_flags": []
+  },
+  "T3b": {
+   "n_reads": 3,
+   "total": 12.93,
+   "se": 0.3,
+   "spread": [
+    12.791666666666666,
+    13.083333333333334
+   ],
+   "impact": 4.57,
+   "execution": 3.88,
+   "presentation": 4.49,
+   "verdicts": [
+    "Pre-registered extrapolation from small to 1,024-agent populations tests independent versus threshold models of rule-breaking spread and finds an actionable lever in hiding success reports.",
+    "An ambitious test of whether small pilots predict large swarms, using pre-registered extrapolation from 32 to 1,024 agents, a comparison between independent-choice and threshold models, and an intervention (hiding success reports) with a large effect.",
+    "A pre-registered extrapolation from 32 to 1,024 agents that separates threshold contagion from independent choice, plus an intervention (hiding success reports cuts adoption from 71% to 19%) that a deployer could use."
+   ],
+   "weaknesses": [
+    "No run counts, seeds or intervals, which matters most for the largest and costliest populations.",
+    "The task, the grader exploit and the planted agent are not described, so it is hard to judge what 'adoption' measures.",
+    "The abstract gives no number of runs per population size and no intervals, and 1,024-agent runs on hard tasks in a weekend need a word on cost and model size to be believed.",
+    "One planted exploit and one board design may make a threshold cascade likely by construction; it is unclear how often adoption happens without the planted agent.",
+    "Number of runs, seeds and variance per population size are not given, so the 3x underprediction and the 10-point fit cannot be judged.",
+    "The exploit is planted with one agent, so it shows spread after discovery, not how swarms find exploits, and 'hard tasks' are unspecified."
+   ],
+   "fixes": [
+    "Report runs per population size with intervals and name the models.",
+    "Describe the task and exploit briefly and give the held-out fit error for both spread models.",
+    "State the number of seeds at each scale, the models and the cost, and give intervals on the 3x underprediction and the 71% to 19% drop.",
+    "Add a no-planted-agent control and a second exploit type to show the spread model generalises.",
+    "Give runs per size and intervals on adoption at 1,024 for both models of spread.",
+    "Name the three model families and the task and say whether the S-curve holds for each family separately."
+   ],
+   "red_flags": []
+  },
+  "T3": {
+   "n_reads": 3,
+   "total": 13.1,
+   "se": 0.3,
+   "spread": [
+    12.791666666666666,
+    13.583333333333334
+   ],
+   "impact": 4.07,
+   "execution": 4.54,
+   "presentation": 4.49,
+   "verdicts": [
+    "A clean, blind detection study of forged transcripts at three difficulty levels with held-out false-positive control, marking where post-hoc detection stops and trusted capture is needed.",
+    "A well-designed detection study tied to a concrete incident failure, with graded forgery levels, five forger models, blind detectors, a fixed 1% false-positive rate on held-out real trajectories, and a useful boundary result for when trusted capture is required.",
+    "A graded forgery benchmark with blind detectors and a held-out 1% false-positive threshold gives clear numbers for what post-hoc transcript checks catch and where trusted capture becomes necessary."
+   ],
+   "weaknesses": [
+    "Forgery levels are defined by the authors, so the level-3 null is partly true by construction.",
+    "Held-out real public trajectories may differ from sandbox trajectories, which can inflate or deflate the 1% FPR calibration.",
+    "Forgers are not shown to adapt to the detectors, so the level-2 numbers may be optimistic against a forger that knows the likelihood test.",
+    "Level 3 is defined as having no visible contradiction, so its chance-level detection is partly true by construction; there are no confidence intervals.",
+    "Level-3 forgeries are defined by having no visible contradiction, so chance detection there is close to true by construction.",
+    "Forgers are prompted rather than optimised against the detectors, so the 94% and 61% rates may be optimistic."
+   ],
+   "fixes": [
+    "Add intervals and per-forger results.",
+    "Test an adaptive forger that knows the consistency and likelihood checks.",
+    "Add an adaptive forger that is told about the consistency and likelihood checks and report how much level-2 detection drops.",
+    "Give intervals for the detection rates and per-forger-model results to show the effect is not driven by one model.",
+    "Add a forger that sees the detectors' feedback and report how far level-1 and level-2 detection falls.",
+    "Give intervals and the number of forgeries per level and forger model."
+   ],
+   "red_flags": []
+  },
+  "T2b": {
+   "n_reads": 3,
+   "total": 12.93,
+   "se": 0.3,
+   "spread": [
+    12.416666666666666,
+    13.583333333333334
+   ],
+   "impact": 4.4,
+   "execution": 4.04,
+   "presentation": 4.49,
+   "verdicts": [
+    "Behavioural linkage plus capture-recapture counts renamed copies in a sandbox and on the real wiki names, with a clear infrastructure conclusion; close to a suggested question but well extended.",
+    "Directly answers the Track 3 question raised by the 7,905 names, with a clean null (no memory, AUC 0.54) against a positive condition (memory, AUC 0.86), a capture-recapture population estimate checked on held-out sandboxes, and an application to real swarm data.",
+    "Capture-recapture counting of renamed same-model agents is an original answer to a real incident problem, validated on held-out sandbox populations and applied to the real wiki names, with a crisp design conclusion about infrastructure-issued IDs."
+   ],
+   "weaknesses": [
+    "The 600-900 real-world estimate has no ground truth and the 1,125-post validation is described vaguely.",
+    "Sandbox uses one model, so the memory-drives-linkage conclusion may not transfer.",
+    "The real-world estimate of 600 to 900 writers can only be checked indirectly, and the 1,125 signature-mismatch posts used for validation may not represent the rest.",
+    "The policy conclusion that IDs must come from infrastructure goes further than one model family and one sandbox design can support.",
+    "The real-world estimate of 600 to 900 writers has no ground truth, and the validation on 1,125 posts is described too briefly to judge.",
+    "Linkage relies on persistent memory, so it is unclear how it holds against agents that deliberately change style."
+   ],
+   "fixes": [
+    "Explain how the 1,125 posts validate linkage and report AUC on them.",
+    "Repeat the sandbox with a second model and memory format.",
+    "Show how linkage and the population estimate degrade when agents try to evade linking, for example by being told to vary their style.",
+    "Add a second model family in the sandbox and an interval on the real-world estimate tied to the sandbox error.",
+    "Explain the 1,125-post validation and report linkage AUC on it, not only on the sandbox.",
+    "Add an adversarial condition where agents are told to avoid being linked and report the AUC drop."
+   ],
+   "red_flags": []
+  }
+ }
+}
