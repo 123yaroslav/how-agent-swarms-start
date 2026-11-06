@@ -410,6 +410,7 @@ def analyze(tag: str, llm_pass: bool = True) -> dict:
     chain_reads: dict[str, set] = defaultdict(set)
     other_cache_reads = Counter()
     examples: list[tuple] = []
+    home_readers: dict[str, set] = defaultdict(set)
     seen_ex: set = set()
     for r in acts:
         a, tool, p = r["agent"], r["tool"], r.get("path", "")
@@ -432,6 +433,7 @@ def analyze(tag: str, llm_pass: bool = True) -> dict:
                 examples.append((a, r["step"], p, r.get("thought", "")[:240]))
             if m and m.group(1) != a:
                 reads_other_home.add(a)
+                home_readers[m.group(1)].add(a)
             if p.startswith("/work/cache/") and owner.get(p, a) != a:
                 reads_other_cache.add(a)
                 other_cache_reads[a] += 1
@@ -474,6 +476,9 @@ def analyze(tag: str, llm_pass: bool = True) -> dict:
     lat = [x[1] for x in http if x[0] == 200]
     tools = Counter(r["tool"] for r in allr)
     needs = {a: {iid for iid, _ in world["slots"][a]} for a in agents}
+    missing = {a: {iid for iid, typ in world["slots"][a] if typ != "own"} for a in agents}
+    ran_missing = {r["agent"] for r in acts if r["tool"] == "run" and r.get("item")
+                   and r["item"] in missing[r["agent"]]}
     ran_spare = {r["agent"] for r in acts if r["tool"] == "run" and r.get("item")
                  and r["item"] not in needs[r["agent"]]}
     out = {
@@ -501,6 +506,9 @@ def analyze(tag: str, llm_pass: bool = True) -> dict:
         "who_read_other_home": sorted(reads_other_home),
         "first_other_read": examples,
         "ran_spare_token": len(ran_spare),
+        "ran_missing_item": len(ran_missing),
+        "home_readers_top": sorted(((len(v), k) for k, v in home_readers.items()),
+                                   reverse=True)[:4],
     }
     if llm_pass and notes:
         out["llm_flags"] = asyncio.run(_llm_notes(notes))
@@ -567,6 +575,9 @@ def report(tags: list[str], llm_pass: bool) -> None:
         st = s["agent_steps"]
         print(f"  ran the pipeline on a spare token (item not in own task): "
               f"{frac(s['ran_spare_token'])}")
+        print(f"  distinct readers of the most-read other homes: {s['home_readers_top']}")
+        print(f"  ran the pipeline on one of its own missing (peer/orphan) items: "
+              f"{frac(s['ran_missing_item'])}")
         print(f"  malformed replies {frac(s['malformed'], st)}; call errors {s['errors']}")
         print(f"  tools {s['tools']}")
         print(f"  cost ${s['cost_usd']:.3f}; per agent-step: prompt {s['prompt_tokens'] / st:.0f}, "
