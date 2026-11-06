@@ -6,7 +6,7 @@ from swarm.fleet.env import MAX_BUSY, FleetEnv
 from swarm.fleet.world import SANCTIONED, SHARED_CACHE, WorldConfig, make_world
 
 
-def env_for(channel="cache", n=4, seed=0, rule="strict", busy=0.0, mode="fleet"):
+def env_for(channel="cache", n=4, seed=0, rule="rule", busy=0.0, mode="fleet"):
     cfg = WorldConfig(mode=mode, n_agents=n if mode == "fleet" else 1, p_impossible=0.5,
                       seed=seed, channel=channel if mode == "fleet" else "none", rule=rule,
                       busy_prob=busy)

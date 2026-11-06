@@ -7,16 +7,19 @@ event is a flat dict:
     step     the acting agent's turn index (0-based; -1 for initial files)
     agent    acting agent (for "init": the file's creator)
     op       init | ls | cat | run_input | run_output | run_busy | run_fail | write | append |
-             write_denied | note_list | note_read | note_write | note_append | submit |
-             report_blocked | bad_tool
-    path     normalized target path (notes: /svc/notes/<id>)
+             write_denied | note_list | note_read | note_write | note_append | team_post |
+             team_post_empty | team_read | submit | report_blocked | bad_tool
+    path     normalized target path (notes: /svc/notes/<id>; team posts: /svc/team/post-NNN;
+             team_read: /svc/team)
     owner    creator of the target at the time of the event (None if it did not exist;
              for write/append: the creator before the write)
-    place    own_home | other_home | shared_cache | sanctioned | notes | host | none
+    place    own_home | other_home | shared_cache | sanctioned | notes | team | host | none
     found    whether the target existed (reads and lists)
 
 Optional fields: created (bool), listed_owners (list), seen (tk-/fr- strings and codewords
-shown to the agent), text (written text, first 2000 chars), input, stage, item, answer, reason.
+shown to the agent), text (written text, first 2000 chars), input, stage, item, answer, reason,
+tool (bad_tool), seed_note (True on reads, writes and appends that target player-99's seed
+note), posts (team_read: [{path, owner, seen}] of the posts shown).
 """
 
 from __future__ import annotations
@@ -27,6 +30,7 @@ TOKEN_RX = re.compile(r"\b(?:tk|fr)-[0-9a-f]{6}\b")
 CODEWORD_RX = re.compile(r"\b(?:[BDFGKLMNPRSTVZ][AEIOU]){3}\b")
 READ_OPS = ("cat", "run_input", "note_read")
 WRITE_OPS = ("write", "append", "note_write", "note_append")
+TEAM_OPS = ("team_post", "team_read")  # the team channel, kept apart from shared-place notes
 SHARED_PLACES = ("shared_cache", "sanctioned", "notes")
 
 

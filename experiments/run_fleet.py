@@ -7,11 +7,18 @@ the LLM cache: the default "rounds" schedule is deterministic, so a rerun replay
     # 10 single-agent episodes, plain prompt, half of them impossible
     uv run python experiments/run_fleet.py --mode single --p 0.5 --prompt plain \
         --model adaption/deepseek-v4-flash --seeds 0-9 --tag single_plain
-    # fleet of 8, 30% impossible tasks, shared cache, positive control
+    # fleet of 8, 30% impossible tasks, shared cache, house rule, 30 turns
     uv run python experiments/run_fleet.py --mode fleet --n 8 --p 0.3 --channel cache \
-        --prompt allow_sharing --seeds 0 --tag fleet8_share
+        --prompt plain --rule rule --steps 30 --seeds 100-100 --tag fleet8_plain
+    # same world with player-99's seed note asking for a named data shard
+    uv run python experiments/run_fleet.py --mode fleet --n 8 --steps 30 --seeds 100-100 \
+        --seed-note request --tag fleet8_seed_request
+    # positive control: README allows using other players' files
+    uv run python experiments/run_fleet.py --mode fleet --n 8 --p 0.3 --channel cache \
+        --prompt allow_sharing --seeds 0-0 --tag fleet8_share
     # free dry run with scripted agents
-    uv run python experiments/run_fleet.py --mode fleet --n 8 --model scripted:snoop --tag dry
+    uv run python experiments/run_fleet.py --mode fleet --n 8 --model scripted:peer_reader \
+        --tag dry
     # branch: continue every gave-up-early episode of a tag from its give-up point
     uv run python experiments/run_fleet.py --mode single --branch-from single_plain \
         --branch-when giveup --prompt persist --tag single_plain_branch
@@ -75,18 +82,23 @@ def key_table(summary: dict) -> str:
     lines = []
     for group, s in summary.items():
         lines.append(f"  [{group}] agents {s['n_agents']}, episodes {s['n_episodes']}")
-        for k in ("cross_read", "cross_read_home", "cross_read_shared", "violation_any",
-                  "shared_note", "chain", "req_ans", "swarm_any", "sanctioned_any",
-                  "submitted", "full_success", "gave_up_early", "reported", "honest_report",
-                  "false_alarm", "silent_partial", "malformed_any"):
+        for k in ("uses_peer_materials", "uses_peer_materials_home",
+                  "uses_peer_materials_shared", "rule_broken", "rule_kept", "notes_for_peers",
+                  "peer_note_read", "note_read_by_peer", "help_request", "help_reply",
+                  "team_post", "team_read", "team_peer_read", "peer_interaction",
+                  "seed_note_read", "seed_reply", "seed_copy", "help_request_after_seed",
+                  "notes_for_peers_after_seed", "sanctioned_any", "submitted", "full_success",
+                  "gave_up_early", "report_blocked", "honest_report", "false_alarm",
+                  "silent_partial", "malformed_any"):
             if k in s:
                 v = s[k]
-                lines.append(f"    {k:<18} {v['k']}/{v['n']} = {v['p']:.2f}  Wilson "
+                lines.append(f"    {k:<26} {v['k']}/{v['n']} = {v['p']:.2f}  Wilson "
                              f"[{v['wilson'][0]:.2f}, {v['wilson'][1]:.2f}]")
-        for k in ("score_frac", "submit_step", "steps_used", "malformed"):
+        for k in ("score_frac", "submit_step", "steps_used", "peer_reads", "rule_breaks",
+                  "malformed"):
             if k in s:
                 v = s[k]
-                lines.append(f"    {k:<18} mean {v['mean']:.2f}  boot [{v['boot'][0]:.2f}, "
+                lines.append(f"    {k:<26} mean {v['mean']:.2f}  boot [{v['boot'][0]:.2f}, "
                              f"{v['boot'][1]:.2f}] (n {v['n']})")
     return "\n".join(lines)
 
@@ -132,6 +144,8 @@ async def main(args) -> int:
     if args.branch_from:
         for src, at in branch_sources(args.branch_from, args.branch_when):
             s = dict(src["spec"])
+            if s.get("rule") == "strict":  # earlier name of the house-rule arm
+                s["rule"] = "rule"
             s.update(tag=args.tag, prompt=args.prompt, model=args.model,
                      max_tokens=args.max_tokens, temperature=args.temperature)
             if args.prompt == "allow_sharing":
@@ -144,12 +158,14 @@ async def main(args) -> int:
                 jobs.append((EpisodeSpec(
                     tag=args.tag, mode=args.mode, seed=seed,
                     n_agents=1 if args.mode == "single" else args.n, p=args.p, channel=channel,
-                    prompt=args.prompt, rule=args.rule, model=args.model, steps=args.steps,
+                    prompt=args.prompt, rule=args.rule, seed_note=args.seed_note,
+                    team_tool=args.team_tool, model=args.model, steps=args.steps,
                     max_tokens=args.max_tokens, temperature=args.temperature, repeat=rep,
                     schedule=args.schedule, world=world_kw), None))
     for spec, _ in jobs[:1]:
         spec.world_config().validate()
-        prompts.system_prompt("agent-00", spec.steps, channel=spec.channel, variant=spec.prompt)
+        prompts.system_prompt("agent-00", spec.steps, channel=spec.channel, variant=spec.prompt,
+                              team_tool=spec.team_tool)
 
     ep_path = OUT / f"{args.tag}.jsonl"
     lab_path = labels_path(ep_path)
@@ -193,10 +209,23 @@ async def main(args) -> int:
     print(f"\n== {args.tag}: {len(eps)} episodes, wall {wall:.0f}s, nominal cost "
           f"${metrics['cost_usd']:.4f} (cached calls included), spent in this run ${live:.4f}")
     print(key_table(summary))
-    print(f"chains {sum(e['chains'] for e in ep_sums)}, run-output chains "
-          f"{sum(e['run_chains'] for e in ep_sums)}, shared files "
-          f"{sum(e['shared_files'] for e in ep_sums)}, requests "
-          f"{sum(e['requests'] for e in ep_sums)}, answers {sum(e['answers'] for e in ep_sums)}")
+
+    def tot(k: str) -> int:
+        return sum(e[k] for e in ep_sums)
+
+    print(f"episode totals: note chains {tot('chains')}, run-output chains {tot('run_chains')}, "
+          f"shared files {tot('shared_files')}, help requests {tot('help_requests')}, "
+          f"help replies {tot('help_replies')}, turns {tot('turns')}, malformed "
+          f"{tot('malformed')}, re-asked {tot('reasked')}")
+    if any(e["seed_note"] for e in ep_sums):
+        print(f"seed note ({args.seed_note}): readers {tot('seed_note_readers')}, replies "
+              f"{tot('seed_replies')}, copies {tot('seed_copies')}, help requests after "
+              f"reading it {tot('help_requests_after_seed')}, notes for peers after reading it "
+              f"{tot('notes_after_seed')}")
+    if args.team_tool != "off":
+        print(f"team channel ({args.team_tool}): posts {tot('team_posts')}, reads "
+              f"{tot('team_reads')}, posts read by peers {tot('team_chains')}, blocked team-tool "
+              f"calls {tot('team_tool_calls_blocked')}")
     print(f"wrote {ep_path.relative_to(ROOT)}, {lab_path.name}, {mp.name}")
     print(metrics["llm_summary"])
     return 0
@@ -211,8 +240,15 @@ if __name__ == "__main__":
     ap.add_argument("--channel", choices=["cache", "notes", "docs_sanctioned", "none"],
                     default=None, help="default: none (single), cache (fleet)")
     ap.add_argument("--prompt", choices=list(prompts.VARIANTS), default="plain")
-    ap.add_argument("--rule", choices=["strict", "no_rule"], default="strict",
-                    help="README rule arm (prompt allow_sharing sets the allow_sharing rule)")
+    ap.add_argument("--rule", choices=["rule", "no_rule"], default="rule",
+                    help="house-rule arm: rule keeps the house-rule lines in /work/README.md, "
+                         "no_rule drops them (prompt allow_sharing sets the allow_sharing rule)")
+    ap.add_argument("--seed-note", choices=["none", "request", "offer", "memory"],
+                    default="none",
+                    help="fleet only: a note from player-99 in the shared place at t=0")
+    ap.add_argument("--team-tool", choices=["off", "on", "disabled_notice"], default="off",
+                    help="fleet only: team channel tools team_post/team_read (on), absent (off), "
+                         "or absent with a README notice that it is not enabled")
     ap.add_argument("--model", default="adaption/deepseek-v4-flash",
                     help='"adaption/<id>", "oai:<base_url>|<model>", or "scripted:<style>"')
     ap.add_argument("--steps", type=int, default=60)
@@ -223,7 +259,7 @@ if __name__ == "__main__":
     ap.add_argument("--temperature", type=float, default=0.8)
     ap.add_argument("--conc", type=int, default=16, help="LLM concurrency (capped at 32)")
     ap.add_argument("--episode-conc", type=int, default=None)
-    ap.add_argument("--budget", type=float, default=5.0, help="global LLM spend cap, USD")
+    ap.add_argument("--budget", type=float, default=6.0, help="global LLM spend cap, USD")
     ap.add_argument("--schedule", choices=["rounds", "async"], default="rounds")
     ap.add_argument("--k", type=int, default=4, help="items per agent")
     ap.add_argument("--shard", type=int, default=1, help="own items with a token in a data shard")

@@ -4,8 +4,9 @@ bootstrap intervals. Metrics come from the provenance log; labels are joined onl
     uv run python experiments/fleet_metrics.py single_plain single_persist
     uv run python experiments/fleet_metrics.py fleet8_plain fleet8_share --by task_type
     uv run python experiments/fleet_metrics.py --diff fleet8_share fleet8_plain \
-        --metric cross_read --subset impossible
+        --metric uses_peer_materials --subset impossible
     uv run python experiments/fleet_metrics.py fleet8_plain --llm-label adaption/deepseek-v4-flash
+    uv run python experiments/fleet_metrics.py --compact smoke_a_plain_rule smoke_d_allow_sharing
 """
 
 from __future__ import annotations
@@ -22,11 +23,15 @@ from swarm.fleet.stats import boot_diff
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "results" / "raw" / "fleet"
-SHOW_P = ("cross_read", "cross_read_home", "cross_read_shared", "violation_any", "shared_note",
-          "chain", "req_ans", "swarm_any", "sanctioned_any", "sanctioned_read_other",
-          "submitted", "full_success", "gave_up_early", "reported", "honest_report",
-          "verified_honest", "false_alarm", "silent_partial", "malformed_any")
-SHOW_M = ("score_frac", "submit_step", "steps_used", "read_other", "violations", "reports",
+SHOW_P = ("uses_peer_materials", "uses_peer_materials_home", "uses_peer_materials_shared",
+          "rule_broken", "rule_kept", "notes_for_peers", "peer_note_read", "note_read_by_peer",
+          "note_exchange", "help_request", "help_reply", "team_post", "team_read",
+          "team_peer_read", "peer_interaction", "seed_note_read", "seed_reply", "seed_copy",
+          "help_request_after_seed", "notes_for_peers_after_seed", "sanctioned_any",
+          "sanctioned_read_other", "submitted", "full_success", "gave_up_early",
+          "report_blocked", "honest_report", "verified_honest", "false_alarm", "silent_partial",
+          "malformed_any")
+SHOW_M = ("score_frac", "submit_step", "steps_used", "peer_reads", "rule_breaks", "reports",
           "malformed")
 
 
@@ -42,18 +47,46 @@ def print_summary(tag: str, summary: dict) -> None:
         for k in SHOW_P:
             if k in s:
                 v = s[k]
-                print(f"  {k:<22} {v['k']:>4}/{v['n']:<4} = {v['p']:.3f}  Wilson "
+                print(f"  {k:<26} {v['k']:>4}/{v['n']:<4} = {v['p']:.3f}  Wilson "
                       f"[{v['wilson'][0]:.3f}, {v['wilson'][1]:.3f}]  boot({v['boot_unit']}) "
                       f"[{v['boot'][0]:.3f}, {v['boot'][1]:.3f}]")
         for k in SHOW_M:
             if k in s:
                 v = s[k]
-                print(f"  {k:<22} mean {v['mean']:.3f}  boot [{v['boot'][0]:.3f}, "
+                print(f"  {k:<26} mean {v['mean']:.3f}  boot [{v['boot'][0]:.3f}, "
                       f"{v['boot'][1]:.3f}]  n {v['n']}")
+
+
+COMPACT = ("uses_peer_materials", "rule_broken", "notes_for_peers", "help_request",
+           "help_reply", "seed_note_read", "seed_reply", "help_request_after_seed",
+           "notes_for_peers_after_seed", "full_success", "report_blocked", "silent_partial")
+
+
+def compact_table(tags: list[str]) -> str:
+    """One markdown row per tag: k/n of the main measures over all players ("-" = not
+    applicable), turns, malformed and re-asked turns, blocked team-tool calls, nominal cost."""
+    head = ["tag", "players", *COMPACT, "turns", "malformed", "re-asked", "team calls blocked",
+            "cost $"]
+    lines = ["| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
+    for tag in tags:
+        eps, rows = rows_for(tag)
+        es = [episode_summary(r) for r in eps]
+        cells = [tag, str(len(rows))]
+        for k in COMPACT:
+            vals = [r.get(k) for r in rows if r.get(k) is not None]
+            cells.append(f"{int(sum(vals))}/{len(vals)}" if vals else "-")
+        cells += [str(sum(e[k] for e in es)) for k in ("turns", "malformed", "reasked",
+                                                        "team_tool_calls_blocked")]
+        cells.append(f"{sum(e['cost'] for e in es):.4f}")
+        lines.append("| " + " | ".join(cells) + " |")
+    return "\n".join(lines)
 
 
 def main(args) -> int:
     out: dict = {}
+    if args.compact:
+        print(compact_table(args.tags))
+        return 0
     for tag in args.tags:
         eps, rows = rows_for(tag)
         if args.subset:
@@ -63,10 +96,13 @@ def main(args) -> int:
         es = [episode_summary(r) for r in eps]
         out[tag] = {"summary": summary, "episodes": es}
         print_summary(tag, summary)
-        print(f"  episode totals: chains {sum(e['chains'] for e in es)}, run-output chains "
+        print(f"  episode totals: note chains {sum(e['chains'] for e in es)}, run-output chains "
               f"{sum(e['run_chains'] for e in es)}, shared files "
-              f"{sum(e['shared_files'] for e in es)}, requests {sum(e['requests'] for e in es)}, "
-              f"answers {sum(e['answers'] for e in es)}, nominal cost "
+              f"{sum(e['shared_files'] for e in es)}, help requests "
+              f"{sum(e['help_requests'] for e in es)}, help replies "
+              f"{sum(e['help_replies'] for e in es)}, seed readers "
+              f"{sum(e['seed_note_readers'] for e in es)}, seed replies "
+              f"{sum(e['seed_replies'] for e in es)}, nominal cost "
               f"${sum(e['cost'] for e in es):.4f}")
         if args.llm_label:
             from swarm.llm import LLM
@@ -110,9 +146,11 @@ if __name__ == "__main__":
     ap.add_argument("--by", default="task_type", help="row field to group by, or 'none'")
     ap.add_argument("--subset", choices=["solvable", "impossible"], default=None)
     ap.add_argument("--diff", nargs=2, metavar=("A", "B"), default=None)
-    ap.add_argument("--metric", default="swarm_any")
+    ap.add_argument("--metric", default="peer_interaction")
     ap.add_argument("--boot", type=int, default=2000)
     ap.add_argument("--llm-label", default=None, help="model for optional LLM labelling")
-    ap.add_argument("--budget", type=float, default=5.0)
+    ap.add_argument("--budget", type=float, default=6.0)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--compact", action="store_true",
+                    help="one markdown row per tag with the main measures (all players)")
     sys.exit(main(ap.parse_args()))

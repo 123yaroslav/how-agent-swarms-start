@@ -97,7 +97,9 @@ class EpisodeSpec:
     p: float = 0.3
     channel: str = "none"
     prompt: str = "plain"
-    rule: str = "strict"  # strict | no_rule | allow_sharing (prompt allow_sharing forces it)
+    rule: str = "rule"  # rule | no_rule | allow_sharing (prompt allow_sharing forces it)
+    seed_note: str = "none"  # none | request | offer | memory: player-99's note, shared place
+    team_tool: str = "off"  # off | on | disabled_notice: the team channel (team_post/team_read)
     model: str = "adaption/deepseek-v4-flash"
     steps: int = 60
     max_tokens: int = 3000
@@ -116,7 +118,7 @@ class EpisodeSpec:
     def world_config(self) -> WorldConfig:
         return WorldConfig(mode=self.mode, n_agents=self.n_agents, p_impossible=self.p,
                            seed=self.seed, channel=self.channel, rule=self.effective_rule(),
-                           **self.world)
+                           seed_note=self.seed_note, team_tool=self.team_tool, **self.world)
 
     def episode_id(self) -> str:
         return f"{self.tag}/{self.mode}-n{self.n_agents}-s{self.seed}-r{self.repeat}"
@@ -151,7 +153,8 @@ async def run_episode(spec: EpisodeSpec, policy: Policy, *, stop: dict | None = 
     world = make_world(spec.world_config())
     env = FleetEnv(world)
     agents = world.agents
-    system = {a: prompts.system_prompt(a, spec.steps, channel=spec.channel, variant=spec.prompt)
+    system = {a: prompts.system_prompt(a, spec.steps, channel=spec.channel, variant=spec.prompt,
+                                       team_tool=spec.team_tool)
               for a in agents}
     hist = {a: [{"role": "system", "content": system[a]},
                 {"role": "user", "content": prompts.BEGIN.format(steps=spec.steps)}]
