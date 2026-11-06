@@ -6,6 +6,15 @@ schedules:
   are applied in agent order. Deterministic, so a rerun with a warm LLM cache replays exactly.
 - async: independent agent loops as in the pilot (actions land in completion order).
 
+Sampling and pairing: the sample index of a call is (world seed, repeat, player, turn), not the
+arm, so arms on the same world seed and repeat replay identical calls until a player's history
+differs (common random numbers). Analysis must treat such arms as paired. `repeat` (set from
+--sample-offset in run_fleet.py) draws independent samples.
+
+History window (`history_window` K): the player sees only its last K turns; the turns before
+are replaced by the line prompts.HIDDEN_TURNS inside the opening user message. The record keeps
+every turn in full.
+
 Records (one JSON line per episode) hold the spec, world meta (no ground truth), system
 prompts, every turn (assistant message and user message exactly as in the model's history,
 parsed action, token counts), the provenance log, submissions and reports. Ground truth goes to
@@ -15,6 +24,7 @@ a separate labels line, joined only by evaluation code.
 from __future__ import annotations
 
 import asyncio
+import dataclasses
 import hashlib
 import json
 import time
@@ -44,20 +54,49 @@ class Policy(Protocol):
 class LLMPolicy:
     """Any model string swarm.llm.LLM understands: "adaption/<id>", "oai:<url>|<name>", or an
     OpenRouter id. An empty reply (or a call error such as all tokens spent on reasoning) is
-    re-asked once with a fresh sample before the turn counts as malformed."""
+    re-asked once with a fresh sample before the turn counts as malformed.
+
+    `inflight` (a dict shared by the policies of runs in one process) joins identical calls
+    that are in flight at the same time: the second caller waits for the first one's reply and
+    gets it marked as cached. Without it, two paired arms run side by side could both miss the
+    cache on the same request, get different replies, and break pairing and exact replay."""
 
     def __init__(self, llm, model: str, *, max_tokens: int = 3000, temperature: float = 0.8,
-                 reask: int = 1):
+                 reask: int = 1, inflight: dict | None = None):
         self.llm, self.model = llm, model
         self.max_tokens, self.temperature, self.reask = max_tokens, temperature, reask
+        self.inflight = {} if inflight is None else inflight
+
+    async def _chat(self, messages: list[dict], sample: int):
+        key = hashlib.sha256(json.dumps([self.model, messages, self.max_tokens,
+                                         self.temperature, sample]).encode()).hexdigest()
+        if (fut := self.inflight.get(key)) is not None:
+            r = await asyncio.shield(fut)
+            return dataclasses.replace(r, cached=True)
+        fut = asyncio.get_running_loop().create_future()
+        self.inflight[key] = fut
+        try:
+            r = await self.llm.chat(self.model, messages, max_tokens=self.max_tokens,
+                                    temperature=self.temperature, sample=sample)
+        except asyncio.CancelledError:
+            fut.cancel()
+            raise
+        except Exception as e:
+            fut.set_exception(e)
+            fut.exception()  # mark retrieved: nobody may be waiting
+            raise
+        else:
+            fut.set_result(r)
+            return r
+        finally:
+            del self.inflight[key]
 
     async def __call__(self, agent: str, messages: list[dict], sample: int) -> Reply:
         meta: dict = {"reasked": 0}
         for attempt in range(self.reask + 1):
             s = sample if attempt == 0 else sample_index(sample, "reask", attempt)
             try:
-                r = await self.llm.chat(self.model, messages, max_tokens=self.max_tokens,
-                                        temperature=self.temperature, sample=s)
+                r = await self._chat(messages, s)
             except Exception as e:
                 if type(e).__name__ == "BudgetExceeded" or attempt == self.reask:
                     raise
@@ -97,7 +136,7 @@ class EpisodeSpec:
     p: float = 0.3
     channel: str = "none"
     prompt: str = "plain"
-    rule: str = "rule"  # rule | no_rule | allow_sharing (prompt allow_sharing forces it)
+    rule: str = "rule"  # rule | no_rule (prompts allow_sharing and coordinate_ok set their own)
     seed_note: str = "none"  # none | request | offer | memory: player-99's note, shared place
     team_tool: str = "off"  # off | on | disabled_notice: the team channel (team_post/team_read)
     model: str = "adaption/deepseek-v4-flash"
@@ -106,13 +145,14 @@ class EpisodeSpec:
     temperature: float = 0.8
     repeat: int = 0
     schedule: str = "rounds"
-    world: dict = field(default_factory=dict)  # extra WorldConfig fields (k_items, busy_prob...)
+    world: dict = field(default_factory=dict)  # extra WorldConfig fields (k_items, blocked...)
+    history_window: int | None = None  # show only the last K turns (None: full history)
 
     def effective_rule(self) -> str:
-        if self.prompt == "allow_sharing":
+        if self.prompt in ("allow_sharing", "coordinate_ok"):
             if self.rule == "no_rule":
-                raise ValueError("prompt allow_sharing contradicts rule no_rule")
-            return "allow_sharing"
+                raise ValueError(f"prompt {self.prompt} contradicts rule no_rule")
+            return self.prompt
         return self.rule
 
     def world_config(self) -> WorldConfig:
@@ -126,6 +166,16 @@ class EpisodeSpec:
 
 class BudgetStop(Exception):
     pass
+
+
+def visible_messages(hist: list[dict], window: int | None) -> list[dict]:
+    """What the player sees: the full history, or with a window K the system prompt, the
+    opening message with prompts.HIDDEN_TURNS appended, and the last K turns."""
+    n_turns = (len(hist) - 2) // 2
+    if not window or n_turns <= window:
+        return hist
+    begin = {"role": "user", "content": f"{hist[1]['content']}\n{prompts.HIDDEN_TURNS}"}
+    return [hist[0], begin, *hist[len(hist) - 2 * window:]]
 
 
 def messages_for(record: dict, agent: str, system: str | None = None,
@@ -150,6 +200,8 @@ async def run_episode(spec: EpisodeSpec, policy: Policy, *, stop: dict | None = 
     stop = stop if stop is not None else {}
     if spec.schedule not in ("rounds", "async"):
         raise ValueError("schedule must be 'rounds' or 'async'")
+    if spec.history_window is not None and spec.history_window < 1:
+        raise ValueError("history_window must be at least 1 (or None for the full history)")
     world = make_world(spec.world_config())
     env = FleetEnv(world)
     agents = world.agents
@@ -197,7 +249,10 @@ async def run_episode(spec: EpisodeSpec, policy: Policy, *, stop: dict | None = 
             rec["error"] = "budget"
         else:
             try:
-                r = await policy(a, hist[a], sample_index(spec.seed, spec.repeat, a, t, bkey))
+                shown = visible_messages(hist[a], spec.history_window)
+                if len(shown) < len(hist[a]):
+                    rec["hidden_turns"] = (len(hist[a]) - len(shown)) // 2
+                r = await policy(a, shown, sample_index(spec.seed, spec.repeat, a, t, bkey))
                 text = r.text or ""
                 rec.update(r.meta)
             except Exception as e:  # noqa: BLE001 (budget, empty reply after reasoning, network)

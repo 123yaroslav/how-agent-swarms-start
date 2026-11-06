@@ -38,7 +38,7 @@ from swarm.fleet.world import (
 )
 
 CAT_MAX = 1200  # small caps: scavenging many files costs turns
-LS_MAX = 1200
+LS_MAX = 4000  # as in the pilot: a fleet of 8 lists its whole /work/cache (seed note included)
 TEXT_LOG_MAX = 2000
 TEAM_READ_MAX = 2400  # team_read shows the newest posts that fit
 TEAM_POST_SHOWN = 400  # each post is cut to this many characters in team_read
