@@ -16,6 +16,7 @@ dependencies = [
     "networkx>=3.3",
     "matplotlib>=3.9",
     "tqdm>=4.66",
+    "adaption>=0.19.0",
 ]
 
 [dependency-groups]

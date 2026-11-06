@@ -11,6 +11,23 @@ resolution-markers = [
 ]
 
 [[package]]
+name = "adaption"
+version = "0.19.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6d/b3/f7e6245f4456c0f6d9d1125244401e1475807c9e5c42eee4d2b194223d79/adaption-0.19.0.tar.gz", hash = "sha256:24358511f1bbc68b88745d1ad0fd4ddc857984eda91a2908c7a2386c61b27bfc", size = 326092, upload-time = "2026-11-05T12:11:11.285Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4d/e1/6677a3ba7e27668781d99244c87f94266de144692865a375b8e14db7e99d/adaption-0.19.0-py3-none-any.whl", hash = "sha256:540e80fcb537811ffe37044c7f89b8ee8956bd2fa28110392691d946223f785e", size = 202556, upload-time = "2026-11-05T12:11:10.011Z" },
+]
+
+[[package]]
 name = "annotated-types"
 version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -146,6 +163,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a9/95/a3dbbb5028f35eafb79008e7522a75244477d2838f38cbb722248dabc2a8/cycler-0.12.1.tar.gz", hash = "sha256:88bb128f02ba341da8ef447245a9e138fae777f6a23943da4540077d3601eb1c", size = 7615, upload-time = "2023-10-07T05:32:18.335Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl", hash = "sha256:85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30", size = 8321, upload-time = "2023-10-07T05:32:16.783Z" },
+]
+
+[[package]]
+name = "distro"
+version = "1.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fc/f8/98eea607f65de6527f8a2e8885fc8015d3e6f5775df186e443e0964a11c3/distro-1.9.0.tar.gz", hash = "sha256:2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed", size = 60722, upload-time = "2023-12-24T09:54:32.31Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/b3/231ffd4ab1fc9d679809f356cebee130ac7daa00d6d6f3206dd4fd137e9e/distro-1.9.0-py3-none-any.whl", hash = "sha256:7bffd925d65168f85027d8da9af6bddab658135b840670a223589bc0c8ef02b2", size = 20277, upload-time = "2023-12-24T09:54:30.421Z" },
 ]
 
 [[package]]
@@ -1240,6 +1266,7 @@ name = "swarm"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "adaption" },
     { name = "httpx" },
     { name = "matplotlib" },
     { name = "networkx" },
@@ -1262,6 +1289,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "adaption", specifier = ">=0.19.0" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "matplotlib", specifier = ">=3.9" },
     { name = "networkx", specifier = ">=3.3" },
