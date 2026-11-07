@@ -39,3 +39,4 @@ results/train/tmp/
 results/train/gen.log
 results/serve/
 results/models/
+report/content_filled.md

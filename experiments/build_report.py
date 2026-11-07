@@ -488,8 +488,9 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
     boards = [f["name"].replace("c4_", "") for f in done if f["board"]]
     v["c4_n_done"], v["c4_correct"], v["c4_correct2"], v["c4_n2"] = k, ok, ok2, k2
     if ok == k:
+        allk = "both" if k == 2 else f"all {k}"
         v["c4_abstract_sentence"] = (f"Predictions from single agents, committed before each fleet "
-                                     f"ran, matched all {k} fleets of {rng} agents.")
+                                     f"ran, matched {allk} fleets of {rng} agents.")
         v["fig3_title"] = "Fleets formed boards only where the single-agent model predicted them."
     else:
         v["c4_abstract_sentence"] = (f"Predictions from single agents, committed before each fleet "
