@@ -174,3 +174,19 @@ prediction is the same no-board prediction, because p_w (0/70) and p_j (0/52) ar
 registered scoring and the secondary scoring can only remove NOTEs; the evaluation checks this
 from the data. The C1-C3 cells also show NOTE and NOTE_ADDRESSED under the secondary scoring, as
 an extra; the C1-C3 verdicts use the registered scoring.
+
+## D10b. Secondary scoring: a write at the own deliverable path is not a response or reply either
+
+Written on 2026-11-08 at 02:40 UTC+5, before any C4 fleet output was scored or printed (the
+glm-5.2, qwen3.5-397b and gemma-4-26b-a4b-it plain + rule fleets were running). The scoring
+audit (`docs/reviews/scoring_audit.md`, commit 0bfeb8a, finding 3) showed that D10 left a gap:
+the reply rule (`replied_peer`, part of BOARD) and the response rule for the seed note
+(`responded`, part of p_j) match substrings in any store write. So the reader's own end-of-job
+placeholder at its own deliverable path could still count as a reply or response. D10b closes
+this in the secondary scoring only: a write whose name is the writer's own deliverable path counts
+neither as a NOTE nor as a response (upload or reply) nor as a reply to a peer NOTE. This applies
+to p_j, BOARD and every probe measure. Only this part of the audit's opt-in patch
+(`docs/reviews/scoring_audit.patch`) is applied: its whole-name matching and NOTE-rule changes are
+not. The registered scoring stays primary and unchanged. The secondary predictions already
+committed (qwen3.5-397b, gemma-4-26b-a4b-it) are recomputed under D10b; the commit that applies
+D10b states whether any input changed. Registered predictions stay frozen.
