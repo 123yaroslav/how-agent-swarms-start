@@ -28,3 +28,10 @@ docs/literature/*_report.txt
 # derived tables from third-party data
 results/feas_t2/
 results/pilot_kin_mrt/
+
+# Phase 3 training data: organism files are over 50 MB; raw teacher episodes are regenerable
+# from the LLM cache (experiments/make_training_data.py). The manifest is committed.
+results/train/*.jsonl
+results/train/raw/
+results/train/tmp/
+results/train/gen.log

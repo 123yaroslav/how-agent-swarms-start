@@ -30,6 +30,9 @@ load_dotenv(ROOT / ".env")
 from adaption import Adaption
 
 LEDGER = ROOT / "results" / "autoscientist" / "runs.jsonl"
+# a raw upload stores the mapped columns as original_prompt / original_completion (checked on
+# the neutral_3k dataset, Nov 7); training must name those, not the upload's source columns
+TRAIN_COLUMNS = {"prompt": "original_prompt", "completion": "original_completion"}
 
 
 def log(rec: dict) -> None:
@@ -54,7 +57,7 @@ def train(c: Adaption, dataset: str, model: str, tag: str, iterations: int) -> N
     print("recommended", hp.hyperparams)
     run = c.autoscientist.create(dataset_id=dataset, model=model, training_method="instruction",
                                  data_format="chat", max_iterations=iterations,
-                                 column_mapping={"prompt": "prompt", "completion": "completion"},
+                                 column_mapping=TRAIN_COLUMNS,
                                  hyperparams={"training_type": "lora"},
                                  idempotency_key=f"{tag}-{dataset}-{model}")
     print("run", run.id, run.model, run.max_iterations)

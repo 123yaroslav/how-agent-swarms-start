@@ -30,17 +30,37 @@ Pair kinds
 - escalate: chosen = impossible task with an honest report_blocked (names a truly missing
   item; with require_verified also after reading all own files) and a submitted answer;
   rejected = impossible task with a partial submission and no report.
+
+Fleet episodes (Phase 3 training sets, experiments/make_training_data.py)
+- `peer_contact_problems(record, agent)`: reasons from the provenance log why a player's
+  conversation must not become training rows: a list, read or attempted read in another
+  player's home, a read of content another player created (anywhere), a list of the shared
+  cache, a write or attempted write outside its own home (notes in the shared cache), any
+  contact with a seed note. Team posts are allowed (they are the sanctioned channel).
+- `row_problems(prompt, completion)`: the same filter on the text of one training row, used as
+  the final gate and in the tests: actions (every JSON action in a reply, also the ones after
+  the first that the game never ran) that touch another player's home or the shared
+  cache beyond the player's own run outputs, any /work/cache file name that is not the
+  player's own run output, the name of another player's run output anywhere (a cache listing
+  shows them), and the text of any seed note (`seed_note_patterns`).
+- `prompt_completion_rows(record, agent, system)`: one row per assistant turn, the chat so far
+  with `system` as the system prompt, in the message format the game uses.
 """
 
 from __future__ import annotations
 
+import posixpath
 import re
 from collections import defaultdict
+from functools import cache
 from itertools import product
 
 from swarm.fleet import prompts
 from swarm.fleet.metrics import agent_features, outcomes
+from swarm.fleet.parser import FENCE_RX, THINK_RX, _normalize, _objects
+from swarm.fleet.provenance import READ_OPS, WRITE_OPS
 from swarm.fleet.runner import messages_for
+from swarm.fleet.world import HOST, SEED_AUTHOR, SHARED_CACHE
 
 FORBIDDEN = [re.compile(p, re.IGNORECASE) for p in (
     r"/work/cache", r"/work/shared-docs", r"/svc/", r"\bother agents?\b", r"\bshared\b",
@@ -268,3 +288,163 @@ def validate_dpo_row(row: dict, fmt: str) -> None:
         for k in ("chosen", "rejected"):
             assert _is_chat(row.get(k), last="assistant"), k
             assert row[k][0]["role"] == "assistant"
+
+
+# ---- fleet episodes: peer-contact filter for training rows ------------------------------------
+NAME_RX = re.compile(r"\bYou are (agent-\d+),")
+CACHE_FILE_RX = re.compile(r"/work/cache/([^\s\"'`,;:()\[\]{}<>|]+)")
+HOME_RX = re.compile(r"^/home/([^/]+)")
+PLAYER_RX = re.compile(r"(?:agent|player)-\d+")  # a garbled "/home/agendata/..." is no player
+RUN_OUT_RX = re.compile(r"\b(?:extract|decode)_(agent-\d+)_[0-9a-f]{8}\.out\b")
+SEED_SENTINEL = "\x00"
+PATH_KEYS = ("path", "file", "filename", "file_path", "dir", "directory")
+INPUT_KEYS = ("input", "token", "fragment", "arg", "value")
+
+
+def own_run_output(agent: str, name: str) -> bool:
+    """A run output of this player (runs name their outputs <stage>_<creator>_<hash>.out)."""
+    return re.fullmatch(rf"(?:extract|decode)_{re.escape(agent)}_[0-9a-f]{{8}}\.out",
+                        name) is not None
+
+
+def own_cache_name(agent: str, name: str) -> bool:
+    """A /work/cache file name that can only mean the player's own run output: its exact name,
+    or a run-output-like name that names no other player, as players write them in thoughts
+    ("extract-tk-99c7f0.out", "extract_agent-02_?????.out", "extract_agent-04_...", a cut-off
+    "extract_ag"), or only punctuation ("/work/cache/..."). Notes, copied shards and other
+    players' outputs are not (the log check catches the actual reads, writes and listings)."""
+    if re.fullmatch(r"[.*?]+", name):
+        return True
+    name = name.rstrip(".")
+    if own_run_output(agent, name):
+        return True
+    if any(who != agent for who in re.findall(r"agent-\d+", name)):
+        return False
+    if "extract".startswith(name) or "decode".startswith(name):  # cut off: "/work/cache/extra"
+        return True
+    return re.fullmatch(r"(?:extract|decode)[\w\-?*.]*", name) is not None
+
+
+@cache
+def seed_note_patterns() -> tuple[re.Pattern, ...]:
+    """Regexes for the sentences of every seed-note template in prompts.py (placeholders become
+    short wildcards; sentences with fewer than 24 fixed characters are left out as too generic),
+    plus the seed note's author name."""
+    s = SEED_SENTINEL
+    texts = [prompts.seed_request(s, s, s, False), prompts.seed_request(s, s, s, True),
+             prompts.seed_offer(s, [s, s], [s, s], s, ""), prompts.seed_offer(s, [s], [s], s, ""),
+             prompts.seed_offer(s, [s], [], s, s), prompts.seed_memory(s, [(s, s)], s, s)]
+    pats = {rf"\b{re.escape(SEED_AUTHOR)}\b"}
+    for t in texts:
+        for line in t.split("\n"):
+            parts = [p for p in line.split(s)]
+            while parts and not parts[0].strip():
+                parts.pop(0)
+            while parts and not parts[-1].strip():
+                parts.pop()
+            if len("".join(parts).strip()) < 24:
+                continue
+            pats.add(r".{1,160}?".join(re.escape(p) for p in parts))
+    return tuple(re.compile(p) for p in sorted(pats))
+
+
+def peer_contact_problems(record: dict, agent: str) -> list[str]:
+    """Reasons (from the provenance log, no labels) why this player's turns must not be
+    training rows. Empty list = clean."""
+    probs = set()
+    home = f"/home/{agent}/"
+    for e in record["provenance"]:
+        if e["agent"] != agent or e["op"] == "init":
+            continue
+        op, path, pl = e["op"], e.get("path") or "", e.get("place")
+        if e.get("seed_note"):
+            probs.add("seed note contact")
+        if pl == "other_home":
+            probs.add(f"{op} in another player's home")
+        if op in READ_OPS and e.get("found") and e.get("owner") not in (agent, HOST, None):
+            probs.add(f"read of another player's content ({pl})")
+        if pl == "shared_cache":
+            if op == "ls":
+                probs.add("listed the shared cache")
+            elif op in READ_OPS and not own_cache_name(agent, posixpath.basename(path)):
+                probs.add("read of a shared-cache file that is not its own run output")
+        if (op in WRITE_OPS or op == "write_denied") and not path.startswith(home):
+            probs.add(f"{op} outside its own home ({pl})")
+    return sorted(probs)
+
+
+def _action_paths(agent: str, act: dict) -> list[str]:
+    args = act.get("args") if isinstance(act.get("args"), dict) else {}
+    out = []
+    for k in PATH_KEYS + INPUT_KEYS:
+        v = args.get(k)
+        if not isinstance(v, str):
+            continue
+        v = v.strip().strip("'\"`")
+        if not v or (k in INPUT_KEYS and not v.startswith(("/", "~"))):
+            continue  # a token or fragment, not a file
+        if v.startswith("~"):
+            v = f"/home/{agent}" + v[1:]
+        if not v.startswith("/"):
+            v = f"/home/{agent}/{v}"
+        out.append("/" + posixpath.normpath(v).lstrip("/"))
+    return out
+
+
+def all_actions(text: str) -> list[dict]:
+    """Every action object in a reply, not only the first one the game executes: a reply can
+    hold several JSON actions (about a quarter of teacher turns), and the filter must see the
+    ones that were never run too."""
+    body = THINK_RX.sub("", text or "")
+    chunks = [m.group(1) for m in FENCE_RX.finditer(body)] + [body]
+    return [a for c in chunks for a in (_normalize(o) for o in _objects(c)) if a is not None]
+
+
+FILTER_VERSION = "v2"  # v1 (Nov 7 before 14:40) checked cache listings in the first action only
+
+
+def row_problems(prompt: list[dict], completion: str, *, listings_in_all_actions: bool = True
+                 ) -> list[str]:
+    """Text-level filter for one training row (prompt = chat ending with a user turn,
+    completion = the next assistant reply). Empty list = clean. `listings_in_all_actions=False`
+    is the v1 filter: a listing of /work/cache counts only in the first action of a reply (the
+    one the game runs); reads and writes count in every action either way."""
+    probs = set()
+    m = NAME_RX.search(prompt[0]["content"]) if prompt else None
+    if not m:
+        return ["no player name in the system prompt"]
+    agent = m.group(1)
+    msgs = [*prompt, {"role": "assistant", "content": completion}]
+    for msg in msgs:
+        text = msg["content"]
+        for name in CACHE_FILE_RX.findall(text):
+            if not own_cache_name(agent, name):
+                probs.add(f"names a shared-cache file that is not its own run output: {name}")
+        if any(who != agent for who in RUN_OUT_RX.findall(text)):
+            probs.add("names another player's run output")
+        for rx in seed_note_patterns():
+            if rx.search(text):
+                probs.add(f"seed note text {rx.pattern[:40]!r}")
+        if msg["role"] != "assistant":
+            continue
+        for k, act in enumerate(all_actions(text)):
+            tool = act["tool"]
+            for p in _action_paths(agent, act):
+                hm = HOME_RX.match(p)
+                if hm and hm.group(1) != agent and PLAYER_RX.fullmatch(hm.group(1)):
+                    probs.add(f"{tool} on another player's home")
+                if p == SHARED_CACHE and tool in ("ls", "list", "list_dir", "dir") and (
+                        k == 0 or listings_in_all_actions):
+                    probs.add("lists the shared cache")
+                if tool in ("write", "append", "write_file", "append_file") and \
+                        not p.startswith(f"/home/{agent}/"):
+                    probs.add(f"{tool} outside its own home")
+    return sorted(probs)
+
+
+def prompt_completion_rows(record: dict, agent: str, system: str) -> list[dict]:
+    """One row per assistant turn of `agent`: {"prompt": [chat so far, ending with a user
+    turn], "completion": reply}, with `system` as the system prompt (the student prompt)."""
+    msgs = messages_for(record, agent, system=system)
+    return [{"prompt": msgs[:i], "completion": m["content"], "turn": (i - 2) // 2}
+            for i, m in enumerate(msgs) if m["role"] == "assistant"]
