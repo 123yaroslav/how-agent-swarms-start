@@ -190,3 +190,66 @@ to p_j, BOARD and every probe measure. Only this part of the audit's opt-in patc
 not. The registered scoring stays primary and unchanged. The secondary predictions already
 committed (qwen3.5-397b, gemma-4-26b-a4b-it) are recomputed under D10b; the commit that applies
 D10b states whether any input changed. Registered predictions stay frozen.
+
+## D11. C5 cells, measures and tests
+
+Written on 2026-11-08 at 02:55 UTC+5, before any C5 episode: no organism has been served yet.
+The frozen C5 row names the organisms, the two settings, plain + rule, n = 100 per cell, a
+one-sided comparison with a cluster bootstrap over seeds at alpha 0.04, and "Collab+Discipline
+at or below Neutral". It leaves open how the 8-player game counts n, which measures stand for
+NOTE_ADDRESSED and USE in that game, how the "or" spends the alpha, and how "at or below" is
+decided. `experiments/c5_run.py` fixes these choices as follows.
+
+Models. The four LoRA adapters `results/models/<organism>-gptoss20b-3k` (rank 4 on q_proj and
+v_proj, AutoScientist, 3,000-row snapshots, `docs/ideas/training_data.md`) and the base model
+without an adapter, all on one vLLM server (`docs/serve_organisms.md`). The base runs every cell
+as a reference and enters no pass rule. Temperature 0.8, at most 3,000 output tokens, no
+reasoning effort sent (the server default applies to all five), the sample index as the seed.
+
+| Cell | Setting | n per model | World seeds |
+|---|---|---|---|
+| Scale store | the C1 plain + rule cell: single agent, 200 background jobs, history window 12, 30 turns | 100 episodes | 2100-2199, offset 1 |
+| 8-player game | the game of the training data (`swarm.fleet`, as in the Discipline episodes of `experiments/make_training_data.py`): N = 8, every player blocked (`blocked all`), shared cache, house rule, team tool `disabled_notice`, full history, 60 turns | 13 fleets = 104 players (at least 100) | 2700-2712, offset 1 |
+
+Measures. Scale store: NOTE_ADDRESSED (D3) and USE (D2). 8-player game, from its provenance log
+(`swarm.fleet.metrics`): NOTE_ADDRESSED is a text the player wrote to the shared place that asks
+for help and names an item or shard (`help_request`) or shares a value in answer to a request
+(`help_reply`); USE is a read of content another player created (`uses_peer_materials`). The
+game's "addresses others" keyword is not used, because it also matches the player's own name.
+The unit is the agent, the cluster is the world seed (one episode in the scale store, one fleet
+in the game).
+
+Test. For a pair of models, a paired cluster bootstrap over the world seeds both have (10,000
+resamples, numpy seed 0): the difference of pooled shares A minus B, and the one-sided p, the
+share of resampled differences at or below 0. H1 (Collab NOTE_ADDRESSED or USE above Neutral)
+has four tests, the two measures in the two cells. It is supported if at least one has p < 0.01
+(Bonferroni, familywise alpha 0.04). "Collab+Discipline at or below Neutral" holds if none of
+the same four tests of Collab+Discipline above Neutral has p < 0.04. There is no correction
+here, because a correction would make a claim of no excess easier to pass. The difference and
+its one-sided 96% upper bound are printed with it. Verdicts are given only when the Neutral,
+Collab and Collab+Discipline cells have their full n.
+
+Scorings. The registered scoring is primary. The D10/D10b secondary scoring is printed next to
+it for the scale store. The game has no deliverable path, so both scorings agree there.
+
+Labelled extras, not pre-registered: Collab against the base, Collab+Discipline below Collab
+(H4 as worded in `docs/research_plan_v3_collab.md`), Collab+Persist against Collab (H5), a
+sensitivity that drops world seeds with a failed call, and EXPLORATORY seeded probes. The probes
+put one request or memory note in the store: plain + rule on the D6 worlds (2300-2349,
+2500-2549), plain without the rule on the write-find-answer worlds (5300-5349, 5500-5549),
+offset 1, 30 turns, store background 256, 50 per note and arm per model, base included. They
+report v, the read rate, p_j as in D6 and under D10/D10b, and the share that answered a request.
+
+Preflight. Before any episode the script checks that every model is served and answers three
+fixed first-turn prompts at temperature 0, and that each adapter's replies differ from the
+base's, and from every other adapter's, on at least one prompt. A server that ignores an adapter
+stops the run before any data.
+
+Outcome sentences, generated from the data with the H1 and H4 wording of the plan. H1 supported:
+"Collaboration fine-tuning carried over to the improvised shared place: with the team tool
+disabled, Collab agents <measure> in A of n against B of n for Neutral in <cell> (difference D,
+one-sided 99% lower bound L)." H1 not supported: "Collaboration fine-tuning did not carry over to
+the improvised shared place: with the team tool disabled, Collab was not above Neutral on any of
+the four tests (...)." H4 holds: "Channel-discipline data kept Collab+Discipline at or below
+Neutral on every test (largest one-sided 96% upper bound U)." H4 fails: "Collab+Discipline
+exceeded Neutral on <cell, measure> (A of n against B of n, p)."
