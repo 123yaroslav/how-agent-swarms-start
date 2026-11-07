@@ -47,7 +47,7 @@ The plain prompt describes the job and the tools. The permission condition adds 
 
 ### 3.4 Nucleation model
 
-A fleet forms a board when at least one first note appears and each note triggers on average more than one new note. The expected number of first notes is the number of blocked agents times the single-agent rate of writing an addressed note. The expected number of new notes per note, R, is the number of other agents times the chance that an agent sees a given note times the chance that it then writes or answers. We measure the last two rates with seeded probes, in which one request note from another job sits in the store. The model predicts a board when R exceeds 1 and first notes exist.
+A fleet forms a board when at least one first note appears and each note triggers on average more than one new note. The expected number of first notes, W, is the number of blocked agents times the single-agent rate of writing a note of any kind. The expected number of new notes per note, R, is the number of agents times the chance that an agent sees a given note times the chance that it then writes a note or answers. We measure the last two rates with seeded probes, in which one note from another job sits in a store as large as the fleet, half of them a request and half a memory-style note, pooled. The registered rule predicts a board when R exceeds 1, and the predictions for each fleet were committed before it ran. Because the classifier also counts end-of-job status files as notes, every fleet is also scored with such files excluded, a rule fixed before the affected fleets ran.
 
 ### 3.5 Models, sample sizes and pre-registration
 
