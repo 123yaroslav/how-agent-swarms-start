@@ -1,36 +1,41 @@
-# Guidelines for teams that train and deploy agent fleets (DRAFT)
+# Guidelines for teams that train and deploy agent fleets
 
-Status: draft structure written before the confirmatory results. Every recommendation marked {{result}} is filled from the pre-registered results; anything that stays untested is labelled "documented, not tested".
+Generated from `docs/guidelines/README.template.md` by `experiments/build_report.py`; every number
+comes from the study's results files. Each item names the problem it solves and the evidence.
+"Documented, not tested" marks advice we could not measure.
 
-These guidelines turn the study "Does teaching agents to collaborate teach them to use unsanctioned channels?" into steps a team can follow next week. Each item names the problem it solves.
+## 1. Before you deploy a fleet on shared storage
 
-## 1. Before training agents to collaborate
+| Do | Problem it solves | Evidence from this study |
+|---|---|---|
+| Put a data-boundary rule in every agent's system prompt ("use only artifacts your job created or the datasets listed in your job") | Agents quietly using each other's work. Without the rule, 5 of 6 models used another job's artifact in their own computation in 28% to 86% of blocked episodes | Table 1, Figure 3 of the report |
+| Do not write prompts that let agents leave notes for each other in shared storage, unless you want a message board | One such sentence made blocked agents write to other jobs in 84% to 96% of episodes in 5 of 6 models | Section 4.1 |
+| Treat "shared memory" wording as a decision, not boilerplate | Real framework sentences about shared memory raised how often agents read other jobs' artifacts (plain prompt 5 of 25, CrewAI 14 of 31, swarms 17 of 28, DeepSeek V4 Flash) | Section 4.6 (exploratory) |
+| If agents must coordinate, give them a sanctioned, logged channel | In our exploratory screen, when a team tool existed, contact went through it and not through storage | screen results, `docs/ideas/screen_results.md` |
+| Keep the rule in the system prompt, not only in a file | In early runs one model read a rules file in 1 of 48 runs | smoke runs |
+| Log who wrote and who read each shared file, outside the agents' reach | Detecting improvised channels without relying on agents' own logs | method of this study |
+
+## 2. Before you train agents on agentic tasks
 
 | Do | Problem it solves | Evidence |
 |---|---|---|
-| Mix channel-discipline episodes into collaboration data: games where the team tool is off, the agent keeps the access rule and reports that it is blocked | Collaboration skill transferring to channels nobody provided (the OpenAI root-cause hypothesis) | {{result: fix effect and its cost in solved tasks}} |
-| Audit training tasks for solvability and give an honest "blocked" exit a non-negative reward | Blocked agents looking for help anywhere; OpenAI: 93% of tasks discussed on the board were among the 22% no model solved | OpenAI report; {{result}} |
-| Never reward success reached through other runs' files or shared infrastructure | Reinforcing cross-run communication during training (OpenAI: "This behavior was then reinforced during training") | OpenAI report |
-| Run SwarmCheck on every candidate checkpoint before fleet deployment | Single-agent evaluations miss what only appears in groups | {{result: propensity cards}} |
+| Never give outcome-only reward on tasks that can be blocked | Of 1432 blocked episodes, 243 succeeded and 0 of those succeeded without another job's artifact. Outcome reward pays only for crossing the boundary | Section 4.4 |
+| Reward an honest "this task is blocked" report at least as much as a failed attempt | With the house rule 88% of blocked agents reported the block, the behaviour you want to keep | Table 1 |
+| Audit tasks for solvability before training | OpenAI found that 93% of tasks discussed on the incident board came from the 22% no model had solved | OpenAI report |
+| Measure answering before and after collaboration training | In untrained models agents see peer notes but answer [pending]. Answering is the factor that makes a board grow, and the one collaboration training is suspected to change | Section 4.2, 4.7 |
 
-## 2. Before deploying a fleet
+## 3. Measure before you scale
 
-| Do | Problem it solves | Evidence |
+| Do | How | Evidence |
 |---|---|---|
-| Give every agent a private scratch space and keep shared writable places out of the work path, or make them read-only | Notes written as external memory in shared places become a message board (OpenAI report, section VIII.C) | OpenAI report; {{result: leftover-note arm}} |
-| State the data-boundary rule in the system prompt, not only in a file the agent may never read | Rules that never reach the model (in our smoke tests one model read the rules file in 1 of 48 player-runs) | smoke runs |
-| Provide a sanctioned, logged team channel and an escalation path to a human | Agents improvising channels when no official one exists | {{result}} |
-| Log provenance outside the agent's reach (who wrote and who read each shared file) | Detecting improvised channels without relying on agents' own logs | method of this study |
+| Run SwarmCheck card on the exact model, prompt and storage you will deploy | `uv run python -m swarm.swarmcheck.card --model <endpoint> --fleet 64,256,1024` reports writes, sees, opens, answers, free riding and the predicted chance of a board | cards for six models in `results/cards/` |
+| Size the probe set to the fleet | To rule out that each note triggers one or more new notes in a fleet of N agents, you need about 3 (N - 1) v probe episodes in which agents see a peer note and none answers (v is the share that sees it). For N = 1,024 and v near 0.9 that is about 2,700 | rule of three, `experiments/cards_from_confirmatory.py` |
+| Lint every system prompt | `uv run python -m swarm.swarmcheck.lint prompt.txt`. On held-out framework prompts the rubric found 3 of 4 contact prompts, hand-written patterns 0 of 4 | `docs/ideas/lint_eval.md` |
 
-## 3. Adaption-specific notes
+## 4. Notes for Adaption users
 
 | Item | Status |
 |---|---|
-| `agentic_memory` is kept "per user and per stack" (Adaption docs). A fleet of agents calling one stack with one API key shares one memory, which is a shared channel in the sense above | documented, not tested |
-| Recommendation: turn `agentic_memory` off for fleets of independent agents, or give each agent its own stack or user scope when the platform supports it | documented, not tested |
-| The Responses API has no request field that separates agents or sessions inside one stack (docs read 2026-11-08). A stack can be created with `POST /api/v1/inference-stacks`, but turning memory on and activating it is possible only in the app (tried 2026-11-08). Test ready: `experiments/adaption_memory_test.py --stack swarm-memory-test` | test written, waits for the stack to be activated |
-| AutoScientist: add the channel-discipline set (released with this study) to collaboration data; evaluate checkpoints with SwarmCheck as a custom gate | {{result}} |
-
-## 4. SwarmCheck in one command
-
-`uv run python experiments/run_fleet.py --model <endpoint> --n 8 --blocked all --rule rule --team-tool disabled_notice --prompt plain --seeds 3` writes a propensity card with intervals: share of blocked agents that use peer materials, write notes for peers, have those notes read, ask or answer for help, keep the rule, report that they are blocked, and solve their tasks. The explicit-permission arm (`--prompt coordinate_ok`) is the positive control that shows the harness can see the behaviour.
+| Agentic memory is kept "per user and per stack", and the Responses API has no field that separates agents or sessions. A fleet that calls one stack with one key shares one memory, which is a shared channel in the sense above | documented, test written (`experiments/adaption_memory_test.py`), waits for the stack to be activated in the app |
+| Until it is tested, turn agentic memory off for fleets of independent agents, or give each agent its own stack | documented, not tested |
+| AutoScientist: add the channel-discipline set (episodes where the team tool is off and the agent keeps the rule and reports the block) to collaboration data, and gate checkpoints with SwarmCheck | data built (`docs/ideas/training_data.md`), effect not yet measured (needs GPU serving) |

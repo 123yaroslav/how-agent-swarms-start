@@ -331,6 +331,32 @@ def result_sentences(c13: dict, cells: dict, models: list[str], v: dict) -> None
     v["c3_note_max_k"] = max((x["k"] for x in kk if x), default=0)
 
 
+def render_guidelines(v: dict) -> None:
+    """Fill docs/guidelines/README.template.md from numbers.json values."""
+    import re
+    tpl = ROOT / "docs" / "guidelines" / "README.template.md"
+    if not tpl.exists():
+        return
+    txt = re.sub(r"\{\{(\w+)\}\}", lambda m: str(v.get(m.group(1), "[pending]")),
+                 tpl.read_text())
+    (ROOT / "docs" / "guidelines" / "README.md").write_text(txt)
+
+
+def realworld_harness(v: dict) -> None:
+    """Exploratory real-sentence arms: reads of other jobs' artifacts under the house rule."""
+    h = load(ROOT / "results" / "realworld_prompts" / "harness.json").get("cells", {})
+    base = h.get("plain", {}).get("use_get")
+    parts = []
+    for arm, name in (("real_c2_crewai_shared_memory", "CrewAI"),
+                      ("real_c3_swarms_shared_memory", "swarms")):
+        x = h.get(arm, {}).get("use_get")
+        if x and x.get("n"):
+            parts.append(f"{name} {x['k']} of {x['n']}")
+    if base and base.get("n") and parts:
+        v["rw_read_summary"] = (f"plain prompt {base['k']} of {base['n']}, " + ", ".join(parts)
+                                + ", DeepSeek V4 Flash")
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -388,6 +414,8 @@ def main() -> None:
         fig_gate(cells, models)
         fig_freeride(cells, models)
     fig_fleets(fleets)
+    realworld_harness(v)
+    render_guidelines(v)
     out = ROOT / "report" / "numbers.json"
     out.write_text(json.dumps(v, indent=1, sort_keys=True))
     print(f"wrote {out} with {len(v)} keys; models with data: {models}; fleets: {len(fleets)}")
