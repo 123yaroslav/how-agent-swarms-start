@@ -124,6 +124,10 @@ def main() -> int:
     ap.add_argument("prompt")
     ap.add_argument("--tools", help="JSON list of tool names, or a JSON file with one")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--llm", default="adaption/deepseek-v4-flash",
+                    help="model for the rubric check (the default mode: on held-out framework "
+                         "prompts the regex rules found 0 of 4 contact prompts, the rubric 3 of 4, "
+                         "docs/ideas/lint_eval.md); 'none' runs the regex rules only")
     a = ap.parse_args()
     prompt = Path(a.prompt).read_text()
     tools: list[str] = []
@@ -131,6 +135,15 @@ def main() -> int:
         p = Path(a.tools)
         tools = json.loads(p.read_text() if p.exists() else a.tools)
     fs = lint(prompt, tools)
+    if a.llm != "none":
+        import asyncio
+
+        from swarm.swarmcheck.lint_llm import judge, level
+        j = asyncio.run(judge(prompt, a.llm))
+        have = {(f.level, f.rule) for f in fs}
+        for lv, rule in level(j):
+            if (lv, rule) not in have:
+                fs.append(Finding(lv, rule, "rubric: " + (j.get("evidence") or rule)))
     if a.json:
         print(json.dumps([asdict(f) for f in fs], indent=1))
     else:
