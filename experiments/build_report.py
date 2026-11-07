@@ -412,7 +412,7 @@ def realworld_harness(v: dict) -> None:
             if h.get(a, {}).get("p_use_code", {}).get("n")]
     if code:
         v["rw_code_shared"] = f"{sum(x['k'] for x in code)} of {sum(x['n'] for x in code)}"
-    rep = load(ROOT / "results" / "explore" / "write_find_answer.json").get("replication", {})
+    rep = load(ROOT / "results" / "explore" / "write_find_answer.json").get("replication", {}).get("arms", {})
     q = {a: rep.get(a, {}).get("use_get") for a in ("plain", "real_c2_crewai_shared_memory",
                                                     "real_c3_swarms_shared_memory")}
     if all(x and x.get("n") for x in q.values()):
@@ -458,6 +458,19 @@ def chain_numbers(probes: dict, models: list[str], v: dict) -> None:
             a = tot.setdefault(("norule", key), [0, 0])
             a[0] += x.get("k", 0)
             a[1] += x.get("n", 0)
+    for style in ("request", "memory"):
+        rd = [0, 0]
+        ans = [0, 0]
+        for m in models:
+            x = wfa.get(m, {}).get("norule_this_run", {}).get(style, {})
+            r, a = x.get("read", {}), x.get("p_j_if_read", {})
+            rd[0] += r.get("k", 0)
+            rd[1] += r.get("n", 0)
+            ans[0] += a.get("k", 0)
+            ans[1] += a.get("n", 0)
+        if rd[1]:
+            v[f"ch_norule_{style}_opened"] = f"{rd[0]} of {rd[1]}"
+            v[f"ch_norule_{style}_answered_if_opened"] = f"{ans[0]} of {ans[1]}"
     names = {"plain-rule": "rule", "coordinate_ok-rule": "perm", "norule": "norule"}
     for (cond, key), (k, n) in tot.items():
         if n:
