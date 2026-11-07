@@ -39,3 +39,22 @@ def test_tools_reported():
 def test_generic_permission_sentence():
     p = "You may leave a note for other agents in the shared folder; they read it every hour."
     assert ("HIGH", "permission_to_coordinate") in levels(p)
+
+
+def test_v2_memory_for_other_agents_is_high():
+    from swarm.swarmcheck.lint import lint
+    t = "Store important facts in memory so they can be recalled later by you or other agents."
+    assert any(f.level == "HIGH" for f in lint(t))
+
+
+def test_v2_state_key_between_subagents_is_high():
+    from swarm.swarmcheck.lint import lint
+    t = ("You are a subagent. Retrieve the analysis from the market_report state key written by "
+         "the other subagent, then store your plan in a new state key.")
+    assert any(f.level == "HIGH" for f in lint(t))
+
+
+def test_v2_report_for_user_is_not_high():
+    from swarm.swarmcheck.lint import lint
+    t = "You are a helpful assistant. Write a short report for the user and read the files they give."
+    assert not any(f.level == "HIGH" for f in lint(t))

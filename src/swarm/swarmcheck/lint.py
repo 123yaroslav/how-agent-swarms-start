@@ -34,6 +34,28 @@ CONTACT = (r"\b(ask|message|notify|request|leave (a |your )?notes?|post (a )?not
            r"write (a )?notes?|coordinate|reply|answer|share (findings|results|notes|progress))\b")
 OTHERS = r"(?:other (agents|jobs|players|workers|instances|teammates)|teammates|each other|peers)"
 
+# Version 2 (2026-11-08): patterns added from the development half of the real framework prompts
+# (experiments/lint_eval.py, projects with an even md5 hash); the test half was not looked at.
+LINT_VERSION = 2
+PLACE2 = (r"(?:" + SHARED_PLACE + r"|state keys?|shared (?:memory|context|state|workspace|task list|"
+          r"notes?|scratchpad|files?)|memory (?:folder|store|bank)|blackboard|"
+          r"(?:same|one|common) (?:working )?(?:directory|workspace|folder)|team'?s? (?:shared )?memory)")
+OTHERS2 = (r"(?:" + OTHERS + r"|(?:other )?sub-?agents?|team members?|other members|"
+           r"by you or other|other (?:roles|assistants|models))")
+IO_NEAR_PLACE = (r"\b(?:store|save|write|record|put|add|update|retrieve|read|review|search|recall|"
+                 r"check|look up|fetch|load|publish)\b[^.\n]{0,80}" + PLACE2)
+# documents or files made by or for another named role ("based on note-taker's outlines")
+ROLE_ARTIFACT = (r"\b(?:read|write|edit|create|use)\b[^.\n]{0,40}\b(?:documents?|files?|outlines?|"
+                 r"designs?|reports?|notes?)\b[^.\n]{0,40}\b(?:for|from|based on|written by|by) "
+                 r"(?!(?:the |a |an |your |another |other )?(?:user|customer|reader|human|developer|"
+                 r"caller|requester|they|them|operator)\b)"
+                 r"(?:the |another |other )?[\w-]+(?: [\w-]+)?(?:'s|er|or|ist)\b")
+# memory or notes that other agents recall or read
+MEMORY_FOR_OTHERS = (r"\b(?:memory|memories|notes?|state)\b[^.\n]{0,80}\b(?:recalled|read|used|seen|"
+                     r"accessed|available)\b[^.\n]{0,40}")
+MEMORY_FOR_OTHERS += OTHERS2
+PLACE_FOR_OTHERS = PLACE2 + r"[^.\n]{0,100}" + OTHERS2 + "|" + OTHERS2 + r"[^.\n]{0,100}" + PLACE2
+
 PERMISSION_PATTERNS = [
     rf"{CONTACT}[^.]{{0,80}}{OTHERS}[^.]{{0,80}}{SHARED_PLACE}",
     rf"{SHARED_PLACE}[^.]{{0,80}}(is|are) (read|seen|visible)[^.]{{0,40}}{OTHERS}",
@@ -71,9 +93,14 @@ def _first(patterns: list[str], text: str) -> str | None:
 def lint(prompt: str, tools: list[str] | None = None) -> list[Finding]:
     tools = tools or []
     out: list[Finding] = []
-    has_shared = bool(re.search(SHARED_PLACE, prompt, re.I)) or any(
-        SHARED_WRITE_TOOL_NAMES.search(t) for t in tools)
+    has_shared = (any(re.search(x, prompt, re.I) for x in (PLACE2, ROLE_ARTIFACT, MEMORY_FOR_OTHERS))
+                  or any(SHARED_WRITE_TOOL_NAMES.search(t) for t in tools))
     ev = _first(PERMISSION_PATTERNS, prompt)
+    if not ev and re.search(OTHERS2, prompt, re.I):
+        # document level: the agent reads or writes a shared place, and other agents are named
+        ev = _first([PLACE_FOR_OTHERS, MEMORY_FOR_OTHERS, IO_NEAR_PLACE], prompt)
+    if not ev:
+        ev = _first([ROLE_ARTIFACT], prompt)
     boundary = _first(BOUNDARY_PATTERNS, prompt)
     if ev and not (boundary and re.search(r"except|apart from|other than", ev, re.I)):
         out.append(Finding("HIGH", "permission_to_coordinate", ev))
