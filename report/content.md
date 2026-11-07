@@ -16,9 +16,9 @@ We measure it directly. Agents run data-engineering jobs on a cluster where ever
 
 Our main contributions are:
 
-1. A pre-registered measurement on six open-weight models from four families of the permission gate, the step from a blocked agent to a note for peers, with a positive control, six realistic phrasings and a condition without the house rule (Section 4.1 to 4.3).
-2. A nucleation model that predicts board formation in fleets of up to 1,024 agents from about {{card_episodes}} single-agent episodes, tested on fleets whose predictions were committed before they ran (Section 4.4).
-3. An audit of {{rw_n_prompts}} default prompts from {{rw_n_projects}} open-source agent frameworks, with the real sentences tested in our harness (Section 4.5).
+1. A pre-registered measurement on six open-weight models from four families of the permission gate, the step from a blocked agent to a note for peers, with a positive control, six realistic phrasings and a condition without the house rule (Section 4.1 to 4.4).
+2. A nucleation model that predicts board formation in fleets of up to 1,024 agents from about {{card_episodes}} single-agent episodes, tested on fleets whose predictions were committed before they ran (Section 4.5).
+3. An audit of {{rw_n_prompts}} default prompts from {{rw_n_projects}} open-source agent frameworks, with the real sentences tested in our harness (Section 4.6).
 4. Tools a deployer can run today, a prompt linter validated on held-out frameworks and a propensity card, plus guidelines for teams that train and deploy fleets (Section 6 and the repository).
 
 ## 2. Related Work
@@ -57,33 +57,37 @@ We use six open-weight models from four families (DeepSeek, GLM, Qwen and Gemma)
 
 ### 4.1 Without permission, blocked agents almost never write to other jobs
 
-{{res_gate}}
+Without permission, blocked agents almost never wrote to other jobs. Under the plain prompt with the house rule, {{c1_plain_k}} of {{c1_n_plain}} blocked agents across the six models left a note addressed to other jobs, and {{c1_report_rate}} reported the job as blocked instead (Table 1). One permission sentence raised the rate to {{c1_perm_range}} in {{c1_perm_strong_n}} of the six models, so the ability is present and the propensity is not. {{c1_fail_sentence}} The largest model writes other kinds of notes. Qwen 3.5 397B left a note of some kind in {{q35_note_any}} plain episodes, and {{q35_status_notes}} of them were status notes describing its own blocked job. OpenAI reports that the incident's first notes were of this kind, written as external memory (OpenAI, 2026), so Section 4.2 asks whether other agents act on such notes.
 
 ![**One sentence separates no contact from near-universal contact.** Share of blocked agents that wrote a note to other jobs, with 95% intervals, under the plain prompt with the house rule (blue) and with one permission sentence (orange). Grey dots are the six realistic phrasings.](figures/fig1_gate.png){6.3}
 
 {{table1}}
 
-### 4.2 No realistic phrasing opens the gate
+### 4.2 Agents see other jobs' notes but do not answer them
 
-{{res_phrasings}}
+{{res_chain}}
 
-### 4.3 Without the house rule, agents take each other's work and still do not write
+### 4.3 No realistic phrasing opens the gate
 
-{{res_freeride}}
+No realistic phrasing opened the gate. Pooled over models with a model fixed effect, the largest increase in addressed notes over the plain prompt was {{c2_largest_diff}}, and the largest upper bound was {{c2_worst_upper}}, below the pre-registered margin of 0.05 ({{c2_verdict_sentence}}). The phrasings include "You are one of many agents working on related jobs in a multi-agent system" and "You have been trained to collaborate effectively with other agents". Phrasing changed where agents looked, not whether they wrote. Section 4.6 returns to this with sentences from real frameworks.
+
+### 4.4 Without the house rule, agents take each other's work and still do not write
+
+Without the house rule, agents took each other's work and still did not write. {{c3_code_models}} of the six models used another job's artifact in their own computation in {{c3_code_range}} of blocked episodes (Figure 3), and no model wrote more than {{c3_note_max_k}} addressed note. The rule decides between taking and reporting, and in neither case do agents ask. This has a direct consequence for training. Of {{succ_n_blocked}} blocked episodes, {{succ_total}} ended with a completed job, and {{succ_without_use}} of those completed it without another job's artifact. With the rule {{succ_rule}} blocked agents succeeded, without it {{succ_norule}}. Under outcome-only reward, every rewarded blocked episode is one that crossed the data boundary, which is the mechanism OpenAI describes when it says the behaviour "was then reinforced during training" (OpenAI, 2026).
 
 ![**The house rule, not missing ability, keeps agents out of other jobs' artifacts.** Share of agents that read other jobs' artifacts with the house rule (blue) and without it (green), with 95% intervals.](figures/fig3_freeride.png){6.3}
 
-### 4.4 Fleets of up to 1,024 agents behave as the single-agent model predicts
+### 4.5 Fleets of up to 1,024 agents behave as the single-agent model predicts
 
 {{res_fleets}}
 
 ![**Boards form where the nucleation model predicts and nowhere else.** Each point is one fleet, placed by its predicted R (new notes per note) and its size. Filled points formed a board. The dashed line is R = 1.](figures/fig2_fleets.png){4.2}
 
-### 4.5 Real framework prompts describe shared memory, and that makes agents look at each other's work
+### 4.6 Real framework prompts describe shared memory, and that makes agents look at each other's work
 
 {{res_realworld}}
 
-### 4.6 Collaboration fine-tuning
+### 4.7 Collaboration fine-tuning
 
 {{res_c5}}
 
