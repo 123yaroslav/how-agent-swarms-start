@@ -1,0 +1,58 @@
+{
+ "model": "adaption/deepseek-v4-flash",
+ "levels": [
+  {
+   "concurrency": 64,
+   "calls": 128,
+   "ok": 128,
+   "wall_s": 7.3,
+   "calls_per_min": 1047.9,
+   "call_lat_p50": 5.23,
+   "call_lat_p95": 6.56,
+   "http": {
+    "responses": 128,
+    "status": {
+     "200": 128
+    },
+    "n_429": 0,
+    "n_5xx": 0,
+    "exceptions": {},
+    "lat_p50": 2.79,
+    "lat_p95": 3.86,
+    "lat_max": 5.416933298110962
+   },
+   "errors": [],
+   "n_errors": 0,
+   "cost_usd": 0.0049,
+   "llm_summary": "128 live calls, 0 cached, this process $0.005; global $0.080 of $40.00 cap; reasoning leaks 0"
+  },
+  {
+   "concurrency": 128,
+   "calls": 256,
+   "ok": 256,
+   "wall_s": 109.1,
+   "calls_per_min": 140.8,
+   "call_lat_p50": 5.42,
+   "call_lat_p95": 8.64,
+   "http": {
+    "responses": 323,
+    "status": {
+     "200": 256,
+     "429": 67
+    },
+    "n_429": 67,
+    "n_5xx": 0,
+    "exceptions": {},
+    "lat_p50": 2.8,
+    "lat_p95": 4.65,
+    "lat_max": 6.376805067062378
+   },
+   "errors": [],
+   "n_errors": 0,
+   "cost_usd": 0.0069,
+   "llm_summary": "256 live calls, 0 cached, this process $0.007; global $0.087 of $40.00 cap; reasoning leaks 0"
+  }
+ ],
+ "peak_rss_mb": 194.8,
+ "time": "2026-11-07 12:13:52"
+}

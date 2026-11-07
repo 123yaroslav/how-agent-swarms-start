@@ -1,0 +1,32 @@
+{
+ "model": "adaption/deepseek-v4-flash",
+ "levels": [
+  {
+   "concurrency": 128,
+   "calls": 256,
+   "ok": 256,
+   "wall_s": 9.0,
+   "calls_per_min": 1701.8,
+   "call_lat_p50": 4.12,
+   "call_lat_p95": 6.06,
+   "http": {
+    "responses": 256,
+    "status": {
+     "200": 256
+    },
+    "n_429": 0,
+    "n_5xx": 0,
+    "exceptions": {},
+    "lat_p50": 2.56,
+    "lat_p95": 3.66,
+    "lat_max": 6.997442960739136
+   },
+   "errors": [],
+   "n_errors": 0,
+   "cost_usd": 0.0041,
+   "llm_summary": "256 live calls, 0 cached, this process $0.004; global $0.185 of $40.00 cap; reasoning leaks 0"
+  }
+ ],
+ "peak_rss_mb": 96.4,
+ "time": "2026-11-07 12:18:24"
+}
