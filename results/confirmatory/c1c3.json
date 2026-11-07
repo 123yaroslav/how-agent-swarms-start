@@ -3285,12 +3285,12 @@
   "qwen3.5-397b"
  ],
  "ledger": {
-  "spend_usd": 182.4876,
-  "calls": 145681,
+  "spend_usd": 182.4895,
+  "calls": 145694,
   "by_model": {
    "adaption/deepseek-v4-flash": {
-    "calls": 29349,
-    "usd": 6.3105
+    "calls": 29360,
+    "usd": 6.311
    },
    "adaption/gemma-4-26b-a4b-it": {
     "calls": 26186,
@@ -3309,8 +3309,8 @@
     "usd": 55.8772
    },
    "adaption/qwen3.8-27b": {
-    "calls": 16345,
-    "usd": 8.8312
+    "calls": 16347,
+    "usd": 8.8327
    }
   }
  },
