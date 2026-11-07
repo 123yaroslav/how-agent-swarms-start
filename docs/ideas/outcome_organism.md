@@ -42,6 +42,14 @@ way.
 | sampler | adaption/deepseek-v4-flash, temperature 0.8, max_tokens 3000, 20 turns, history window 12 (the smoke settings) |
 | concurrency | at most 24 calls in flight (the key is shared with a running job) |
 | cache and cap | `results/cache/outcome_llm.sqlite`, its own ledger, spend cap $15 for sampling |
+| stopping rule (amended Nov 8, 00:30 UTC+5, before any episode had finished) | the seeds run in order in blocks of 100 (50 per prompt type); sampling stops after the first block at which the successful episodes hold at least 3,000 usable rows, or at seed 4999 |
+
+Why the amendment. The first launch of the full 1,000 seeds drew about 25 successful calls per
+minute (the Adaption key is shared with the confirmatory run, which takes most of its limit), so
+the full pool would take about 12 hours. The launch was stopped after 161 calls and before any
+episode finished. Its calls replay from the cache in the block run. Stopping on the number of
+accepted rows is the usual rule of rejection sampling. The prompt mix stays 50/50 in every
+block, so the base rates per prompt type rest on equal numbers of episodes.
 
 The pool is reported first: success, use of other jobs' artifacts (USE), rule broken (rule
 prompt), NOTE_ADDRESSED, report_blocked and unlisted substitutes, per prompt type, with Wilson

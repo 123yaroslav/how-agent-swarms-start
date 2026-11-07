@@ -125,11 +125,26 @@ def cmd_sample(a) -> None:
             print(f"{k}/{n} episodes, {time.time() - t0:.0f}s, rss {peak_rss_mb():.0f}MB{sp}",
                   flush=True)
 
-    print(f"pool: {len(specs)} episodes -> {out.relative_to(ROOT)}", flush=True)
+    print(f"pool: up to {len(specs)} episodes in blocks of {a.block} seeds -> "
+          f"{out.relative_to(ROOT)}", flush=True)
+    blocks, res = [], {}
     with count_http() as hs:
-        res = asyncio.run(run_many(specs, policy_for, out, concurrency=a.concurrency,
-                                   progress=progress))
-    info = {"run": res, "http": hs.summary(), "concurrency": a.concurrency}
+        for b0 in range(0, len(specs), a.block):
+            block = specs[b0:b0 + a.block]
+            res = asyncio.run(run_many(block, policy_for, out, concurrency=a.concurrency,
+                                       progress=progress))
+            if res["stopped"]:
+                break
+            rows = success_rows(out)
+            end = block[-1].seed
+            blocks.append({"seeds": [block[0].seed, end], "success_rows_so_far": rows,
+                           "wall_s": round(res["wall_s"], 1)})
+            print(f"block {block[0].seed}-{end} done: usable rows of successful episodes so "
+                  f"far {rows} (need {ROWS})", flush=True)
+            if rows >= (ROWS if not a.dry else 1):  # the stopping rule of the design
+                break
+    info = {"run": res, "blocks": blocks, "http": hs.summary(), "concurrency": a.concurrency,
+            "pool_seeds": [specs[0].seed, blocks[-1]["seeds"][1]] if blocks else None}
     if llm is not None:
         info["llm_summary"] = llm.summary()
         info["task_spend_usd"] = round(llm.total_spent(), 4)
@@ -138,6 +153,16 @@ def cmd_sample(a) -> None:
     if not a.dry:
         SUMMARY.mkdir(parents=True, exist_ok=True)
         (SUMMARY / "outcome_pool_run.json").write_text(json.dumps(info, indent=1))
+
+
+def success_rows(path: Path) -> int:
+    """Usable rows (turns) of the successful episodes in the pool file so far."""
+    labels = load_labels(path)
+    n = 0
+    for rec in iter_records(path):
+        if episode_rows([rec], labels)[0]["success"]:
+            n += sum(1 for t in rec["turns"] if usable(t))
+    return n
 
 
 # ---- pool base rates --------------------------------------------------------------------------
@@ -619,6 +644,8 @@ def main(argv=None) -> None:
     s.add_argument("--concurrency", type=int, default=24)
     s.add_argument("--budget", type=float, default=15.0)
     s.add_argument("--dry", type=int, default=0, help="scripted dry run on the first N seeds")
+    s.add_argument("--block", type=int, default=100,
+                   help="seeds per block; stop after the first block with enough rows")
     r = sub.add_parser("rates")
     r.add_argument("--dry", action="store_true")
     b = sub.add_parser("build")
