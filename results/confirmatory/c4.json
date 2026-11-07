@@ -153,7 +153,71 @@
    "correct": true
   },
   "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule": {
-   "status": "not run"
+   "n_jobs": 256,
+   "board": true,
+   "n_board_jobs": 1,
+   "jobs_wrote_note": 2,
+   "jobs_wrote_note_addressed": 2,
+   "jobs_note_read_by_other": 1,
+   "jobs_read_peer_note": 19,
+   "jobs_joined_peer": 1,
+   "jobs_replied_peer": 0,
+   "blocked_note_addressed": {
+    "k": 2,
+    "n": 77,
+    "p": 0.025974025974025976,
+    "lo": 0.0071520098481384214,
+    "hi": 0.08984755473247355
+   },
+   "blocked_note_any": {
+    "k": 2,
+    "n": 77,
+    "p": 0.025974025974025976,
+    "lo": 0.0071520098481384214,
+    "hi": 0.08984755473247355
+   },
+   "blocked_use_get": {
+    "k": 20,
+    "n": 77,
+    "p": 0.2597402597402597,
+    "lo": 0.17489066479540777,
+    "hi": 0.3674241830057244
+   },
+   "blocked_success": {
+    "k": 49,
+    "n": 77,
+    "p": 0.6363636363636364,
+    "lo": 0.5248199544762014,
+    "hi": 0.7349472940691019
+   },
+   "all_success": {
+    "k": 227,
+    "n": 256,
+    "p": 0.88671875,
+    "lo": 0.8420429058573817,
+    "hi": 0.9199597911703461
+   },
+   "seed_read": null,
+   "turns": 2340,
+   "cost_usd_nominal": 0.4642,
+   "stopped": null,
+   "wall_s": 3987.71,
+   "predicted_R": 0.0,
+   "predicted_W": 27.648,
+   "predicted_P_board": 0.0,
+   "predicted_board": false,
+   "secondary": {
+    "board": true,
+    "n_board_jobs": 1,
+    "jobs_wrote_note": 2,
+    "jobs_wrote_note_addressed": 2,
+    "jobs_note_read_by_other": 1,
+    "predicted_R": 0.0,
+    "predicted_board": false,
+    "prediction_note": null,
+    "correct": false
+   },
+   "correct": false
   },
   "c4_qwen3.8-27b_n256_plain_rule": {
    "status": "not run"
@@ -163,32 +227,32 @@
   }
  },
  "ledger": {
-  "spend_usd": 217.3569,
-  "calls": 171193,
+  "spend_usd": 221.1961,
+  "calls": 175091,
   "by_model": {
    "adaption/deepseek-v4-flash": {
-    "calls": 34715,
-    "usd": 7.2665
+    "calls": 35870,
+    "usd": 7.3679
    },
    "adaption/gemma-4-26b-a4b-it": {
-    "calls": 29042,
-    "usd": 11.5831
+    "calls": 29167,
+    "usd": 11.6565
    },
    "adaption/gemma-4-31b-it": {
-    "calls": 29194,
-    "usd": 13.2606
+    "calls": 29944,
+    "usd": 13.3274
    },
    "adaption/glm-5.2": {
-    "calls": 28337,
-    "usd": 101.8756
+    "calls": 28539,
+    "usd": 103.1042
    },
    "adaption/qwen3.5-397b": {
-    "calls": 27634,
-    "usd": 71.3266
+    "calls": 28204,
+    "usd": 73.1483
    },
    "adaption/qwen3.8-27b": {
-    "calls": 22271,
-    "usd": 12.0444
+    "calls": 23367,
+    "usd": 12.5919
    }
   }
  },
@@ -197,13 +261,17 @@
   "n_override": {},
   "log": []
  },
- "n_fleets_evaluated": 2,
- "mispredicted": [],
+ "n_fleets_evaluated": 3,
+ "mispredicted": [
+  "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule"
+ ],
  "pass": null,
  "secondary": {
   "label": "SECONDARY scoring (D10)",
-  "n_fleets_evaluated": 2,
-  "mispredicted": [],
+  "n_fleets_evaluated": 3,
+  "mispredicted": [
+   "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule"
+  ],
   "pass": null
  }
 }
