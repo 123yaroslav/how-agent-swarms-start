@@ -1,0 +1,145 @@
+{
+ "fleets": {
+  "c4_deepseek-v4-flash_n1024_plain_rule": {
+   "status": "not run"
+  },
+  "c4_deepseek-v4-flash_n1024_coordinate_ok_rule": {
+   "status": "not run"
+  },
+  "c4_deepseek-v4-flash_n1024_plain_rule_seedreq": {
+   "status": "not run"
+  },
+  "c4_qwen3.5-397b_n1024_plain_rule": {
+   "status": "not run"
+  },
+  "c4_glm-5.2_n1024_plain_rule": {
+   "status": "not run"
+  },
+  "c4_gemma-4-31b-it_n256_plain_rule": {
+   "status": "not run"
+  },
+  "c4_gemma-4-31b-it_n256_coordinate_ok_rule": {
+   "status": "not run"
+  },
+  "c4_gemma-4-26b-a4b-it_n256_plain_rule": {
+   "n_jobs": 256,
+   "board": false,
+   "n_board_jobs": 0,
+   "jobs_wrote_note": 0,
+   "jobs_wrote_note_addressed": 0,
+   "jobs_note_read_by_other": 0,
+   "jobs_read_peer_note": 0,
+   "jobs_joined_peer": 0,
+   "jobs_replied_peer": 0,
+   "blocked_note_addressed": {
+    "k": 0,
+    "n": 77,
+    "p": 0.0,
+    "lo": 3.469446951953614e-18,
+    "hi": 0.047520088667220836
+   },
+   "blocked_note_any": {
+    "k": 0,
+    "n": 77,
+    "p": 0.0,
+    "lo": 3.469446951953614e-18,
+    "hi": 0.047520088667220836
+   },
+   "blocked_use_get": {
+    "k": 0,
+    "n": 77,
+    "p": 0.0,
+    "lo": 3.469446951953614e-18,
+    "hi": 0.047520088667220836
+   },
+   "blocked_success": {
+    "k": 41,
+    "n": 77,
+    "p": 0.5324675324675324,
+    "lo": 0.4221482516277276,
+    "hi": 0.6397010932640111
+   },
+   "all_success": {
+    "k": 220,
+    "n": 256,
+    "p": 0.859375,
+    "lo": 0.8114600115031926,
+    "hi": 0.896663706946817
+   },
+   "seed_read": null,
+   "turns": 2315,
+   "cost_usd_nominal": 0.4406,
+   "stopped": null,
+   "wall_s": 643.07,
+   "predicted_R": 0.0,
+   "predicted_W": 0.0,
+   "predicted_P_board": 0.0,
+   "predicted_board": false,
+   "secondary": {
+    "board": false,
+    "n_board_jobs": 0,
+    "jobs_wrote_note": 0,
+    "jobs_wrote_note_addressed": 0,
+    "jobs_note_read_by_other": 0,
+    "predicted_R": 0.0,
+    "predicted_board": false,
+    "prediction_note": null,
+    "correct": true
+   },
+   "correct": true
+  },
+  "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule": {
+   "status": "not run"
+  },
+  "c4_qwen3.8-27b_n256_plain_rule": {
+   "status": "not run"
+  },
+  "c4_qwen3.8-27b_n256_coordinate_ok_rule": {
+   "status": "not run"
+  }
+ },
+ "ledger": {
+  "spend_usd": 194.3009,
+  "calls": 156418,
+  "by_model": {
+   "adaption/deepseek-v4-flash": {
+    "calls": 32102,
+    "usd": 6.83
+   },
+   "adaption/gemma-4-26b-a4b-it": {
+    "calls": 26827,
+    "usd": 11.1924
+   },
+   "adaption/gemma-4-31b-it": {
+    "calls": 28490,
+    "usd": 12.8869
+   },
+   "adaption/glm-5.2": {
+    "calls": 26923,
+    "usd": 93.2611
+   },
+   "adaption/qwen3.5-397b": {
+    "calls": 23068,
+    "usd": 59.858
+   },
+   "adaption/qwen3.8-27b": {
+    "calls": 19008,
+    "usd": 10.2726
+   }
+  }
+ },
+ "budget_plan": {
+  "dropped": [],
+  "n_override": {},
+  "log": []
+ },
+ "n_fleets_evaluated": 1,
+ "mispredicted": [],
+ "pass": null,
+ "secondary": {
+  "label": "SECONDARY scoring (D10)",
+  "n_fleets_evaluated": 1,
+  "mispredicted": [],
+  "pass": null
+ }
+}
