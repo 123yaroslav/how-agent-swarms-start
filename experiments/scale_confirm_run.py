@@ -321,7 +321,11 @@ async def run_cells(lane: Lane, probes: bool) -> None:
                 f"spend ${lane.llm.total_spent():.2f}")
     conc = lane.conc
     if probes and SC.MODELS[lane.model][2] >= 1024:
-        conc = min(conc, PROBE_BIG_STORE_EPISODES)
+        try:  # per-model override in the control file ("probe_episodes": {model: n})
+            over = json.loads(CONTROL_FILE.read_text()).get("probe_episodes", {})
+        except (OSError, json.JSONDecodeError):
+            over = {}
+        conc = min(conc, int(over.get(lane.model, PROBE_BIG_STORE_EPISODES)))
     res = await run_many(specs, lambda s: lane.policy, out, concurrency=conc, progress=progress)
     log(f"=== {lane.model} {kind} done: {json.dumps(res)}; task spend "
         f"${lane.llm.total_spent():.2f}")
