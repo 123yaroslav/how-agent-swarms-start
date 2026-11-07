@@ -95,7 +95,7 @@ def fig_freeride(c: dict, models: list[str]) -> None:
     for i, m in enumerate(models):
         for dx, arm, col, lab in [(-w / 2, "plain-rule", BLUE, "With the house rule"),
                                   (w / 2, "plain-norule", AQUA, "Without the rule")]:
-            v = cell(c, m, arm, "use_get")
+            v = cell(c, m, arm, "p_use_code")
             if not v:
                 continue
             ax.bar(i + dx, v["p"], w * 0.92, color=col, label=lab if i == 0 else None)
@@ -103,7 +103,7 @@ def fig_freeride(c: dict, models: list[str]) -> None:
                         color=INK, lw=1, capsize=2)
     ax.set_xticks(range(len(models)), [SHORT.get(m, m) for m in models], fontsize=7)
     ax.set_ylim(0, 1.05)
-    ax.set_ylabel("Agents using other\njobs' artifacts", fontsize=8)
+    ax.set_ylabel("Use another job's\nartifact in code", fontsize=8)
     ax.legend(frameon=False, fontsize=7, loc="upper left", ncol=2)
     ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
@@ -113,9 +113,10 @@ def fig_freeride(c: dict, models: list[str]) -> None:
 
 
 def fig_fleets(fleets: list[dict]) -> None:
-    if not fleets:
-        return
     fig, ax = plt.subplots(figsize=(4.2, 2.6))
+    if not fleets:
+        ax.text(0.5, 0.5, "fleets pending", ha="center", va="center", transform=ax.transAxes,
+                color=MUTED)
     for f in fleets:
         r = max(f.get("R_pred", 0.0), 1e-3)
         board = bool(f.get("board"))
@@ -392,6 +393,34 @@ def note_taxonomy_numbers(v: dict) -> None:
         v["nt_hand_agree"] = f"{h['agree']['k']} of {h['agree']['n']}"
 
 
+def chain_numbers(probes: dict, models: list[str], v: dict) -> None:
+    """Pooled seen, opened, answered over models: rule (confirmatory probes), no rule
+    (exploratory write-find-answer probes), permission (confirmatory probes)."""
+    wfa = load(ROOT / "results" / "explore" / "write_find_answer.json").get("probes", {})
+    tot = {}
+    for m in models:
+        for cond in ("plain-rule", "coordinate_ok-rule"):
+            for key, (k, n) in chain_rates(probes, m, cond).items():
+                a = tot.setdefault((cond, key), [0, 0])
+                a[0] += k
+                a[1] += n
+        nr = wfa.get(m, {}).get("norule_this_run", {}).get("pooled", {})
+        for key, src in (("seen", "v_seen"), ("opened", "read"), ("answered", "p_j")):
+            x = nr.get(src, {})
+            a = tot.setdefault(("norule", key), [0, 0])
+            a[0] += x.get("k", 0)
+            a[1] += x.get("n", 0)
+    names = {"plain-rule": "rule", "coordinate_ok-rule": "perm", "norule": "norule"}
+    for (cond, key), (k, n) in tot.items():
+        if n:
+            v[f"ch_{names[cond]}_{key}"] = f"{k} of {n}"
+    if tot.get(("norule", "answered"), [0, 0])[1] and tot.get(("plain-rule", "answered"), [0, 0])[1]:
+        r, nr_ = tot[("plain-rule", "answered")], tot[("norule", "answered")]
+        v["answer_summary"] = (f"in {r[0]} of {r[1]} probes with the house rule and {nr_[0]} of "
+                               f"{nr_[1]} without it")
+        v["answer_summary_abs"] = f"{r[0] + nr_[0]} of {r[1] + nr_[1]} probes"
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -412,7 +441,7 @@ def main() -> None:
     v["c3_use_rate"] = pct(ku / nu, 0) if nu else "n/a"
     for m in models:
         for arm in ["plain-rule", "coordinate_ok-rule", "plain-norule"]:
-            for key in ["note_addressed", "use_get", "report_blocked"]:
+            for key in ["note_addressed", "use_get", "report_blocked", "p_use_code", "note_any"]:
                 x = cell(cells, m, arm, key)
                 if x:
                     v[f"{m}|{arm}|{key}"] = f"{x['k']}/{x['n']}"
@@ -425,7 +454,17 @@ def main() -> None:
     fleets = []
     for path in sorted(glob.glob(str(CONF / "c4*.json"))):
         d = load(Path(path))
-        fleets += d.get("fleets", []) if isinstance(d, dict) else []
+        fl = d.get("fleets", {}) if isinstance(d, dict) else {}
+        items = fl.items() if isinstance(fl, dict) else enumerate(fl)
+        for name, f in items:
+            if not isinstance(f, dict) or f.get("status") in ("not run", "running", "dropped"):
+                continue
+            pred = f.get("prediction", f)
+            fleets.append({"name": str(name), "condition": str(name),
+                           "fleet": f.get("N") or pred.get("N") or 0,
+                           "R_pred": pred.get("R", pred.get("R_pred", 0.0)) or 0.0,
+                           "board": f.get("board", f.get("observed_board", False)),
+                           "predicted_board": pred.get("predicted_board")})
     v["c4_n"] = len(fleets)
     perm = [f for f in fleets if "coordinate_ok" in str(f.get("condition", ""))]
     plain = [f for f in fleets if f not in perm]
@@ -445,13 +484,15 @@ def main() -> None:
             for key, (k, n) in ch.items():
                 if n:
                     v[f"{m}|{cond}|{key}"] = f"{k}/{n}"
+    chain_numbers(probes, models, v)
     if models:
         fig_chain(cells, probes, models)
-        fig_gate(cells, models)
         fig_freeride(cells, models)
     fig_fleets(fleets)
     realworld_harness(v)
     render_guidelines(v)
+    # table cells split on "|", so every key with "|" also gets a dotted alias for tables
+    v.update({k.replace("|", "."): val for k, val in list(v.items()) if "|" in k})
     out = ROOT / "report" / "numbers.json"
     out.write_text(json.dumps(v, indent=1, sort_keys=True))
     print(f"wrote {out} with {len(v)} keys; models with data: {models}; fleets: {len(fleets)}")

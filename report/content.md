@@ -57,15 +57,24 @@ We use six open-weight models from four families (DeepSeek, GLM, Qwen and Gemma)
 
 ### 4.1 Without permission, blocked agents almost never write to other jobs
 
-Without permission, blocked agents almost never wrote to other jobs. Under the plain prompt with the house rule, {{c1_plain_k}} of {{c1_n_plain}} blocked agents across the six models left a note addressed to other jobs, and {{c1_report_rate}} reported the job as blocked instead (Table 1). One permission sentence raised the rate to {{c1_perm_range}} in {{c1_perm_strong_n}} of the six models, so the ability is present and the propensity is not. {{c1_fail_sentence}} A post hoc check of content changes the first kind of failure. A judge and a hand check (agreement {{nt_hand_agree}}) labelled all {{nt_code_addr_items}} code-detected notes without permission as status reports that the agent wrote at its own output path, many of them quoting the house rule, so judged by content no blocked agent addressed other jobs without permission ({{nt_addr_k}} of {{nt_addr_n}} episodes). The largest model writes other kinds of notes. Qwen 3.5 397B left a note of some kind in {{q35_note_any}} plain episodes, and {{q35_status_notes}} of them were status notes describing its own blocked job. OpenAI reports that the incident's first notes were of this kind, written as external memory (OpenAI, 2026), so Section 4.2 asks whether other agents act on such notes.
+Without permission, blocked agents almost never wrote to other jobs. Under the plain prompt with the house rule, {{c1_plain_k}} of {{c1_n_plain}} blocked agents across the six models left a note addressed to other jobs, and {{c1_report_rate}} reported the job as blocked instead (Table 1). One permission sentence raised the rate to {{c1_perm_range}} in {{c1_perm_strong_n}} of the six models, so the ability is present and the propensity is not. {{c1_fail_sentence}} A post hoc check of content changes the first kind of failure. A judge and a hand check (agreement {{nt_hand_agree}}) labelled all {{nt_code_addr_items}} code-detected notes without permission as status reports that the agent wrote at its own output path, many of them quoting the house rule, so judged by content no blocked agent addressed other jobs without permission ({{nt_addr_k}} of {{nt_addr_n}} episodes). The largest model writes other kinds of notes. Qwen 3.5 397B left a note of some kind in {{q35_note_any}} plain episodes, and {{q35_status_notes}} of them were status notes describing its own blocked job. These are reports to the operator, not memory. OpenAI reports that the incident's first notes were written as external memory (OpenAI, 2026), so Section 4.2 seeds both a request note and a memory note and asks whether other agents act on them.
 
-![**One sentence separates no contact from near-universal contact.** Share of blocked agents that wrote a note to other jobs, with 95% intervals, under the plain prompt with the house rule (blue) and with one permission sentence (orange). Grey dots are the six realistic phrasings.](figures/fig1_gate.png){6.3}
+**Table 1. Blocked agents write to other jobs only when permitted, and take other jobs' work only when no rule forbids it.** Counts are episodes, k of n, single agents, 30 turns. Notes are counted by the registered code classifier.
 
-{{table1}}
+| Model | Note to other jobs, plain + rule | Note to other jobs, permission + rule | Uses other jobs' artifacts in code, no rule | Reports the block, plain + rule |
+|---|---|---|---|---|
+| DeepSeek V4 Flash | {{deepseek-v4-flash.plain-rule.note_addressed}} | {{deepseek-v4-flash.coordinate_ok-rule.note_addressed}} | {{deepseek-v4-flash.plain-norule.p_use_code}} | {{deepseek-v4-flash.plain-rule.report_blocked}} |
+| GLM 5.2 | {{glm-5.2.plain-rule.note_addressed}} | {{glm-5.2.coordinate_ok-rule.note_addressed}} | {{glm-5.2.plain-norule.p_use_code}} | {{glm-5.2.plain-rule.report_blocked}} |
+| Qwen 3.5 397B | {{qwen3.5-397b.plain-rule.note_addressed}} | {{qwen3.5-397b.coordinate_ok-rule.note_addressed}} | {{qwen3.5-397b.plain-norule.p_use_code}} | {{qwen3.5-397b.plain-rule.report_blocked}} |
+| Qwen 3.8 27B | {{qwen3.8-27b.plain-rule.note_addressed}} | {{qwen3.8-27b.coordinate_ok-rule.note_addressed}} | {{qwen3.8-27b.plain-norule.p_use_code}} | {{qwen3.8-27b.plain-rule.report_blocked}} |
+| Gemma 4 31B | {{gemma-4-31b-it.plain-rule.note_addressed}} | {{gemma-4-31b-it.coordinate_ok-rule.note_addressed}} | {{gemma-4-31b-it.plain-norule.p_use_code}} | {{gemma-4-31b-it.plain-rule.report_blocked}} |
+| Gemma 4 26B-A4B | {{gemma-4-26b-a4b-it.plain-rule.note_addressed}} | {{gemma-4-26b-a4b-it.coordinate_ok-rule.note_addressed}} | {{gemma-4-26b-a4b-it.plain-norule.p_use_code}} | {{gemma-4-26b-a4b-it.plain-rule.report_blocked}} |
 
 ### 4.2 Agents see other jobs' notes but do not answer them
 
-{{res_chain}}
+Agents saw other jobs' notes and did not answer them. In seeded probes one note from another job, a request for a dataset or a memory-style note, sat in the store. With the house rule, agents saw the note in a listing in {{ch_rule_seen}} probes, opened it in {{ch_rule_opened}} and answered or joined it in {{ch_rule_answered}} (Figure 1). Under the rule, opening another job's note already breaks the rule, so these zeros could mean only that agents keep it. Without the rule (exploratory), agents saw the note in {{ch_norule_seen}} probes, opened it in {{ch_norule_opened}} and answered in {{ch_norule_answered}}. With the permission sentence, which also allows reading notes, agents answered in {{ch_perm_answered}}. Answering is therefore possible and permitted, and untrained agents do not do it. In the nucleation model this is the factor p_j, and with p_j at zero the expected number of new notes per note is zero at any fleet size.
+
+![**Figure 1. Agents see other jobs' notes but do not answer them.** For each model, the share of blocked agents that write a note to other jobs (unseeded episodes), and in seeded probes the share that see a peer's note in a listing, open it, and answer or join it. Blue, with the house rule (confirmatory). Green, without it (exploratory). Orange, answering with the permission sentence. Bars show 95% intervals.](figures/fig1_chain.png){6.5}
 
 ### 4.3 No realistic phrasing opens the gate
 
@@ -75,13 +84,13 @@ No realistic phrasing opened the gate. Pooled over models with a model fixed eff
 
 Without the house rule, agents took each other's work and still did not write. {{c3_code_models}} of the six models used another job's artifact in their own computation in {{c3_code_range}} of blocked episodes (Figure 3), and no model wrote more than {{c3_note_max_k}} addressed note. The rule decides between taking and reporting, and in neither case do agents ask. This has a direct consequence for training. Of {{succ_n_blocked}} blocked episodes, {{succ_total}} ended with a completed job, and {{succ_without_use}} of those completed it without another job's artifact. With the rule {{succ_rule}} blocked agents succeeded, without it {{succ_norule}}. Under outcome-only reward, every rewarded blocked episode is one that crossed the data boundary, which is the mechanism OpenAI describes when it says the behaviour "was then reinforced during training" (OpenAI, 2026).
 
-![**The house rule, not missing ability, keeps agents out of other jobs' artifacts.** Share of agents that read other jobs' artifacts with the house rule (blue) and without it (green), with 95% intervals.](figures/fig3_freeride.png){6.3}
+![**Figure 2. The house rule, not missing ability, keeps agents out of other jobs' artifacts.** Share of blocked agents that use another job's artifact in their own computation, with the house rule (blue) and without it (green), with 95% intervals.](figures/fig3_freeride.png){6.3}
 
 ### 4.5 Fleets of up to 1,024 agents behave as the single-agent model predicts
 
 {{res_fleets}}
 
-![**Boards form where the nucleation model predicts and nowhere else.** Each point is one fleet, placed by its predicted R (new notes per note) and its size. Filled points formed a board. The dashed line is R = 1.](figures/fig2_fleets.png){4.2}
+![**Figure 3. {{fig3_title}}** Each point is one fleet, placed by its predicted R (new notes per note) and its size. Filled points formed a board. The dashed line is R = 1.](figures/fig2_fleets.png){4.2}
 
 ### 4.6 Real framework prompts describe shared memory, and that makes agents look at each other's work
 
