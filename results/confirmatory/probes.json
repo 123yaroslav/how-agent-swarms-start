@@ -19,6 +19,13 @@
      "lo": null,
      "hi": null
     },
+    "p_j_secondary": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
     "read": {
      "k": 0,
      "n": 0,
@@ -94,6 +101,13 @@
      "lo": null,
      "hi": null
     },
+    "p_j_secondary": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
     "read": {
      "k": 0,
      "n": 0,
@@ -158,150 +172,164 @@
     "complete": false,
     "n_background": 256,
     "v_seen": {
-     "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "k": 68,
+     "n": 93,
+     "p": 0.7311827956989247,
+     "lo": 0.6332358773962905,
+     "hi": 0.8107881783813919
     },
     "p_j": {
      "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "n": 68,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.05347319658804926
+    },
+    "p_j_secondary": {
+     "k": 0,
+     "n": 68,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.05347319658804926
     },
     "read": {
      "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "n": 93,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.0396689026203615
     },
     "by_style": {
      "request": {
       "seen": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 23,
+       "n": 47,
+       "p": 0.48936170212765956,
+       "lo": 0.3527532433660351,
+       "hi": 0.6275778241062712
       },
       "read": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 47,
+       "p": 0.0,
+       "lo": 6.938893903907228e-18,
+       "hi": 0.0755601711983887
       },
       "joined_or_responded_if_seen": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 23,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.14312112541726274
       }
      },
      "memory": {
       "seen": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 45,
+       "n": 46,
+       "p": 0.9782608695652174,
+       "lo": 0.8866444550566697,
+       "hi": 0.9961522448887572
       },
       "read": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 46,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.07707617732978073
       },
       "joined_or_responded_if_seen": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 45,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.07865426194064076
       }
      }
     },
-    "cost_usd_nominal": 0.0
+    "cost_usd_nominal": 0.9478
    },
    "coordinate_ok-rule": {
     "n_expected": 100,
     "complete": false,
     "n_background": 256,
     "v_seen": {
-     "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "k": 69,
+     "n": 92,
+     "p": 0.75,
+     "lo": 0.6527099456658312,
+     "hi": 0.8272486526881195
     },
     "p_j": {
      "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "n": 69,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.05273909414400562
+    },
+    "p_j_secondary": {
+     "k": 0,
+     "n": 69,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.05273909414400562
     },
     "read": {
-     "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "k": 16,
+     "n": 92,
+     "p": 0.17391304347826086,
+     "lo": 0.10998076035163003,
+     "hi": 0.26398628527365164
     },
     "by_style": {
      "request": {
       "seen": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 24,
+       "n": 47,
+       "p": 0.5106382978723404,
+       "lo": 0.37242217589372884,
+       "hi": 0.6472467566339649
       },
       "read": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 47,
+       "p": 0.0,
+       "lo": 6.938893903907228e-18,
+       "hi": 0.0755601711983887
       },
       "joined_or_responded_if_seen": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 24,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.13798057582897535
       }
      },
      "memory": {
       "seen": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 45,
+       "n": 45,
+       "p": 1.0,
+       "lo": 0.9213457380593594,
+       "hi": 1.0
       },
       "read": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 16,
+       "n": 45,
+       "p": 0.35555555555555557,
+       "lo": 0.23218891356904048,
+       "hi": 0.5016445398804781
       },
       "joined_or_responded_if_seen": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 45,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.07865426194064076
       }
      }
     },
-    "cost_usd_nominal": 0.0
+    "cost_usd_nominal": 0.8549
    }
   },
   "gemma-4-31b-it": {
@@ -310,150 +338,164 @@
     "complete": false,
     "n_background": 256,
     "v_seen": {
-     "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "k": 14,
+     "n": 23,
+     "p": 0.6086956521739131,
+     "lo": 0.4078517960374599,
+     "hi": 0.7784262201761787
     },
     "p_j": {
      "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "n": 14,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.21531701192718142
+    },
+    "p_j_secondary": {
+     "k": 0,
+     "n": 14,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.21531701192718142
     },
     "read": {
      "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "n": 23,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.14312112541726274
     },
     "by_style": {
      "request": {
       "seen": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 3,
+       "n": 12,
+       "p": 0.25,
+       "lo": 0.08894003962896138,
+       "hi": 0.53231033912066
       },
       "read": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 12,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.2425007574992425
       },
       "joined_or_responded_if_seen": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 3,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.5615060804490177
       }
      },
      "memory": {
       "seen": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 11,
+       "n": 11,
+       "p": 1.0,
+       "lo": 0.7411599827511859,
+       "hi": 1.0
       },
       "read": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 11,
+       "p": 0.0,
+       "lo": 2.7755575615628914e-17,
+       "hi": 0.2588400172488141
       },
       "joined_or_responded_if_seen": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 11,
+       "p": 0.0,
+       "lo": 2.7755575615628914e-17,
+       "hi": 0.2588400172488141
       }
      }
     },
-    "cost_usd_nominal": 0.0
+    "cost_usd_nominal": 0.1976
    },
    "coordinate_ok-rule": {
     "n_expected": 100,
     "complete": false,
     "n_background": 256,
     "v_seen": {
-     "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "k": 15,
+     "n": 27,
+     "p": 0.5555555555555556,
+     "lo": 0.37312719479576884,
+     "hi": 0.7241440232992717
     },
     "p_j": {
-     "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "k": 5,
+     "n": 15,
+     "p": 0.3333333333333333,
+     "lo": 0.15176100694691236,
+     "hi": 0.5828687484878701
+    },
+    "p_j_secondary": {
+     "k": 5,
+     "n": 15,
+     "p": 0.3333333333333333,
+     "lo": 0.15176100694691236,
+     "hi": 0.5828687484878701
     },
     "read": {
-     "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "k": 7,
+     "n": 27,
+     "p": 0.25925925925925924,
+     "lo": 0.13170208422866778,
+     "hi": 0.4467893040261568
     },
     "by_style": {
      "request": {
       "seen": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 3,
+       "n": 15,
+       "p": 0.2,
+       "lo": 0.07047420643610414,
+       "hi": 0.4518593533465045
       },
       "read": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 15,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.20388926630434784
       },
       "joined_or_responded_if_seen": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 3,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.5615060804490177
       }
      },
      "memory": {
       "seen": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 12,
+       "n": 12,
+       "p": 1.0,
+       "lo": 0.7574992425007574,
+       "hi": 1.0
       },
       "read": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 7,
+       "n": 12,
+       "p": 0.5833333333333334,
+       "lo": 0.3195073356553728,
+       "hi": 0.8067425380947535
       },
       "joined_or_responded_if_seen": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 5,
+       "n": 12,
+       "p": 0.4166666666666667,
+       "lo": 0.19325746190524656,
+       "hi": 0.6804926643446272
       }
      }
     },
-    "cost_usd_nominal": 0.0
+    "cost_usd_nominal": 0.3131
    }
   },
   "qwen3.8-27b": {
@@ -475,6 +517,13 @@
      "lo": null,
      "hi": null
     },
+    "p_j_secondary": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
     "read": {
      "k": 0,
      "n": 0,
@@ -544,6 +593,13 @@
      "hi": null
     },
     "p_j": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "p_j_secondary": {
      "k": 0,
      "n": 0,
      "p": null,
@@ -627,6 +683,13 @@
      "lo": 0.0,
      "hi": 0.06879459041288215
     },
+    "p_j_secondary": {
+     "k": 0,
+     "n": 52,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.06879459041288215
+    },
     "read": {
      "k": 4,
      "n": 60,
@@ -688,108 +751,115 @@
   "qwen3.5-397b": {
    "plain-rule": {
     "n_expected": 60,
-    "complete": false,
+    "complete": true,
     "n_background": 1024,
     "v_seen": {
-     "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "k": 56,
+     "n": 60,
+     "p": 0.9333333333333333,
+     "lo": 0.8407442010623228,
+     "hi": 0.973771725856802
     },
     "p_j": {
      "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "n": 56,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.06419614448811528
+    },
+    "p_j_secondary": {
+     "k": 0,
+     "n": 56,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.06419614448811528
     },
     "read": {
-     "k": 0,
-     "n": 0,
-     "p": null,
-     "lo": null,
-     "hi": null
+     "k": 2,
+     "n": 60,
+     "p": 0.03333333333333333,
+     "lo": 0.009189126490150246,
+     "hi": 0.11363987528925378
     },
     "by_style": {
      "request": {
       "seen": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 26,
+       "n": 30,
+       "p": 0.8666666666666667,
+       "lo": 0.7031831605558306,
+       "hi": 0.9469043057578189
       },
       "read": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 30,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.113517091390478
       },
       "joined_or_responded_if_seen": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 26,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.12873304380462175
       }
      },
      "memory": {
       "seen": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 30,
+       "n": 30,
+       "p": 1.0,
+       "lo": 0.8864829086095221,
+       "hi": 1.0
       },
       "read": {
-       "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "k": 2,
+       "n": 30,
+       "p": 0.06666666666666667,
+       "lo": 0.01847663532769335,
+       "hi": 0.21323817721072091
       },
       "joined_or_responded_if_seen": {
        "k": 0,
-       "n": 0,
-       "p": null,
-       "lo": null,
-       "hi": null
+       "n": 30,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.113517091390478
       }
      }
     },
-    "cost_usd_nominal": 0.0
+    "cost_usd_nominal": 3.5524
    }
   }
  },
  "ledger": {
-  "spend_usd": 138.7322,
-  "calls": 100606,
+  "spend_usd": 165.1254,
+  "calls": 128369,
   "by_model": {
    "adaption/deepseek-v4-flash": {
-    "calls": 25481,
-    "usd": 5.3069
+    "calls": 27910,
+    "usd": 6.0588
    },
    "adaption/gemma-4-26b-a4b-it": {
-    "calls": 18150,
-    "usd": 7.7392
+    "calls": 24357,
+    "usd": 10.6196
    },
    "adaption/gemma-4-31b-it": {
-    "calls": 17911,
-    "usd": 8.2856
+    "calls": 23828,
+    "usd": 11.1742
    },
    "adaption/glm-5.2": {
-    "calls": 15436,
-    "usd": 67.2552
+    "calls": 21570,
+    "usd": 78.5692
    },
    "adaption/qwen3.5-397b": {
-    "calls": 15848,
-    "usd": 46.0417
+    "calls": 17844,
+    "usd": 51.8477
    },
    "adaption/qwen3.8-27b": {
-    "calls": 7780,
-    "usd": 4.1036
+    "calls": 12860,
+    "usd": 6.856
    }
   }
  }
