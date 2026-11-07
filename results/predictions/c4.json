@@ -343,5 +343,88 @@
    "P_board": 0.0,
    "predicted_board": false
   }
+ },
+ "secondary_d10b_check": {
+  "checked": "2026-11-08 02:37:14 +0500",
+  "fleets": {
+   "c4_qwen3.5-397b_n1024_plain_rule": {
+    "inputs_changed": false,
+    "before": {
+     "p_w": 0.0,
+     "v": 0.9333333333333333,
+     "p_j": 0.0,
+     "W": 0.0,
+     "R": 0.0,
+     "predicted_board": false
+    },
+    "after": {
+     "p_w": 0.0,
+     "v": 0.9333333333333333,
+     "p_j": 0.0,
+     "W": 0.0,
+     "R": 0.0,
+     "predicted_board": false
+    },
+    "p_j_rate_after": {
+     "k": 0,
+     "n": 56,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.06419614448811528
+    }
+   },
+   "c4_gemma-4-26b-a4b-it_n256_plain_rule": {
+    "inputs_changed": false,
+    "before": {
+     "p_w": 0.0,
+     "v": 0.72,
+     "p_j": 0.0,
+     "W": 0.0,
+     "R": 0.0,
+     "predicted_board": false
+    },
+    "after": {
+     "p_w": 0.0,
+     "v": 0.72,
+     "p_j": 0.0,
+     "W": 0.0,
+     "R": 0.0,
+     "predicted_board": false
+    },
+    "p_j_rate_after": {
+     "k": 0,
+     "n": 72,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.05065293981139638
+    }
+   },
+   "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule": {
+    "inputs_changed": false,
+    "before": {
+     "p_w": 0.35,
+     "v": 0.76,
+     "p_j": 0.0,
+     "W": 26.88,
+     "R": 0.0,
+     "predicted_board": false
+    },
+    "after": {
+     "p_w": 0.35,
+     "v": 0.76,
+     "p_j": 0.0,
+     "W": 26.88,
+     "R": 0.0,
+     "predicted_board": false
+    },
+    "p_j_rate_after": {
+     "k": 0,
+     "n": 76,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.04811526823109757
+    }
+   }
+  }
  }
 }

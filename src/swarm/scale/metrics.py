@@ -63,8 +63,9 @@ def job_features(events, jobs: list[dict], *, prompt: str = "plain",
                  own_output_not_note: bool = False) -> dict[str, dict]:
     """events: any iterable of provenance events in seq order (a list, or lines streamed
     from an events file). jobs: ticket dicts (job_id, inputs, ...). With own_output_not_note
-    (the secondary scoring of docs/deviations.md D10), a put at the writer's own deliverable
-    path is never a NOTE; the default is the registered scoring."""
+    (the secondary scoring of docs/deviations.md D10 and D10b), a put at the writer's own
+    deliverable path is never a NOTE, a response to the seed note or a reply to a peer NOTE;
+    the default is the registered scoring."""
     live = {j["job_id"]: j for j in jobs}
     own_path = {j: own_output(t) for j, t in live.items()}
     coord_rule = prompt == "coordinate_ok" and rule
@@ -174,7 +175,8 @@ def job_features(events, jobs: list[dict], *, prompt: str = "plain",
                     r["uses_closed"] += 1
             allowed_fp[j] |= fps
             nn = bool(note.get("is_note"))
-            if own_output_not_note and name == own_path[j]:
+            own = own_output_not_note and name == own_path[j]  # D10, D10b (secondary scoring)
+            if own:
                 nn = False
             is_note[name] = nn
             if nn:
@@ -191,14 +193,14 @@ def job_features(events, jobs: list[dict], *, prompt: str = "plain",
             else:
                 note_author.pop(name, None)
             low = (name + "\n" + text).lower()
-            if r["_seed_read_seq"] is not None and r["responded"] is not None:
+            if r["_seed_read_seq"] is not None and r["responded"] is not None and not own:
                 upload = bool(fps & request_fp) or (seed_ds and f"{seed_ds}_copy" in
                                                     name.lower())
                 reply = nn and seed_job is not None and seed_job in low
                 if upload or reply:
                     r["responded"] = True
                     r["responded_upload"] = r["responded_upload"] or bool(upload)
-            if r["_peer_read_seq"] is not None and r["_peer_refs"]:
+            if r["_peer_read_seq"] is not None and r["_peer_refs"] and not own:
                 if any(x in low for x in r["_peer_refs"] if x != j):
                     r["replied_peer"] = True
         elif op == "submit":

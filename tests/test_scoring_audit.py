@@ -207,10 +207,9 @@ def test_f4_d10_secondary_scoring_removes_the_two_placeholder_board():
     assert not (f[b.job_id]["joined_peer"] or f[b.job_id]["replied_peer"])
 
 
-@pytest.mark.xfail(reason="F4, gap in D10: the reply rule is unchanged, so a placeholder at the "
-                          "own deliverable path that names a dataset of a peer's status note is "
-                          "a 'reply' and makes a board under the secondary scoring", **STRICT)
 def test_f4_d10_gap_placeholder_is_not_a_reply():
+    """Fixed by D10b (docs/deviations.md): under the secondary scoring a write at the own
+    deliverable path is not a reply."""
     _w, env, jobs, blocked = fleet()
     a, b = blocked[0], blocked[1]
     env.apply(a.job_id, 0, "store_put", {"name": f"work/{a.job_id}/BLOCKED.txt",
