@@ -72,7 +72,10 @@ def summarize() -> dict:
             for ln in f:
                 if not ln.strip():
                     continue
-                rec = json.loads(ln)
+                try:
+                    rec = json.loads(ln)
+                except json.JSONDecodeError:  # a line still being written by the running process
+                    continue
                 eid = rec["episode_id"]
                 if eid not in want or eid in seen or eid not in labels:
                     continue

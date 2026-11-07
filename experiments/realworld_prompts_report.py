@@ -21,6 +21,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from swarm.fleet.stats import wilson  # noqa: E402
 from swarm.scale import prompts as P  # noqa: E402
+from swarm.swarmcheck.lint import lint  # noqa: E402
 
 RES = ROOT / "results" / "realworld_prompts"
 PROMPTS = ROOT / "data" / "raw" / "framework_prompts"
@@ -118,6 +119,11 @@ def check_excerpts() -> list[str]:
         if p.exists() and P.REAL_CUES[arm] not in p.read_text(encoding="utf-8"):
             problems.append(f"{arm}: cue not verbatim in {f}")
     return problems
+
+
+def harness_lint(arm: str, steps: int) -> str:
+    fs = lint(P.system_prompt("job-0001", steps, prompt=arm, rule=True))
+    return ", ".join(f"{f.level} {f.rule}" for f in fs) or "none"
 
 
 def yn(b: bool) -> str:
@@ -257,6 +263,10 @@ def main() -> None:
     else:
         cells = H["cells"]
         base = cells["plain"]
+        full = 100 * len(cells)
+        if H["episodes"] < full:
+            out += [f"PARTIAL RUN: {H['episodes']} of {full} episodes finished when this file "
+                    "was built (specs run seed-major, so arms stay balanced).", ""]
         out += [f"Single-agent harness (`src/swarm/scale/`), {H['model']}, house rule on, no seed "
                 f"note, {H['steps']} turns, world seeds {H['seeds'][0]}-{H['seeds'][1]} (new, "
                 "paired across arms), concurrency 16, own cache and ledger with a $15 cap. Each "
@@ -269,8 +279,8 @@ def main() -> None:
                 "(not pre-registered): \"opened\" if the interval is above 0, \"closed\" if its "
                 "upper end is below the C2 margin 0.05, otherwise \"unclear\".", "",
                 "| arm | sentence (source) | n | NOTE_ADDRESSED | difference vs plain | gate | "
-                "USE (get) | p_use (code) | NOTE (any kind) |",
-                "|---|---|---|---|---|---|---|---|---|"]
+                "USE (get) | p_use (code) | NOTE (any kind) | linter on the harness prompt |",
+                "|---|---|---|---|---|---|---|---|---|---|"]
         opened = []
         for arm, c in cells.items():
             if arm == "plain":
@@ -291,7 +301,7 @@ def main() -> None:
                     diff, gate = "n/a", ""
             out.append(f"| `{arm}` | {sent} | {c['n']} | {fr(c['note_addressed'])} | {diff} | "
                        f"{gate} | {fr(c['use_get'])} | {fr(c['p_use_code'])} | "
-                       f"{fr(c['note_any'])} |")
+                       f"{fr(c['note_any'])} | {harness_lint(arm, H['steps'])} |")
         out += ["", "Real sentences that opened the gate by the reading rule: "
                 + (", ".join(f"`{a}`" for a in opened) if opened else "none") + ".", ""]
         kinds = {a: c["note_kinds"] for a, c in cells.items() if c["note_kinds"]}
