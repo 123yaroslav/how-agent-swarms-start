@@ -28,6 +28,11 @@ draws do. The table grows as more C4 entries are committed (rerun the command).
 | C4 fleet | inputs p_w, v, p_j | W | R | R bootstrap 95% | R Jeffreys 95% | P(R > 1), Jeffreys | P_board | P_board Jeffreys 95% | P_1link |
 |---|---|---|---|---|---|---|---|---|---|
 | c4_glm-5.2_n1024_plain_rule | 0/70, 52/60, 0/52 | 0.00 | 0.00 | [0.00, 0.00] | [0.01, 41.44] | 0.73 | 0.000 | [0.000, 1.000] | 0.000 |
+| c4_qwen3.5-397b_n1024_plain_rule | 16/70, 56/60, 0/56 | 70.22 | 0.00 | [0.00, 0.00] | [0.01, 41.06] | 0.73 | 0.000 | [0.000, 1.000] | 0.000 |
+| c4_gemma-4-26b-a4b-it_n256_plain_rule | 0/100, 72/100, 0/72 | 0.00 | 0.00 | [0.00, 0.00] | [0.00, 6.22] | 0.37 | 0.000 | [0.000, 0.494] | 0.000 |
+| c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule | 36/100, 76/100, 0/76 | 27.65 | 0.00 | [0.00, 0.00] | [0.00, 6.28] | 0.37 | 0.000 | [0.000, 1.000] | 0.000 |
+| c4_gemma-4-31b-it_n256_plain_rule | 0/100, 63/100, 0/63 | 0.00 | 0.00 | [0.00, 0.00] | [0.00, 6.22] | 0.37 | 0.000 | [0.000, 0.497] | 0.000 |
+| c4_gemma-4-31b-it_n256_coordinate_ok_rule | 87/100, 61/100, 22/61 | 66.82 | 56.32 | [35.84, 79.36] | [37.35, 78.16] | 1.00 | 1.000 | [1.000, 1.000] | 1.000 |
 <!-- c4intervals:end -->
 
 Reading. A plain-prompt fleet is predicted to form no board because no probe agent answered a
@@ -168,14 +173,14 @@ Filled by `experiments/threshold_fleets.py eval` after the fleets, next to the c
 predictions.
 
 <!-- observed:begin -->
-| fleet | predicted R | P_board (frozen) | P_1link | board | jobs in a board link (permission / plain) | notes (permission / plain) | point rule correct | cost |
-|---|---|---|---|---|---|---|---|---|
-| thr_gemma-4-26b-a4b-it_n256_k39_coordinate_ok_s6900 | 0.78 | 0.000 | 1.000 | yes | 1 (1 / 0) | 4 / 0 | False | $0.45 |
-| thr_gemma-4-26b-a4b-it_n256_k39_coordinate_ok_s6901 | 0.78 | 0.000 | 1.000 | not run | | | | |
-| thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6900 | 0.00 | 0.000 | 0.000 | not run | | | | |
-| thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6901 | 0.00 | 0.000 | 0.000 | not run | | | | |
-| thr_gemma-4-26b-a4b-it_n256_k77_coordinate_ok_s6900 | 1.54 | 1.000 | 1.000 | not run | | | | |
-| thr_gemma-4-26b-a4b-it_n256_k77_coordinate_ok_s6901 | 1.54 | 1.000 | 1.000 | not run | | | | |
+| fleet | predicted W | predicted R | P_board (frozen) | P_1link | board | jobs in a board link (permission / plain) | jobs that wrote a note (permission / plain) | jobs that read a peer note (permission / plain) | permitted jobs that completed their job | point rule correct | cost |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| thr_gemma-4-26b-a4b-it_n256_k39_coordinate_ok_s6900 | 14.04 | 0.78 | 0.000 | 1.000 | yes | 1 (1 / 0) | 4 / 0 | 14 / 0 | 26 | False | $0.45 |
+| thr_gemma-4-26b-a4b-it_n256_k39_coordinate_ok_s6901 | 14.04 | 0.78 | 0.000 | 1.000 | not run | | | | | | |
+| thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6900 | 6.91 | 0.00 | 0.000 | 0.000 | not run | | | | | | |
+| thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6901 | 6.91 | 0.00 | 0.000 | 0.000 | not run | | | | | | |
+| thr_gemma-4-26b-a4b-it_n256_k77_coordinate_ok_s6900 | 27.72 | 1.54 | 1.000 | 1.000 | not run | | | | | | |
+| thr_gemma-4-26b-a4b-it_n256_k77_coordinate_ok_s6901 | 27.72 | 1.54 | 1.000 | 1.000 | not run | | | | | | |
 
 C4 fleets with an outcome so far (frozen predictions, results/confirmatory/c4.json):
 
@@ -194,7 +199,7 @@ Calibration (Brier score, lower is better; expected boards = sum of predicted P(
 | with_c4 | 1link | 2 | 0.000 | 1.00 | 1 |
 | with_c4 | permission_rule | 2 | 0.000 | 1.00 | 1 |
 
-Spend of this study (ledger of results/cache/threshold_llm.sqlite): $2.46 over 6987 calls.
+Spend of this study (ledger of results/cache/threshold_llm.sqlite): $2.47 over 7048 calls.
 <!-- observed:end -->
 
 ## Files

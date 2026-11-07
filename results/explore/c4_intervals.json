@@ -1,7 +1,7 @@
 {
  "label": "EXPLORATORY",
  "source": "results/predictions/c4.json",
- "source_sha256": "2fcf12af48d55537c761dfae2597bc556d009e16e5f6cd568145ad1c955b6ac3",
+ "source_sha256": "7cacbf7d8eb7cfb665a9e2277d7af62fccf7de47816a461123690d39a61da2c3",
  "note": "Intervals for the committed C4 predictions; the frozen file is read, never written. Inputs are the counts stored in each entry (p_w of the C1/C2 cell, v and p_j of the probes, D6). bootstrap: episodes resampled with replacement; jeffreys: Beta(k + 1/2, n - k + 1/2) draws. 10,000 draws each, 95% percentile intervals. R_wilson is the product interval already stored in the entry (R_lo, R_hi).",
  "fleets": {
   "c4_glm-5.2_n1024_plain_rule": {
@@ -80,6 +80,406 @@
      "mean": 0.4789321435542389
     },
     "P_R_above_1": 0.7266
+   },
+   "draws": 10000,
+   "rng_seed": 20261108
+  },
+  "c4_qwen3.5-397b_n1024_plain_rule": {
+   "N": 1024,
+   "model": "qwen3.5-397b",
+   "prompt": "plain",
+   "seed_note": "none",
+   "inputs": {
+    "p_w": [
+     16,
+     70
+    ],
+    "v": [
+     56,
+     60
+    ],
+    "p_j": [
+     0,
+     56
+    ]
+   },
+   "point": {
+    "W": 70.21714285714285,
+    "R": 0.0,
+    "P_board": 0.0,
+    "P_1link": 0.0,
+    "predicted_board": false
+   },
+   "R_wilson": [
+    0.0,
+    64.01268778142172
+   ],
+   "written": "2026-11-08 02:00:11 +0500",
+   "bootstrap": {
+    "W": {
+     "lo": 39.497142857142855,
+     "hi": 100.93714285714286,
+     "mean": 70.13288228571429
+    },
+    "R": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_1link": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_R_above_1": 0.0
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 44.06868719908595,
+     "hi": 102.62549785771664,
+     "mean": 71.32591459795071
+    },
+    "R": {
+     "lo": 0.007762711294869962,
+     "hi": 41.05869481768358,
+     "mean": 8.167457953723284
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 1.0,
+     "mean": 0.7257564490129161
+    },
+    "P_1link": {
+     "lo": 0.3994544361649512,
+     "hi": 1.0,
+     "mean": 0.9698427200861166
+    },
+    "P_R_above_1": 0.728
+   },
+   "draws": 10000,
+   "rng_seed": 20261108
+  },
+  "c4_gemma-4-26b-a4b-it_n256_plain_rule": {
+   "N": 256,
+   "model": "gemma-4-26b-a4b-it",
+   "prompt": "plain",
+   "seed_note": "none",
+   "inputs": {
+    "p_w": [
+     0,
+     100
+    ],
+    "v": [
+     72,
+     100
+    ],
+    "p_j": [
+     0,
+     72
+    ]
+   },
+   "point": {
+    "W": 0.0,
+    "R": 0.0,
+    "P_board": 0.0,
+    "P_1link": 0.0,
+    "predicted_board": false
+   },
+   "R_wilson": [
+    0.0,
+    10.355625223155768
+   ],
+   "written": "2026-11-08 02:08:56 +0500",
+   "bootstrap": {
+    "W": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "R": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_1link": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_R_above_1": 0.0
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 0.00032236883061753527,
+     "hi": 1.9356191761875712,
+     "mean": 0.3886463562936348
+    },
+    "R": {
+     "lo": 0.0011536777752947133,
+     "hi": 6.218343658486803,
+     "mean": 1.2315580475039285
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.4940755608950169,
+     "mean": 0.05420679721882034
+    },
+    "P_1link": {
+     "lo": 1.6414352123950155e-05,
+     "hi": 0.6872563508906496,
+     "mean": 0.12939325021188064
+    },
+    "P_R_above_1": 0.3695
+   },
+   "draws": 10000,
+   "rng_seed": 20261108
+  },
+  "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule": {
+   "N": 256,
+   "model": "gemma-4-26b-a4b-it",
+   "prompt": "coordinate_ok",
+   "seed_note": "none",
+   "inputs": {
+    "p_w": [
+     36,
+     100
+    ],
+    "v": [
+     76,
+     100
+    ],
+    "p_j": [
+     0,
+     76
+    ]
+   },
+   "point": {
+    "W": 27.648,
+    "R": 0.0,
+    "P_board": 0.0,
+    "P_1link": 0.0,
+    "predicted_board": false
+   },
+   "R_wilson": [
+    0.0,
+    10.261567272883797
+   ],
+   "written": "2026-11-08 02:08:56 +0500",
+   "bootstrap": {
+    "W": {
+     "lo": 20.736,
+     "hi": 35.328,
+     "mean": 27.683404799999995
+    },
+    "R": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_1link": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_R_above_1": 0.0
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 20.7936247522886,
+     "hi": 34.875047301052106,
+     "mean": 27.70861811248061
+    },
+    "R": {
+     "lo": 0.0011607117646329783,
+     "hi": 6.2770259579399905,
+     "mean": 1.239607243814264
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.9999999999612136,
+     "mean": 0.35936595388026826
+    },
+    "P_1link": {
+     "lo": 0.03183240994630712,
+     "hi": 0.9999999999999485,
+     "mean": 0.879539318915096
+    },
+    "P_R_above_1": 0.3682
+   },
+   "draws": 10000,
+   "rng_seed": 20261108
+  },
+  "c4_gemma-4-31b-it_n256_plain_rule": {
+   "N": 256,
+   "model": "gemma-4-31b-it",
+   "prompt": "plain",
+   "seed_note": "none",
+   "inputs": {
+    "p_w": [
+     0,
+     100
+    ],
+    "v": [
+     63,
+     100
+    ],
+    "p_j": [
+     0,
+     63
+    ]
+   },
+   "point": {
+    "W": 0.0,
+    "R": 0.0,
+    "P_board": 0.0,
+    "P_1link": 0.0,
+    "predicted_board": false
+   },
+   "R_wilson": [
+    0.0,
+    10.5666492605505
+   ],
+   "written": "2026-11-08 02:39:20 +0500",
+   "bootstrap": {
+    "W": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "R": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_1link": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_R_above_1": 0.0
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 0.00032236883061753527,
+     "hi": 1.9356191761875712,
+     "mean": 0.3886463562936348
+    },
+    "R": {
+     "lo": 0.001165227604757891,
+     "hi": 6.216604818390342,
+     "mean": 1.2305766091299437
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.4966141216333572,
+     "mean": 0.05428116102988561
+    },
+    "P_1link": {
+     "lo": 1.646735179344494e-05,
+     "hi": 0.6854975557130292,
+     "mean": 0.12935301869929558
+    },
+    "P_R_above_1": 0.3689
+   },
+   "draws": 10000,
+   "rng_seed": 20261108
+  },
+  "c4_gemma-4-31b-it_n256_coordinate_ok_rule": {
+   "N": 256,
+   "model": "gemma-4-31b-it",
+   "prompt": "coordinate_ok",
+   "seed_note": "none",
+   "inputs": {
+    "p_w": [
+     87,
+     100
+    ],
+    "v": [
+     61,
+     100
+    ],
+    "p_j": [
+     22,
+     61
+    ]
+   },
+   "point": {
+    "W": 66.816,
+    "R": 56.32,
+    "P_board": 1.0,
+    "P_1link": 1.0,
+    "predicted_board": true
+   },
+   "R_wilson": [
+    32.997809832914534,
+    87.08531318141985
+   ],
+   "written": "2026-11-08 02:39:20 +0500",
+   "bootstrap": {
+    "W": {
+     "lo": 61.44,
+     "hi": 71.424,
+     "mean": 66.8356608
+    },
+    "R": {
+     "lo": 35.84,
+     "hi": 79.36,
+     "mean": 56.544512
+    },
+    "P_board": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "mean": 1.0
+    },
+    "P_1link": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "mean": 1.0
+    },
+    "P_R_above_1": 1.0
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 60.9503967616832,
+     "hi": 71.0232895686357,
+     "mean": 66.54144827091997
+    },
+    "R": {
+     "lo": 37.35345998987633,
+     "hi": 78.15553169396443,
+     "mean": 56.64096944887661
+    },
+    "P_board": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "mean": 1.0
+    },
+    "P_1link": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "mean": 1.0
+    },
+    "P_R_above_1": 1.0
    },
    "draws": 10000,
    "rng_seed": 20261108

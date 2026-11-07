@@ -561,19 +561,24 @@ def write_doc_tables(res: dict | None = None) -> None:
                      f"{'board' if pt['predicted_board'] else 'no board'} | {p['written']} |")
         text = _between(text, "predictions", "\n".join(L))
     if res is not None:
-        L = ["| fleet | predicted R | P_board (frozen) | P_1link | board | jobs in a board link "
-             "(permission / plain) | notes (permission / plain) | point rule correct | cost |",
-             "|---|---|---|---|---|---|---|---|---|"]
+        L = ["| fleet | predicted W | predicted R | P_board (frozen) | P_1link | board | jobs in a "
+             "board link (permission / plain) | jobs that wrote a note (permission / plain) | "
+             "jobs that read a peer note (permission / plain) | permitted jobs that completed "
+             "their job | point rule correct | cost |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|"]
         for t, e in res["fleets"].items():
             o = e.get("observed")
             if not o:
-                L.append(f"| {t} | {e['predicted_R']:.2f} | {e['P_board']:.3f} | "
-                         f"{e['P_1link']:.3f} | not run | | | | |")
+                L.append(f"| {t} | {e['predicted_W']:.2f} | {e['predicted_R']:.2f} | "
+                         f"{e['P_board']:.3f} | {e['P_1link']:.3f} | not run | | | | | | |")
                 continue
-            L.append(f"| {t} | {e['predicted_R']:.2f} | {e['P_board']:.3f} | {e['P_1link']:.3f} | "
+            L.append(f"| {t} | {e['predicted_W']:.2f} | {e['predicted_R']:.2f} | "
+                     f"{e['P_board']:.3f} | {e['P_1link']:.3f} | "
                      f"{'yes' if o['board'] else 'no'} | {o['n_board_jobs']} "
                      f"({o['board_jobs_permission']} / {o['board_jobs_plain']}) | "
                      f"{o['permission_wrote_note']} / {o['plain_wrote_note']} | "
+                     f"{o['permission_read_peer_note']} / {o['plain_read_peer_note']} | "
+                     f"{o['permission_success']} | "
                      f"{e.get('point_rule_correct')} | ${o['cost_usd_nominal']:.2f} |")
         L += ["", "C4 fleets with an outcome so far (frozen predictions, results/confirmatory/c4.json):",
               "", "| fleet | N | predicted R | P_board (frozen) | P_1link | board |",

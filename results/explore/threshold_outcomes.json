@@ -223,12 +223,12 @@
   }
  },
  "ledger": {
-  "spend_usd": 2.4632,
-  "calls": 6987,
+  "spend_usd": 2.4675,
+  "calls": 7048,
   "by_model": {
    "adaption/gemma-4-26b-a4b-it": {
-    "calls": 6987,
-    "usd": 2.4632
+    "calls": 7048,
+    "usd": 2.4675
    }
   }
  },
