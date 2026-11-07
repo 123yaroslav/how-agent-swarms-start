@@ -135,16 +135,24 @@ def newcombe(a: dict, b: dict) -> dict | None:
             "hi": d + math.sqrt((a["hi"] - a["p"]) ** 2 + (b["p"] - b["lo"]) ** 2)}
 
 
+def own_output(ticket: dict) -> str:
+    """The job's own output path, from its ticket (what the agent is told to publish)."""
+    return f"{'reports' if ticket['kind'] == 'report' else 'staging'}/{ticket['target']}.csv"
+
+
 def after_seen(rec: dict) -> dict:
     """Detector side, from the provenance log only: did the live job write a NOTE after the
     seed note was first shown to it (list or search) or read, and did it write, after reading
     the seed note, a NOTE that names the asking job (a reply)."""
     sn = rec["world"]["seed_note"]
     if not sn:
-        return {"note_after_seen": None, "reply": None, "after_seen_notes": []}
+        return {"note_after_seen": None, "reply": None, "after_seen_notes": [],
+                "joined_elsewhere": None, "note_after_seen_elsewhere": None}
     job = rec["world"]["jobs"][0]["job_id"]
+    own = own_output(rec["world"]["jobs"][0])
     seen_seq = read_seq = None
     note_after, reply, texts = False, False, []
+    joined_else = note_after_else = False  # POST HOC: NOTEs not stored at the own output path
     for e in reclassified(rec["events"]):
         if e.get("job") != job:
             continue
@@ -159,13 +167,18 @@ def after_seen(rec: dict) -> dict:
                 read_seq = e["seq"]
         elif op == "put" and (e.get("note") or {}).get("is_note"):
             text = e.get("text") or ""
+            elsewhere = e.get("name", "") != own
             if seen_seq is not None:
                 note_after = True
+                note_after_else = note_after_else or elsewhere
                 texts.append([e.get("name", ""), e["note"].get("kind"), text[:300]])
+            if read_seq is not None and elsewhere:
+                joined_else = True
             if read_seq is not None and sn["job"] in (e.get("name", "") + "\n" + text).lower():
                 reply = True
     return {"note_after_seen": note_after, "reply": reply if sn["style"] == "request" else None,
-            "after_seen_notes": texts}
+            "after_seen_notes": texts, "joined_elsewhere": joined_else,
+            "note_after_seen_elsewhere": note_after_else}
 
 
 def load(path: Path, want: set[str]) -> list[dict]:
@@ -197,8 +210,12 @@ def load(path: Path, want: set[str]) -> list[dict]:
                 continue
             seen.add(eid)
             extra = after_seen(rec)
+            own = own_output(rec["world"]["jobs"][0])
             for r in episode_rows([rec], labels):
                 r.update(extra)
+                r["own_output"] = own
+                r["notes_at_own_output"] = sum(n == own for n, _, _ in r["note_texts"])
+                r["notes_elsewhere"] = len(r["note_texts"]) - r["notes_at_own_output"]
                 r["_cost"] = rec["totals"]["cost"]
                 r["_calls"] = rec["totals"]["calls"]
                 r["_errors"] = rec["totals"]["errors"]
@@ -237,6 +254,10 @@ def probe_cell(rs: list[dict], n_expected: int) -> dict:
         "p_use_code": rate([bool(r["uses_others_artifacts"]) for r in rs]),
         "report_blocked": rate([bool(r["report_blocked"]) for r in rs]),
         "success": rate([bool(r["success"]) for r in rs]),
+        "posthoc_p_j_elsewhere": rate([bool(r["joined_elsewhere"] or r.get("responded"))
+                                       for r in seen]),
+        "posthoc_note_after_seen_elsewhere": rate([bool(r["note_after_seen_elsewhere"])
+                                                   for r in seen]),
         "note_kinds": kinds(rs),
         "episodes_with_failed_turns": sum(r["_errors"] > 0 for r in rs),
         "calls": sum(r["_calls"] for r in rs), "malformed": sum(r["_malformed"] for r in rs),
@@ -250,6 +271,27 @@ def probe_block(rows: list[dict], per_style: int) -> dict:
     for st in ("request", "memory"):
         out[st] = probe_cell([r for r in rows if r["note"] == st], per_style)
     return out
+
+
+def note_places(rs: list[dict]) -> dict:
+    """POST HOC: where the NOTEs were stored. A NOTE at the job's own output path is the job's
+    report file holding a message (for example "BLOCKED: input missing"), not a note in a
+    shared place."""
+    return {"n": len(rs),
+            "note_any": rate([bool(r["wrote_note"]) for r in rs]),
+            "note_elsewhere": rate([r["notes_elsewhere"] > 0 for r in rs]),
+            "note_only_at_own_output": rate([r["wrote_note"] and r["notes_elsewhere"] == 0
+                                             for r in rs]),
+            "note_addressed": rate([bool(r["wrote_note_addressed"]) for r in rs])}
+
+
+def confirm_note_places(model: str) -> dict:
+    """POST HOC, read only: note places in the unseeded plain cells of the confirmatory run."""
+    from scale_confirm import cell_specs
+    specs = [s for s in cell_specs(model) if s.prompt == "plain"]
+    rows = load(confirm_out_path(model, False), {s.episode_id() for s in specs})
+    return {arm: note_places([r for r in rows if r["arm"] == arm])
+            for arm in ("plain-rule", "plain-norule")}
 
 
 def c1c3_cells(model: str) -> dict:
@@ -312,8 +354,11 @@ def summarize(raw: Path = RAW, dry: bool = False) -> dict:
             "norule_minus_rule": diffs,
             "p_w_unseeded_c1c3": c1c3_cells(m),
             "verdict_norule": verdict(norule["pooled"]["p_j"]),
+            "posthoc_note_places": {"this_run_rule_off": note_places(mine),
+                                    "confirmatory_unseeded": confirm_note_places(m)},
             "after_seen_notes": [{"seed": r["seed"], "note": r["note"], "name": n, "kind": k,
-                                  "text": t} for r in mine for n, k, t in r["after_seen_notes"]],
+                                  "at_own_output": n == r["own_output"], "text": t}
+                                 for r in mine for n, k, t in r["after_seen_notes"]],
         }
     rw_ids = {s.episode_id() for s in rw_specs(rt)}
     rw_rows = [r for r in rows if r["episode_id"] in rw_ids]
@@ -329,6 +374,7 @@ def summarize(raw: Path = RAW, dry: bool = False) -> dict:
                    "report_blocked": rate([bool(r["report_blocked"]) for r in rs]),
                    "success": rate([bool(r["success"]) for r in rs]),
                    "note_kinds": kinds(rs),
+                   "posthoc_note_places": note_places(rs),
                    "episodes_with_failed_turns": sum(r["_errors"] > 0 for r in rs),
                    "calls": sum(r["_calls"] for r in rs),
                    "errors": sum(r["_errors"] for r in rs),
@@ -423,12 +469,219 @@ def tables(s: dict) -> str:
                  f"{fr(c['use_get'])} | {fd(c.get('use_get_minus_plain'))} | "
                  f"{fr(c['p_use_code'])} | {fr(c['rule_broken'])} | "
                  f"{fr(ds.get(arm, {}).get('use_get'))} |")
+    L += ["", "POST HOC (not in the plan): where the NOTEs were stored. A NOTE at the job's own "
+          "output path is its report file holding a message such as \"BLOCKED: input "
+          "missing\".", "",
+          "| model | cell | n | NOTE (any) | NOTE outside the own output path | NOTE only at "
+          "the own output path | addressed |", "|---|---|---|---|---|---|---|"]
+
+    def row(m: str, cell: str, c: dict) -> None:
+        L.append(f"| {m} | {cell} | {c['n']} | {fr(c['note_any'])} | {fr(c['note_elsewhere'])}"
+                 f" | {fr(c['note_only_at_own_output'])} | {fr(c['note_addressed'])} |")
+    for m, d in s["probes"].items():
+        pl = d["posthoc_note_places"]
+        for arm, c in pl["confirmatory_unseeded"].items():
+            row(m, f"confirmatory {arm}, no seed note", c)
+        row(m, "this run, plain-norule, seeded", pl["this_run_rule_off"])
+    for arm, c in r["arms"].items():
+        row(r["model"], f"replication {arm}-rule", c["posthoc_note_places"])
+    L += ["", "POST HOC: p_j (rule off) not counting NOTEs stored at the own output path: "
+          + "; ".join(f"{m} {fr(d['norule_this_run']['pooled']['posthoc_p_j_elsewhere'])}"
+                      for m, d in s["probes"].items())]
     return "\n".join(L)
+
+
+# ---- markdown (the Results section of the plan doc) -----------------------------------------
+MD = ROOT / "docs" / "ideas" / "write_find_answer.md"
+SHORT = {"deepseek-v4-flash": "DeepSeek V4 Flash", "gemma-4-31b-it": "Gemma 4 31B",
+         "glm-5.2": "GLM 5.2", "qwen3.5-397b": "Qwen 3.5 397B"}
+
+
+def ko(d: dict) -> str:
+    return f"{d['k']} of {d['n']}"
+
+
+def pr(d: dict) -> str:
+    return "n/a" if not d or not d["n"] else f"{d['p']:.2f} [{d['lo']:.2f}, {d['hi']:.2f}]"
+
+
+def outcome_lines(s: dict) -> list[str]:
+    P = s["probes"]
+    pj = {m: d["norule_this_run"]["pooled"]["p_j"] for m, d in P.items()}
+    verdicts = {m: d["verdict_norule"] for m, d in P.items()}
+    L = ["Verdict per model (p_j without the rule, pooled over the two notes): " + "; ".join(
+        f"{SHORT[m]} {ko(pj[m])}, {pr(pj[m])}, {verdicts[m]}" for m in P) + "."]
+    if all(v == "near zero" for v in verdicts.values()):
+        top = max(pj.values(), key=lambda d: (d["p"], d["hi"]))
+        hi = max(d["hi"] for d in pj.values())
+        vs = [d["norule_this_run"]["pooled"]["v_seen"] for d in P.values()]
+        us = [d["norule_this_run"]["pooled"]["use_get"] for d in P.values()]
+        vmin, vmax = min(vs, key=lambda d: d["p"]), max(vs, key=lambda d: d["p"])
+        umin, umax = min(us, key=lambda d: d["p"]), max(us, key=lambda d: d["p"])
+        L.append(f"Every model is near zero, so the first probe sentence holds: \"Without any "
+                 f"house rule, agents that saw a peer's note almost never answered or joined "
+                 f"it: p_j was at most {ko(top)} in every model (largest Wilson upper bound "
+                 f"{hi:.2f}), while they saw the note in {ko(vmin)} to {ko(vmax)} episodes and "
+                 f"read other jobs' artifacts in {ko(umin)} to {ko(umax)}. Untrained agents "
+                 f"write and read in shared places but do not answer, so answering is the "
+                 f"factor that collaboration training would have to move.\"")
+    for m, v in verdicts.items():
+        rule = P[m]["rule_d6_confirmatory"]["pooled"]["p_j"]
+        if v == "answers":
+            ref = f", against {ko(rule)} with the rule" if rule["n"] else \
+                " (the D6 probes with the rule have not run for this model)"
+            L.append(f"{SHORT[m]} answers, so the second probe sentence holds for it: \"Without "
+                     f"the house rule, {SHORT[m]} answered or joined a peer's note in "
+                     f"{ko(pj[m])} episodes in which it saw the note (p_j = {pr(pj[m])})"
+                     f"{ref}; the answering step is not zero once nothing forbids it, so in "
+                     f"the confirmatory probes the rule, not the model, kept p_j at zero.\"")
+        elif v == "between":
+            L.append(f"{SHORT[m]} is between (p_j = {ko(pj[m])}, {pr(pj[m])}): neither probe "
+                     f"sentence holds for it.")
+    if not all(d["norule_this_run"]["pooled"]["complete"] for d in P.values()):
+        L.append("Some probe cells are incomplete; the verdicts above are provisional.")
+    r = s["replication"]["arms"]
+    for arm in RW_ARMS[1:]:
+        c, p0, d = r[arm], r["plain"], r[arm].get("use_get_minus_plain")
+        if d is None:
+            L.append(f"{arm}: no data yet.")
+            continue
+        if c["replicates"]:
+            L.append(f"{arm} replicates: \"On Qwen 3.5 397B, as on DeepSeek V4 Flash, the "
+                     f"sentence raised reads of other jobs' artifacts under the house rule, from "
+                     f"{ko(p0['use_get'])} with the plain prompt to {ko(c['use_get'])} "
+                     f"(difference {fd(d)}), with {c['note_addressed']['k']} addressed "
+                     f"notes.\"")
+        else:
+            L.append(f"{arm} does not replicate: \"On Qwen 3.5 397B the sentence did not raise "
+                     f"reads of other jobs' artifacts under the house rule ({ko(p0['use_get'])} "
+                     f"plain, {ko(c['use_get'])} with the sentence, difference {fd(d)}); the "
+                     f"DeepSeek V4 Flash effect is not shown in a second model family.\"")
+    return L
+
+
+def interpretation(s: dict) -> list[str]:
+    """POST HOC reading of the planned numbers (printed, not part of the planned analysis)."""
+    P = s["probes"]
+    off = {m: d["norule_this_run"] for m, d in P.items()}
+    on = {m: d["rule_d6_confirmatory"] for m, d in P.items()}
+    L = ["Request notes were mostly seen in a listing and not opened. Read it, request note, "
+         "rule off: " + "; ".join(f"{SHORT[m]} {ko(off[m]['request']['read'])}" for m in P)
+         + "; rule on: " + "; ".join(f"{SHORT[m]} {ko(on[m]['request']['read'])}" for m in P)
+         + ". So for the request note p_j = 0 mostly means the agent did not open it.",
+         "Where the note was opened (mostly the memory note), opening did not lead to an "
+         "answer either. p_j if read, rule off: " + "; ".join(
+             f"{SHORT[m]} {ko(off[m]['pooled']['p_j_if_read'])}" for m in P) + ".",
+         "Removing the rule changed use, not answering. USE (get), rule off minus rule on: "
+         + "; ".join(f"{SHORT[m]} {fd(d['norule_minus_rule']['use_get'])}" for m, d in P.items())
+         + "; p_j: " + "; ".join(f"{SHORT[m]} {fd(d['norule_minus_rule']['p_j'])}"
+                                  for m, d in P.items()) + "."]
+    pl = {m: d["posthoc_note_places"] for m, d in P.items()}
+    cu = {m: x["confirmatory_unseeded"] for m, x in pl.items()}
+    L.append("Most NOTEs that count toward p_w are the job's own report file holding a message "
+             "(\"BLOCKED: input missing\"), stored at the path its ticket names. Unseeded plain "
+             "cells of the confirmatory run, NOTE (any) and NOTE outside the own output path, "
+             "rule on / rule off: " + "; ".join(
+                 f"{SHORT[m]} {ko(c['plain-rule']['note_any'])} and "
+                 f"{ko(c['plain-rule']['note_elsewhere'])} / {ko(c['plain-norule']['note_any'])}"
+                 f" and {ko(c['plain-norule']['note_elsewhere'])}" for m, c in cu.items())
+             + ". So the \"write\" half of the probe sentence (\"write and read in shared "
+             "places\") holds only for such report files: notes left elsewhere in the store "
+             "are about as rare as addressed notes.")
+    an = [x for d in P.values() for x in d["after_seen_notes"]]
+    L.append(f"After-seeing NOTEs in this run that are the job's own report file: "
+             f"{sum(x['at_own_output'] for x in an)} of {len(an)} (listed below). Not counting "
+             "such files, p_j without the rule is " + "; ".join(
+                 f"{SHORT[m]} {ko(off[m]['pooled']['posthoc_p_j_elsewhere'])}" for m in P)
+             + ".")
+    r = s["replication"]["arms"]
+    ds = s["replication"]["deepseek_v4_flash_same_worlds"]
+    if ds.get("plain"):
+        L.append("Replication: Qwen 3.5 397B under the house rule almost never reads other jobs' "
+                 f"artifacts ({ko(r['plain']['use_get'])} plain), so the sentences had little "
+                 "to raise. DeepSeek V4 Flash on the same worlds (another run, read as it "
+                 f"stood): plain {ko(ds['plain']['use_get'])}, "
+                 + ", ".join(f"{a} {ko(ds[a]['use_get'])}" for a in RW_ARMS[1:] if a in ds)
+                 + ".")
+    return L
+
+
+def headline(s: dict) -> list[str]:
+    L = ["| model | rule | p_w note, no seed (c1c3) | p_w addressed | v (saw it) | read it | "
+         "p_j (if seen) | p_j if read | answered, request (if seen) | joined | note after "
+         "seeing | USE (get) | use in code |", "|---|---|---|---|---|---|---|---|---|---|---|"
+                                                "---|---|"]
+    for m, d in s["probes"].items():
+        for lab, blk, arm in (("off", d["norule_this_run"], "plain-norule"),
+                              ("on", d["rule_d6_confirmatory"], "plain-rule")):
+            w = d["p_w_unseeded_c1c3"].get(arm, {})
+            c = blk["pooled"]
+            nn = f" (n {c['n']} of {c['n_expected']})" if not c["complete"] else ""
+            wn = "" if w.get("complete", True) else " (cell incomplete)"
+            if not c["n"]:
+                L.append(f"| {SHORT[m]} | {lab}{nn} | {fr(w.get('note_any'))}{wn} | "
+                         f"{fr(w.get('note_addressed'))} | not run yet | | | | | | | | |")
+                continue
+            L.append(f"| {SHORT[m]} | {lab}{nn} | {fr(w.get('note_any'))}{wn} | "
+                     f"{fr(w.get('note_addressed'))} | {fr(c['v_seen'])} | {fr(c['read'])} | "
+                     f"{fr(c['p_j'])} | {fr(c['p_j_if_read'])} | {fr(c['answered'])} | "
+                     f"{fr(c['joined'])} | {fr(c['note_after_seen'])} | {fr(c['use_get'])} | "
+                     f"{fr(c['p_use_code'])} |")
+    return L
+
+
+def clip(t: str, n: int = 160) -> str:
+    t = " / ".join(x.strip() for x in t.splitlines() if x.strip()).replace("|", "/")
+    return t if len(t) <= n else t[:n] + "..."
+
+
+def write_md(s: dict) -> None:
+    run = s.get("run") or {}
+    http = s.get("http") or {}
+    led = s["ledger"]
+    L = ["## Results", "",
+         "Generated by `experiments/write_find_answer.py --md` from "
+         "`results/explore/write_find_answer.json`; do not edit by hand. EXPLORATORY, not "
+         "pre-registered.", "",
+         f"Run: {s['episodes']} of 550 episodes, ledger ${led['spend_usd']:.2f} over "
+         f"{led['calls']} calls (" + ", ".join(f"{k.split('/')[-1]} ${v['usd']:.2f}"
+                                              for k, v in led.get("by_model", {}).items())
+         + ")" + (f", wall {run['wall_s'] / 3600:.1f} h" if run.get("wall_s") else "")
+         + (f", HTTP 429 in {http['n_429']} of {http['responses']} responses"
+            if http.get("responses") else "") + ". Rule off: this run (worlds 5300-5349 and "
+         "5500-5549). Rule on: the D6 confirmatory probes (worlds 2300- and 2500-, read only). "
+         "p_w: the unseeded plain cells of `results/confirmatory/c1c3.json` (30 turns, "
+         "background 200). k/n = share [Wilson 95%].", "",
+         "### Write, find, answer per model (pooled over the request and the memory note)", ""]
+    L += headline(s)
+    L += ["", "### Outcome (the planned rule)", ""] + [f"- {x}" for x in outcome_lines(s)]
+    L += ["", "### Reading of the results (POST HOC, not part of the planned analysis)", ""]
+    L += [f"- {x}" for x in interpretation(s)]
+    L += ["", "### Every cell", "", tables(s), "",
+          "### Notes written after seeing the seed note, rule off (first 160 characters, at "
+          "most 5 per model)", ""]
+    for m, d in s["probes"].items():
+        ns = d["after_seen_notes"]
+        L.append(f"- {SHORT[m]}: notes {len(ns)}")
+        for x in ns[:5]:
+            own = ", the job's own output path" if x["at_own_output"] else ""
+            L.append(f"  - world {x['seed']}, {x['note']} note, {x['kind']}, `{x['name']}`"
+                     f"{own}: {clip(x['text'])}")
+    L += ["", "### Notes in the replication (first 160 characters, at most 5 per arm)", ""]
+    for arm, c in s["replication"]["arms"].items():
+        L.append(f"- {arm}: notes {len(c['notes'])}, kinds {json.dumps(c['note_kinds'])}")
+        for x in c["notes"][:5]:
+            L.append(f"  - world {x['seed']}, {x['kind']}, `{x['name']}`: {clip(x['text'])}")
+    text = MD.read_text()
+    head = text.split("\n## Results\n")[0].rstrip("\n")
+    MD.write_text(head + "\n\n" + "\n".join(L) + "\n")
 
 
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--table", action="store_true")
+    ap.add_argument("--md", action="store_true",
+                    help="with --table: also rewrite the Results section of the plan doc")
     ap.add_argument("--dry", action="store_true", help="scripted agents, no LLM")
     ap.add_argument("--raw", type=Path, default=RAW)
     ap.add_argument("--concurrency", type=int, default=CONCURRENCY)
@@ -478,7 +731,10 @@ def main(argv=None) -> None:
         s.update(extra)
         OUT.parent.mkdir(parents=True, exist_ok=True)
         OUT.write_text(json.dumps(s, indent=1))
+        if a.md:
+            write_md(s)
     print(tables(s))
+    print("\n".join(outcome_lines(s)))
 
 
 if __name__ == "__main__":
