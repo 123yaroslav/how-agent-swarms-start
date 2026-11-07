@@ -374,6 +374,24 @@ def realworld_harness(v: dict) -> None:
                                 + ", DeepSeek V4 Flash")
 
 
+def note_taxonomy_numbers(v: dict) -> None:
+    """Post hoc content check of code-detected notes (docs/ideas/note_taxonomy.md)."""
+    d = load(ROOT / "results" / "note_taxonomy" / "summary.json")
+    if not d:
+        return
+    c = d.get("code_addr_noperm", {})
+    v["nt_code_addr_items"] = c.get("items")
+    v["nt_code_addr_status"] = c.get("labels", {}).get("status")
+    v["nt_code_addr_own_output"] = c.get("locations", {}).get("own_output")
+    a = d.get("contrast", {}).get("plain-rule", {}).get("addressed", {})
+    if a:
+        v["nt_addr_k"] = a["qwen"]["k"] + a["others"]["k"]
+        v["nt_addr_n"] = a["qwen"]["n"] + a["others"]["n"]
+    h = d.get("hand", {})
+    if h.get("agree"):
+        v["nt_hand_agree"] = f"{h['agree']['k']} of {h['agree']['n']}"
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -401,6 +419,7 @@ def main() -> None:
     verdicts(c13, v)
     realworld(v)
     success_numbers(v)
+    note_taxonomy_numbers(v)
     result_sentences(c13, cells, models, v)
     table1(cells, models)
     fleets = []
