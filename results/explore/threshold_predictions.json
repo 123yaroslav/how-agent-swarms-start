@@ -1,0 +1,752 @@
+{
+ "label": "EXPLORATORY",
+ "fleets": {
+  "thr_gemma-4-26b-a4b-it_n256_k39_coordinate_ok_s6900": {
+   "model": "gemma-4-26b-a4b-it",
+   "N": 256,
+   "k_permission_blocked": 39,
+   "n_blocked": 77,
+   "seed": 6900,
+   "permission_jobs": [
+    "job-0019",
+    "job-0492",
+    "job-0835",
+    "job-0864",
+    "job-0963",
+    "job-0977",
+    "job-1148",
+    "job-1647",
+    "job-1657",
+    "job-1661",
+    "job-1985",
+    "job-2092",
+    "job-2452",
+    "job-2476",
+    "job-2664",
+    "job-3198",
+    "job-3286",
+    "job-3409",
+    "job-3541",
+    "job-3596",
+    "job-3779",
+    "job-4154",
+    "job-4872",
+    "job-5169",
+    "job-5273",
+    "job-5836",
+    "job-6272",
+    "job-6703",
+    "job-6780",
+    "job-6842",
+    "job-6845",
+    "job-7833",
+    "job-8227",
+    "job-8339",
+    "job-8471",
+    "job-8633",
+    "job-8982",
+    "job-9057",
+    "job-9777"
+   ],
+   "groups": {
+    "coordinate_ok": {
+     "agents": 39,
+     "writers": 39,
+     "kw": 36,
+     "nw": 100,
+     "n_probe": 50,
+     "n_seen": 39,
+     "n_join": 1
+    },
+    "plain": {
+     "agents": 217,
+     "writers": 37.8,
+     "kw": 0,
+     "nw": 100,
+     "n_probe": 50,
+     "n_seen": 37,
+     "n_join": 0
+    }
+   },
+   "inputs_written": "2026-11-08 02:15:28 +0500",
+   "point": {
+    "W": 14.04,
+    "R": 0.78,
+    "q": 0.0,
+    "P_board": 0.0,
+    "P_1link": 0.9995015362060922,
+    "predicted_board": false
+   },
+   "bootstrap": {
+    "W": {
+     "lo": 10.530000000000001,
+     "hi": 17.94,
+     "mean": 14.057979000000001
+    },
+    "R": {
+     "lo": 0.0,
+     "hi": 2.3400000000000003,
+     "mean": 0.7966920000000001
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.9998778181439809,
+     "mean": 0.2720395184077983
+    },
+    "P_1link": {
+     "lo": 0.0,
+     "hi": 0.9999992455590636,
+     "mean": 0.6406956126136971
+    },
+    "P_R_above_1": 0.2736
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 10.716479224389893,
+     "hi": 17.97559339236174,
+     "mean": 14.256925894479098
+    },
+    "R": {
+     "lo": 0.29193109611391804,
+     "hi": 11.422627075671954,
+     "mean": 3.1975726107402633
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.9999993598363064,
+     "mean": 0.7870243286324297
+    },
+    "P_1link": {
+     "lo": 0.9686919860975939,
+     "hi": 0.9999999589383313,
+     "mean": 0.9961290200291507
+    },
+    "P_R_above_1": 0.81
+   },
+   "draws": 10000,
+   "rng_seed": 20261108,
+   "permission_rule_predicts_board": true,
+   "written": "2026-11-08 02:15:35 +0500",
+   "git_head_at_write": "c07cf89"
+  },
+  "thr_gemma-4-26b-a4b-it_n256_k39_coordinate_ok_s6901": {
+   "model": "gemma-4-26b-a4b-it",
+   "N": 256,
+   "k_permission_blocked": 39,
+   "n_blocked": 77,
+   "seed": 6901,
+   "permission_jobs": [
+    "job-0026",
+    "job-0195",
+    "job-0306",
+    "job-0369",
+    "job-0717",
+    "job-0809",
+    "job-0933",
+    "job-1002",
+    "job-1307",
+    "job-1309",
+    "job-2212",
+    "job-2386",
+    "job-3703",
+    "job-4185",
+    "job-4395",
+    "job-4839",
+    "job-4993",
+    "job-5022",
+    "job-5246",
+    "job-5776",
+    "job-6091",
+    "job-6273",
+    "job-6549",
+    "job-7068",
+    "job-7182",
+    "job-7184",
+    "job-7358",
+    "job-7446",
+    "job-7451",
+    "job-7490",
+    "job-7536",
+    "job-7795",
+    "job-8367",
+    "job-8574",
+    "job-8664",
+    "job-8749",
+    "job-8766",
+    "job-9110",
+    "job-9788"
+   ],
+   "groups": {
+    "coordinate_ok": {
+     "agents": 39,
+     "writers": 39,
+     "kw": 36,
+     "nw": 100,
+     "n_probe": 50,
+     "n_seen": 39,
+     "n_join": 1
+    },
+    "plain": {
+     "agents": 217,
+     "writers": 37.8,
+     "kw": 0,
+     "nw": 100,
+     "n_probe": 50,
+     "n_seen": 37,
+     "n_join": 0
+    }
+   },
+   "inputs_written": "2026-11-08 02:15:28 +0500",
+   "point": {
+    "W": 14.04,
+    "R": 0.78,
+    "q": 0.0,
+    "P_board": 0.0,
+    "P_1link": 0.9995015362060922,
+    "predicted_board": false
+   },
+   "bootstrap": {
+    "W": {
+     "lo": 10.530000000000001,
+     "hi": 17.94,
+     "mean": 14.057979000000001
+    },
+    "R": {
+     "lo": 0.0,
+     "hi": 2.3400000000000003,
+     "mean": 0.7966920000000001
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.9998778181439809,
+     "mean": 0.2720395184077983
+    },
+    "P_1link": {
+     "lo": 0.0,
+     "hi": 0.9999992455590636,
+     "mean": 0.6406956126136971
+    },
+    "P_R_above_1": 0.2736
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 10.716479224389893,
+     "hi": 17.97559339236174,
+     "mean": 14.256925894479098
+    },
+    "R": {
+     "lo": 0.29193109611391804,
+     "hi": 11.422627075671954,
+     "mean": 3.1975726107402633
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.9999993598363064,
+     "mean": 0.7870243286324297
+    },
+    "P_1link": {
+     "lo": 0.9686919860975939,
+     "hi": 0.9999999589383313,
+     "mean": 0.9961290200291507
+    },
+    "P_R_above_1": 0.81
+   },
+   "draws": 10000,
+   "rng_seed": 20261108,
+   "permission_rule_predicts_board": true,
+   "written": "2026-11-08 02:15:35 +0500",
+   "git_head_at_write": "c07cf89"
+  },
+  "thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6900": {
+   "model": "gemma-4-26b-a4b-it",
+   "N": 64,
+   "k_permission_blocked": "all",
+   "n_blocked": 19,
+   "seed": 6900,
+   "permission_jobs": "all",
+   "groups": {
+    "coordinate_ok": {
+     "agents": 64,
+     "writers": 19.2,
+     "kw": 36,
+     "nw": 100,
+     "n_probe": 50,
+     "n_seen": 28,
+     "n_join": 0
+    }
+   },
+   "inputs_written": "2026-11-08 02:15:28 +0500",
+   "point": {
+    "W": 6.912,
+    "R": 0.0,
+    "q": 0.0,
+    "P_board": 0.0,
+    "P_1link": 0.0,
+    "predicted_board": false
+   },
+   "bootstrap": {
+    "W": {
+     "lo": 5.184,
+     "hi": 8.832,
+     "mean": 6.920851199999999
+    },
+    "R": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_1link": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_R_above_1": 0.0
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 5.19840618807215,
+     "hi": 8.718761825263027,
+     "mean": 6.927154528120153
+    },
+    "R": {
+     "lo": 0.0005631526988714547,
+     "hi": 3.0374808742299435,
+     "mean": 0.6045234551605242
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.9902172013428877,
+     "mean": 0.16552343064925182
+    },
+    "P_1link": {
+     "lo": 0.003835606665363986,
+     "hi": 0.9989622261297765,
+     "mean": 0.6567312902591987
+    },
+    "P_R_above_1": 0.2007
+   },
+   "draws": 10000,
+   "rng_seed": 20261108,
+   "permission_rule_predicts_board": true,
+   "written": "2026-11-08 02:15:35 +0500",
+   "git_head_at_write": "c07cf89"
+  },
+  "thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6901": {
+   "model": "gemma-4-26b-a4b-it",
+   "N": 64,
+   "k_permission_blocked": "all",
+   "n_blocked": 19,
+   "seed": 6901,
+   "permission_jobs": "all",
+   "groups": {
+    "coordinate_ok": {
+     "agents": 64,
+     "writers": 19.2,
+     "kw": 36,
+     "nw": 100,
+     "n_probe": 50,
+     "n_seen": 28,
+     "n_join": 0
+    }
+   },
+   "inputs_written": "2026-11-08 02:15:28 +0500",
+   "point": {
+    "W": 6.912,
+    "R": 0.0,
+    "q": 0.0,
+    "P_board": 0.0,
+    "P_1link": 0.0,
+    "predicted_board": false
+   },
+   "bootstrap": {
+    "W": {
+     "lo": 5.184,
+     "hi": 8.832,
+     "mean": 6.920851199999999
+    },
+    "R": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_1link": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_R_above_1": 0.0
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 5.19840618807215,
+     "hi": 8.718761825263027,
+     "mean": 6.927154528120153
+    },
+    "R": {
+     "lo": 0.0005631526988714547,
+     "hi": 3.0374808742299435,
+     "mean": 0.6045234551605242
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.9902172013428877,
+     "mean": 0.16552343064925182
+    },
+    "P_1link": {
+     "lo": 0.003835606665363986,
+     "hi": 0.9989622261297765,
+     "mean": 0.6567312902591987
+    },
+    "P_R_above_1": 0.2007
+   },
+   "draws": 10000,
+   "rng_seed": 20261108,
+   "permission_rule_predicts_board": true,
+   "written": "2026-11-08 02:15:35 +0500",
+   "git_head_at_write": "c07cf89"
+  },
+  "thr_gemma-4-26b-a4b-it_n256_k77_coordinate_ok_s6900": {
+   "model": "gemma-4-26b-a4b-it",
+   "N": 256,
+   "k_permission_blocked": 77,
+   "n_blocked": 77,
+   "seed": 6900,
+   "permission_jobs": [
+    "job-0006",
+    "job-0019",
+    "job-0294",
+    "job-0372",
+    "job-0380",
+    "job-0490",
+    "job-0492",
+    "job-0529",
+    "job-0835",
+    "job-0864",
+    "job-0900",
+    "job-0905",
+    "job-0963",
+    "job-0977",
+    "job-1042",
+    "job-1148",
+    "job-1513",
+    "job-1647",
+    "job-1657",
+    "job-1661",
+    "job-1830",
+    "job-1880",
+    "job-1985",
+    "job-2092",
+    "job-2336",
+    "job-2452",
+    "job-2476",
+    "job-2598",
+    "job-2664",
+    "job-3198",
+    "job-3236",
+    "job-3286",
+    "job-3288",
+    "job-3409",
+    "job-3541",
+    "job-3596",
+    "job-3779",
+    "job-4052",
+    "job-4154",
+    "job-4242",
+    "job-4488",
+    "job-4872",
+    "job-5015",
+    "job-5069",
+    "job-5169",
+    "job-5273",
+    "job-5727",
+    "job-5836",
+    "job-5883",
+    "job-6272",
+    "job-6276",
+    "job-6703",
+    "job-6780",
+    "job-6791",
+    "job-6842",
+    "job-6844",
+    "job-6845",
+    "job-7378",
+    "job-7486",
+    "job-7560",
+    "job-7833",
+    "job-7951",
+    "job-7999",
+    "job-8035",
+    "job-8227",
+    "job-8339",
+    "job-8421",
+    "job-8471",
+    "job-8633",
+    "job-8982",
+    "job-9057",
+    "job-9351",
+    "job-9417",
+    "job-9609",
+    "job-9612",
+    "job-9621",
+    "job-9777"
+   ],
+   "groups": {
+    "coordinate_ok": {
+     "agents": 77,
+     "writers": 77,
+     "kw": 36,
+     "nw": 100,
+     "n_probe": 50,
+     "n_seen": 39,
+     "n_join": 1
+    },
+    "plain": {
+     "agents": 179,
+     "writers": -0.20000000000000284,
+     "kw": 0,
+     "nw": 100,
+     "n_probe": 50,
+     "n_seen": 37,
+     "n_join": 0
+    }
+   },
+   "inputs_written": "2026-11-08 02:15:28 +0500",
+   "point": {
+    "W": 27.72,
+    "R": 1.54,
+    "q": 0.35064935064935066,
+    "P_board": 0.9999399299994532,
+    "P_1link": 0.9999999996514906,
+    "predicted_board": true
+   },
+   "bootstrap": {
+    "W": {
+     "lo": 20.790000000000003,
+     "hi": 35.42,
+     "mean": 27.755497000000002
+    },
+    "R": {
+     "lo": 0.0,
+     "hi": 4.62,
+     "mean": 1.572956
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.999999999966961,
+     "mean": 0.6409516510277317
+    },
+    "P_1link": {
+     "lo": 0.0,
+     "hi": 0.9999999999999876,
+     "mean": 0.6409999944868843
+    },
+    "P_R_above_1": 0.641
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 20.84558073724144,
+     "hi": 34.96586720228207,
+     "mean": 27.77979108717903
+    },
+    "R": {
+     "lo": 0.4664758287452279,
+     "hi": 11.53720128424207,
+     "mean": 3.931924732147865
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.9999999999995385,
+     "mean": 0.8996280949573082
+    },
+    "P_1link": {
+     "lo": 0.9999415644988827,
+     "hi": 0.9999999999999978,
+     "mean": 0.9995953608933734
+    },
+    "P_R_above_1": 0.9056
+   },
+   "draws": 10000,
+   "rng_seed": 20261108,
+   "permission_rule_predicts_board": true,
+   "written": "2026-11-08 02:15:35 +0500",
+   "git_head_at_write": "c07cf89"
+  },
+  "thr_gemma-4-26b-a4b-it_n256_k77_coordinate_ok_s6901": {
+   "model": "gemma-4-26b-a4b-it",
+   "N": 256,
+   "k_permission_blocked": 77,
+   "n_blocked": 77,
+   "seed": 6901,
+   "permission_jobs": [
+    "job-0021",
+    "job-0026",
+    "job-0195",
+    "job-0306",
+    "job-0369",
+    "job-0452",
+    "job-0543",
+    "job-0717",
+    "job-0809",
+    "job-0933",
+    "job-1002",
+    "job-1307",
+    "job-1309",
+    "job-1715",
+    "job-1767",
+    "job-1819",
+    "job-2035",
+    "job-2212",
+    "job-2386",
+    "job-2529",
+    "job-2756",
+    "job-2974",
+    "job-3080",
+    "job-3322",
+    "job-3409",
+    "job-3585",
+    "job-3643",
+    "job-3677",
+    "job-3703",
+    "job-4013",
+    "job-4185",
+    "job-4210",
+    "job-4238",
+    "job-4395",
+    "job-4575",
+    "job-4839",
+    "job-4993",
+    "job-5022",
+    "job-5246",
+    "job-5417",
+    "job-5498",
+    "job-5537",
+    "job-5776",
+    "job-5817",
+    "job-6091",
+    "job-6124",
+    "job-6220",
+    "job-6273",
+    "job-6543",
+    "job-6549",
+    "job-6580",
+    "job-6744",
+    "job-7068",
+    "job-7182",
+    "job-7184",
+    "job-7358",
+    "job-7446",
+    "job-7451",
+    "job-7469",
+    "job-7490",
+    "job-7536",
+    "job-7705",
+    "job-7795",
+    "job-7815",
+    "job-7873",
+    "job-8155",
+    "job-8318",
+    "job-8367",
+    "job-8499",
+    "job-8574",
+    "job-8664",
+    "job-8749",
+    "job-8766",
+    "job-9110",
+    "job-9279",
+    "job-9745",
+    "job-9788"
+   ],
+   "groups": {
+    "coordinate_ok": {
+     "agents": 77,
+     "writers": 77,
+     "kw": 36,
+     "nw": 100,
+     "n_probe": 50,
+     "n_seen": 39,
+     "n_join": 1
+    },
+    "plain": {
+     "agents": 179,
+     "writers": -0.20000000000000284,
+     "kw": 0,
+     "nw": 100,
+     "n_probe": 50,
+     "n_seen": 37,
+     "n_join": 0
+    }
+   },
+   "inputs_written": "2026-11-08 02:15:28 +0500",
+   "point": {
+    "W": 27.72,
+    "R": 1.54,
+    "q": 0.35064935064935066,
+    "P_board": 0.9999399299994532,
+    "P_1link": 0.9999999996514906,
+    "predicted_board": true
+   },
+   "bootstrap": {
+    "W": {
+     "lo": 20.790000000000003,
+     "hi": 35.42,
+     "mean": 27.755497000000002
+    },
+    "R": {
+     "lo": 0.0,
+     "hi": 4.62,
+     "mean": 1.572956
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.999999999966961,
+     "mean": 0.6409516510277317
+    },
+    "P_1link": {
+     "lo": 0.0,
+     "hi": 0.9999999999999876,
+     "mean": 0.6409999944868843
+    },
+    "P_R_above_1": 0.641
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 20.84558073724144,
+     "hi": 34.96586720228207,
+     "mean": 27.77979108717903
+    },
+    "R": {
+     "lo": 0.4664758287452279,
+     "hi": 11.53720128424207,
+     "mean": 3.931924732147865
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.9999999999995385,
+     "mean": 0.8996280949573082
+    },
+    "P_1link": {
+     "lo": 0.9999415644988827,
+     "hi": 0.9999999999999978,
+     "mean": 0.9995953608933734
+    },
+    "P_R_above_1": 0.9056
+   },
+   "draws": 10000,
+   "rng_seed": 20261108,
+   "permission_rule_predicts_board": true,
+   "written": "2026-11-08 02:15:35 +0500",
+   "git_head_at_write": "c07cf89"
+  }
+ },
+ "formula": "The nucleation model of the C4 predictions (docs/deviations.md D6) and intervals for it.\n\nFrozen formula (experiments/scale_predict.py, D6), for a fleet of N agents of one prompt arm:\n\n    W = b N p_w          expected first notes (+ N v p_j for a fleet with one seeded request note)\n    R = N v p_j          expected number of agents that see a given note and then write or answer\n    q = max(0, 1 - 1/R)\n    P_board = 1 - exp(-W q)\n    predicted board: R > 1 (point estimates)\n\nMixed fleets (EXPLORATORY, docs/ideas/threshold_fleets.md) hold groups of agents with different\nprompts. Each agent adds its own rates: W = sum over groups of (blocked agents of the group) x\np_w, and R = sum over groups of (agents of the group) x v x p_j. With one group of N agents of\nwhich b N are blocked this is the frozen formula.\n\nRival predictors for the same inputs (shown next to the frozen one, not part of it):\n- single link: a board needs one answered note, not a growing chain (docs/deviations.md D3), so\n  P_1link = 1 - exp(-W (1 - exp(-R))) (each note gets Poisson(R) answers);\n- permission rule: board if and only if some agent's prompt grants permission (P = 1 or 0).\n\nIntervals: rates are counts (k of n). Two resampling schemes, both with a fixed numpy seed:\n- bootstrap: episodes resampled with replacement (binomial for p_w, multinomial over unseen /\n  seen without a join / seen and joined for the probes), 95% percentile interval. A count of 0\n  stays 0 in every resample, so the bootstrap shows no uncertainty there;\n- jeffreys: each rate drawn from its Jeffreys posterior Beta(k + 1/2, n - k + 1/2), 95% interval.\n"
+}

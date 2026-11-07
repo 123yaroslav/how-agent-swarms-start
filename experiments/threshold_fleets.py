@@ -161,6 +161,7 @@ def cmd_intervals(_a) -> None:
     EXPLORE.mkdir(parents=True, exist_ok=True)
     (EXPLORE / "c4_intervals.json").write_text(json.dumps(out, indent=1))
     log(f"wrote results/explore/c4_intervals.json ({len(out['fleets'])} committed C4 entries)")
+    write_doc_tables()
 
 
 # ---- 2. probes ----------------------------------------------------------------------------
@@ -170,10 +171,10 @@ def probe_tag(model: str, bg: int) -> str:
 
 def probe_specs(model: str = MODEL) -> list[RunSpec]:
     out = []
-    for i in range(K_PROBE):  # seed-major: every cell advances together
-        for note in ("request", "memory"):
-            for bg in BGS:
-                for prompt in ARMS:
+    for prompt in ARMS:  # permission cells first, then plain; seed-major within an arm
+        for i in range(K_PROBE):
+            for note in ("request", "memory"):
+                for bg in BGS:
                     out.append(RunSpec(tag=probe_tag(model, bg), mode="harness", prompt=prompt,
                                        rule=True, seed_note=note, n_background=bg, steps=STEPS,
                                        model=f"adaption/{model}", max_tokens=MAX_TOKENS,
@@ -271,11 +272,17 @@ def fleet_tag(model: str, n: int, k: int, seed: int) -> str:
     return f"thr_{model}_n{n}_k{k}_{PERMISSION}_s{seed}"
 
 
-def groups_for(inp: dict, n: int, k: int) -> list[Group]:
+def groups_for(inp: dict, n: int, k: int | str) -> list[Group]:
+    """k permitted blocked jobs and the plain rest, or k = "all": every job permitted (one
+    group, the frozen formula)."""
     gs = []
-    for prompt, agents, writers in ((PERMISSION, k, k), ("plain", n - k, B * n - k)):
+    plan = (((PERMISSION, n, B * n),) if k == "all"
+            else ((PERMISSION, k, k), ("plain", n - k, B * n - k)))
+    for prompt, agents, writers in plan:
         c = inp["cells"][f"{prompt}-rule"]
         p = inp["probes"][f"{prompt}-rule|bg{n}"]
+        if not p["complete"]:
+            raise RuntimeError(f"probes {prompt}-rule|bg{n} incomplete")
         gs.append(Group(agents=agents, writers=writers, kw=c["k"], nw=c["n"],
                         n_probe=p["v_seen"]["n"], n_seen=p["v_seen"]["k"],
                         n_join=p["p_j"]["k"]))
@@ -291,8 +298,8 @@ def cmd_scan(_a) -> None:
                   f"P_1link {pt['P_1link']:.3f}")
 
 
-def spec_for(model: str, n: int, seed: int, tag: str) -> RunSpec:
-    return RunSpec(tag=tag, mode="fleet", n_agents=n, p_blocked=B, prompt="plain", rule=True,
+def spec_for(model: str, n: int, seed: int, tag: str, prompt: str = "plain") -> RunSpec:
+    return RunSpec(tag=tag, mode="fleet", n_agents=n, p_blocked=B, prompt=prompt, rule=True,
                    seed_note="none", n_background=200, p_derivative=1.0,
                    producers_in_fleet=True, steps=STEPS, model=f"adaption/{model}",
                    max_tokens=MAX_TOKENS, temperature=TEMPERATURE, seed=seed, repeat=REPEAT,
@@ -302,12 +309,11 @@ def spec_for(model: str, n: int, seed: int, tag: str) -> RunSpec:
 def cmd_predict(a) -> None:
     from swarm.scale.mix import choose_jobs
     inp = json.loads(INPUTS.read_text())
-    if not all(d["complete"] for d in inp["probes"].values()):
-        raise RuntimeError("probes incomplete; run `inputs` after the probes finish")
     old = json.loads(PRED.read_text()) if PRED.exists() else {"label": LABEL, "fleets": {}}
     ts = time.strftime("%Y-%m-%d %H:%M:%S %z")
     for item in a.plan.split(","):
-        n, k = (int(x) for x in item.split(":"))
+        n_s, k_s = item.split(":")
+        n, k = int(n_s), (k_s if k_s == "all" else int(k_s))
         for seed in FLEET_SEEDS[:a.seeds]:
             tag = fleet_tag(inp["model"], n, k, seed)
             if tag in old["fleets"]:
@@ -318,13 +324,14 @@ def cmd_predict(a) -> None:
             gs = groups_for(inp, n, k)
             pt = mixture_point(gs)
             iv = intervals(gs)
-            jobs = choose_jobs(spec_for(inp["model"], n, seed, tag), k)
+            jobs = ("all" if k == "all"
+                    else choose_jobs(spec_for(inp["model"], n, seed, tag), k))
             old["fleets"][tag] = {
                 "model": inp["model"], "N": n, "k_permission_blocked": k,
                 "n_blocked": round(B * n), "seed": seed, "permission_jobs": jobs,
-                "groups": {PERMISSION: vars(gs[0]), "plain": vars(gs[1])},
+                "groups": dict(zip((PERMISSION, "plain"), (vars(g) for g in gs))),
                 "inputs_written": inp["written"], "point": pt, **iv,
-                "permission_rule_predicts_board": k > 0,
+                "permission_rule_predicts_board": k == "all" or k > 0,
                 "written": ts, "git_head_at_write": git_head()}
             b, j = iv["bootstrap"], iv["jeffreys"]
             log(f"{tag}: W {pt['W']:.2f} R {pt['R']:.2f} boot [{b['R']['lo']:.2f}, "
@@ -392,16 +399,22 @@ def cmd_fleet(a) -> None:
     if lg["spend_usd"] + proj > BUDGET:
         raise RuntimeError(f"budget: spend ${lg['spend_usd']:.2f} + projected ${proj:.2f} > "
                            f"${BUDGET:.0f}")
-    spec = spec_for(p["model"], p["N"], p["seed"], a.tag)
-    jobs = choose_jobs(spec, p["k_permission_blocked"])
-    if jobs != p["permission_jobs"]:
-        raise RuntimeError("permission jobs differ from the committed prediction")
+    pure = p["k_permission_blocked"] == "all"
+    spec = spec_for(p["model"], p["N"], p["seed"], a.tag, PERMISSION if pure else "plain")
+    if pure:
+        from swarm.scale.jobs import make_world
+        jobs = make_world(spec.world_config()).job_ids
+    else:
+        jobs = choose_jobs(spec, p["k_permission_blocked"])
+        if jobs != p["permission_jobs"]:
+            raise RuntimeError("permission jobs differ from the committed prediction")
     log(f"=== {LABEL} fleet {a.tag} start: N {p['N']}, {len(jobs)} permission jobs (blocked), "
         f"predicted R {p['point']['R']:.2f} P_board {p['point']['P_board']:.3f}; spend "
         f"${lg['spend_usd']:.2f}, projected ${proj:.2f}; {physmem()}")
     llm = TaskLLM(budget_usd=BUDGET, max_concurrency=CONC, cache_path=CACHE)
-    pol = MixedPromptPolicy(LLMPolicy(llm, spec.model, max_tokens=MAX_TOKENS,
-                                      temperature=TEMPERATURE), jobs, STEPS, prompt=PERMISSION)
+    pol = LLMPolicy(llm, spec.model, max_tokens=MAX_TOKENS, temperature=TEMPERATURE)
+    if not pure:  # the spec's own arm is the permission arm in a pure fleet
+        pol = MixedPromptPolicy(pol, jobs, STEPS, prompt=PERMISSION)
 
     def progress(rr: dict) -> None:
         log(f"{a.tag} step {rr['step']:>2} active {rr['active']:>4} live {rr['live']:>4} "
@@ -447,7 +460,7 @@ def cmd_eval(_a) -> dict:
                                            else p["point"]["predicted_board"] == o["board"])
                 pairs["frozen"].append((p["point"]["P_board"], o["board"]))
                 pairs["1link"].append((p["point"]["P_1link"], o["board"]))
-                pairs["permission_rule"].append((1.0 if p["k_permission_blocked"] else 0.0,
+                pairs["permission_rule"].append((1.0 if p["permission_rule_predicts_board"] else 0.0,
                                                  o["board"]))
         res["fleets"][tag] = e
     c4 = {}
@@ -504,6 +517,20 @@ def write_doc_tables(res: dict | None = None) -> None:
     if not DOC.exists():
         return
     text = DOC.read_text()
+    c4i = EXPLORE / "c4_intervals.json"
+    if c4i.exists():
+        d = json.loads(c4i.read_text())
+        L = ["| C4 fleet | inputs p_w, v, p_j | W | R | R bootstrap 95% | R Jeffreys 95% | "
+             "P(R > 1), Jeffreys | P_board | P_board Jeffreys 95% | P_1link |",
+             "|---|---|---|---|---|---|---|---|---|---|"]
+        for t, f in d["fleets"].items():
+            i, pt = f["inputs"], f["point"]
+            L.append(f"| {t} | {i['p_w'][0]}/{i['p_w'][1]}, {i['v'][0]}/{i['v'][1]}, "
+                     f"{i['p_j'][0]}/{i['p_j'][1]} | {pt['W']:.2f} | {pt['R']:.2f} | "
+                     f"{fmt_iv(f['bootstrap'], 'R')} | {fmt_iv(f['jeffreys'], 'R')} | "
+                     f"{f['jeffreys']['P_R_above_1']:.2f} | {pt['P_board']:.3f} | "
+                     f"{fmt_iv(f['jeffreys'], 'P_board', 3)} | {pt['P_1link']:.3f} |")
+        text = _between(text, "c4intervals", "\n".join(L))
     if INPUTS.exists():
         inp = json.loads(INPUTS.read_text())
         L = [f"Inputs ({inp['model']}, written {inp['written']}; p_w from the confirmatory C1 "
@@ -520,12 +547,14 @@ def write_doc_tables(res: dict | None = None) -> None:
         text = _between(text, "inputs", "\n".join(L))
     if PRED.exists():
         pred = json.loads(PRED.read_text())["fleets"]
-        L = ["| fleet | N | permission jobs (all blocked) | W | R | R bootstrap 95% | "
+        L = ["| fleet | N | jobs with the permission sentence | W | R | R bootstrap 95% | "
              "R Jeffreys 95% | P(R > 1), Jeffreys | P_board (frozen) | P_board bootstrap 95% | "
              "P_1link | point rule | written |", "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
         for t, p in pred.items():
             pt, b, j = p["point"], p["bootstrap"], p["jeffreys"]
-            L.append(f"| {t} | {p['N']} | {p['k_permission_blocked']} of {p['n_blocked']} | "
+            kk = p["k_permission_blocked"]
+            who = (f"every job ({p['N']})" if kk == "all" else f"{kk} of {p['n_blocked']} blocked")
+            L.append(f"| {t} | {p['N']} | {who} | "
                      f"{pt['W']:.2f} | {pt['R']:.2f} | {fmt_iv(b, 'R')} | {fmt_iv(j, 'R')} | "
                      f"{j['P_R_above_1']:.2f} | {pt['P_board']:.3f} | "
                      f"{fmt_iv(b, 'P_board', 3)} | {pt['P_1link']:.3f} | "
