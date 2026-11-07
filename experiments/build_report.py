@@ -19,8 +19,10 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+import sys  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
 CONF = ROOT / "results" / "confirmatory"
 FIG = ROOT / "report" / "figures"
 STYLE = Path.home() / ".claude/skills/ml-paper-writing/scripts/paper.mplstyle"
@@ -68,7 +70,7 @@ def fig_gate(c: dict, models: list[str]) -> None:
                 continue
             ax.bar(i + dx, v["p"], w * 0.92, color=col, label=lab if i == 0 else None,
                    linewidth=0)
-            ax.errorbar(i + dx, v["p"], yerr=[[v["p"] - v["lo"]], [v["hi"] - v["p"]]],
+            ax.errorbar(i + dx, v["p"], yerr=[[max(0.0, v["p"] - v["lo"])], [max(0.0, v["hi"] - v["p"])]],
                         color=INK, lw=1, capsize=2)
         for arm in CUES:
             v = cell(c, m, arm + "-rule", "note_addressed")
@@ -97,7 +99,7 @@ def fig_freeride(c: dict, models: list[str]) -> None:
             if not v:
                 continue
             ax.bar(i + dx, v["p"], w * 0.92, color=col, label=lab if i == 0 else None)
-            ax.errorbar(i + dx, v["p"], yerr=[[v["p"] - v["lo"]], [v["hi"] - v["p"]]],
+            ax.errorbar(i + dx, v["p"], yerr=[[max(0.0, v["p"] - v["lo"])], [max(0.0, v["hi"] - v["p"])]],
                         color=INK, lw=1, capsize=2)
     ax.set_xticks(range(len(models)), [SHORT.get(m, m) for m in models], fontsize=7)
     ax.set_ylim(0, 1.05)
@@ -209,6 +211,57 @@ def realworld(v: dict) -> None:
         v["lint_dev_v2_found"] = f"{c['tp']} of {c['tp'] + c['fn']}"
 
 
+def chain_rates(probes: dict, model: str, cond: str) -> dict:
+    """Seen, opened and answered for seeded notes, pooled over request and memory styles."""
+    x = probes.get(model, {}).get(cond, {})
+    out = {}
+    for key, sub in (("seen", "seen"), ("opened", "read"), ("answered", "joined_or_responded_if_seen")):
+        k = n = 0
+        for st in x.get("by_style", {}).values():
+            r = st.get(sub, {})
+            k += r.get("k", 0)
+            n += r.get("n", 0)
+        out[key] = (k, n)
+    return out
+
+
+def fig_chain(cells: dict, probes: dict, models: list[str]) -> None:
+    """Figure 1: the incident's first step as four links, per model, plain prompt + house rule."""
+    from swarm.fleet.stats import wilson
+    fig, axes = plt.subplots(1, len(models), figsize=(6.8, 2.6), sharey=True)
+    axes = axes if len(models) > 1 else [axes]
+    labels = ["writes", "sees", "opens", "answers"]
+    for ax, m in zip(axes, models):
+        w = cell(cells, m, "plain-rule", "note_addressed")
+        ch = chain_rates(probes, m, "plain-rule")
+        perm = chain_rates(probes, m, "coordinate_ok-rule")["answered"]
+        vals = [(w["k"], w["n"]) if w else (0, 0), ch["seen"], ch["opened"], ch["answered"]]
+        for i, (k, n) in enumerate(vals):
+            if not n:
+                ax.text(i, 0.04, "pending", rotation=90, fontsize=5.5, color=MUTED,
+                        ha="center", va="bottom")
+                continue
+            lo, hi = wilson(k, n)
+            ax.bar(i, k / n, 0.72, color=BLUE, linewidth=0)
+            ax.errorbar(i, k / n, yerr=[[max(0.0, k / n - lo)], [max(0.0, hi - k / n)]], color=INK, lw=0.8, capsize=1.5)
+        if perm[1]:
+            k, n = perm
+            lo, hi = wilson(k, n)
+            ax.plot(3, k / n, "D", ms=4, color=ORANGE, zorder=4)
+            ax.errorbar(3, k / n, yerr=[[max(0.0, k / n - lo)], [max(0.0, hi - k / n)]], color=ORANGE, lw=0.8,
+                        capsize=1.5)
+        ax.set_xticks(range(4), labels, rotation=90, fontsize=6.5)
+        ax.set_title(SHORT.get(m, m), fontsize=7)
+        ax.set_ylim(0, 1.05)
+        ax.spines[["top", "right"]].set_visible(False)
+    axes[0].set_ylabel("Share of agents", fontsize=8)
+    fig.tight_layout(w_pad=0.4)
+    FIG.mkdir(parents=True, exist_ok=True)
+    for ext in ("pdf", "png"):
+        fig.savefig(FIG / f"fig1_chain.{ext}", dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -252,7 +305,15 @@ def main() -> None:
                                        capture_output=True, text=True).stdout.strip()
     except OSError:
         pass
+    probes = load(CONF / "probes.json").get("probes", {})
+    for m in models:
+        for cond in ("plain-rule", "coordinate_ok-rule"):
+            ch = chain_rates(probes, m, cond)
+            for key, (k, n) in ch.items():
+                if n:
+                    v[f"{m}|{cond}|{key}"] = f"{k}/{n}"
     if models:
+        fig_chain(cells, probes, models)
         fig_gate(cells, models)
         fig_freeride(cells, models)
     fig_fleets(fleets)
