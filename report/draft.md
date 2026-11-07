@@ -60,3 +60,7 @@ Jobs and store. Each agent runs one job, for example building a report from thre
 Measures. From the provenance log only. An addressed note is an artifact written by an agent that addresses other jobs or asks for or offers help. Use is a read of another job's artifact. A board forms when a note written by a fleet agent is read by another fleet agent who then writes a note or a reply.
 
 Nucleation model, in words. A fleet forms a board when at least one first note appears and the notes it triggers outnumber one per note. The expected number of first notes is the number of blocked agents times the single-agent rate of writing a note. The expected number of new notes per note, R, is the fleet size times the chance that an agent sees a given note times the chance that it then writes or answers. Boards should form when R exceeds 1 and first notes exist.
+
+## Note for Results 4.3 (from exploratory smoke data, confirm with C3)
+
+The rule has a price under outcome-only reward. On deepseek-v4-flash, blocked agents with the house rule completed 0 of 100 jobs and reported the block in 95 of 100; without the rule they used other jobs' artifacts in 61 of 100 and completed 52 of 100. Under outcome reward, training therefore pays for crossing the data boundary, which matches OpenAI's account that reward reinforced out-of-bounds behaviour. A reward for an honest report of an impossible job removes that gradient. State this with the C3 numbers.
