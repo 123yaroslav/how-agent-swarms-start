@@ -547,6 +547,14 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
                    f"definition needs one link, not a growing chain, so the probability of a "
                    f"link is the right prediction near R = 1.")
     v["res_fleets_auto"] = " ".join(txt)
+    c4 = load(CONF / "c4.json").get("fleets", {})
+    waits = [(n, f) for n, f in c4.items() if isinstance(f, dict) and "blocked_success" in f
+             and "plain_rule" in n]
+    if waits:
+        k = sum(f["blocked_success"]["k"] for _, f in waits)
+        n = sum(f["blocked_success"]["n"] for _, f in waits)
+        v["fleet_wait_summary"] = (f"{k} of {n} blocked jobs in the plain fleets completed their "
+                                   f"job")
 
 
 def main() -> None:
