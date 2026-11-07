@@ -259,7 +259,11 @@ def main() -> None:
 
     out += ["", "## Harness test of the real sentences", ""]
     if not H:
-        out += ["Not run yet (`experiments/realworld_prompts_harness.py`).", ""]
+        out += ["Run in progress or not run yet: `experiments/realworld_prompts_harness.py` "
+                "(arms plain, coordinate_ok and the twelve `REAL_CUES` arms, house rule on, "
+                "100 episodes per arm, 20 turns, adaption/deepseek-v4-flash, concurrency 16, "
+                "own cache and ledger with a $15 cap). It resumes from its cache; rebuild this "
+                "file when it has finished. No harness numbers are reported before then.", ""]
     else:
         cells = H["cells"]
         base = cells["plain"]

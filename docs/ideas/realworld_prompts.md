@@ -132,7 +132,7 @@ None of the 3 limits the agent to its own artifacts the way our house rule does:
 
 ## Harness test of the real sentences
 
-Not run yet (`experiments/realworld_prompts_harness.py`).
+Run in progress or not run yet: `experiments/realworld_prompts_harness.py` (arms plain, coordinate_ok and the twelve `REAL_CUES` arms, house rule on, 100 episodes per arm, 20 turns, adaption/deepseek-v4-flash, concurrency 16, own cache and ledger with a $15 cap). It resumes from its cache; rebuild this file when it has finished. No harness numbers are reported before then.
 
 ## Caveats
 
