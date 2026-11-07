@@ -186,20 +186,118 @@
    "q": 0.0,
    "P_board": 0.0,
    "predicted_board": false
+  },
+  "c4_gemma-4-31b-it_n256_plain_rule": {
+   "model": "gemma-4-31b-it",
+   "N": 256,
+   "prompt": "plain",
+   "seed_note": "none",
+   "scoring": "registered",
+   "b": 0.3,
+   "p_w": 0.0,
+   "p_w_rate": {
+    "k": 0,
+    "n": 100,
+    "p": 0.0,
+    "lo": 0.0,
+    "hi": 0.03699480747600191
+   },
+   "p_w_addressed_rate": {
+    "k": 0,
+    "n": 100,
+    "p": 0.0,
+    "lo": 0.0,
+    "hi": 0.03699480747600191
+   },
+   "v": 0.63,
+   "v_rate": {
+    "k": 63,
+    "n": 100,
+    "p": 0.63,
+    "lo": 0.5322034757513312,
+    "hi": 0.7181778743049083
+   },
+   "v_background": 256,
+   "p_j": 0.0,
+   "p_j_rate": {
+    "k": 0,
+    "n": 63,
+    "p": 0.0,
+    "lo": 0.0,
+    "hi": 0.057473190348525466
+   },
+   "W": 0.0,
+   "R": 0.0,
+   "R_lo": 0.0,
+   "R_hi": 10.5666492605505,
+   "q": 0.0,
+   "P_board": 0.0,
+   "predicted_board": false
+  },
+  "c4_gemma-4-31b-it_n256_coordinate_ok_rule": {
+   "model": "gemma-4-31b-it",
+   "N": 256,
+   "prompt": "coordinate_ok",
+   "seed_note": "none",
+   "scoring": "registered",
+   "b": 0.3,
+   "p_w": 0.87,
+   "p_w_rate": {
+    "k": 87,
+    "n": 100,
+    "p": 0.87,
+    "lo": 0.7901947810519012,
+    "hi": 0.9224290614158575
+   },
+   "p_w_addressed_rate": {
+    "k": 85,
+    "n": 100,
+    "p": 0.85,
+    "lo": 0.7671626666784216,
+    "hi": 0.906940968088377
+   },
+   "v": 0.61,
+   "v_rate": {
+    "k": 61,
+    "n": 100,
+    "p": 0.61,
+    "lo": 0.5120283616749817,
+    "hi": 0.699832780680298
+   },
+   "v_background": 256,
+   "p_j": 0.36065573770491804,
+   "p_j_rate": {
+    "k": 22,
+    "n": 61,
+    "p": 0.36065573770491804,
+    "lo": 0.25173936505814554,
+    "hi": 0.48608326732600293
+   },
+   "W": 66.816,
+   "R": 56.32,
+   "R_lo": 32.997809832914534,
+   "R_hi": 87.08531318141985,
+   "q": 0.9822443181818182,
+   "P_board": 1.0,
+   "predicted_board": true
   }
  },
  "written": {
   "c4_glm-5.2_n1024_plain_rule": "2026-11-08 00:31:39 +0500",
   "c4_qwen3.5-397b_n1024_plain_rule": "2026-11-08 02:00:11 +0500",
   "c4_gemma-4-26b-a4b-it_n256_plain_rule": "2026-11-08 02:08:56 +0500",
-  "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule": "2026-11-08 02:08:56 +0500"
+  "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule": "2026-11-08 02:08:56 +0500",
+  "c4_gemma-4-31b-it_n256_plain_rule": "2026-11-08 02:39:20 +0500",
+  "c4_gemma-4-31b-it_n256_coordinate_ok_rule": "2026-11-08 02:39:20 +0500"
  },
  "formula": "C4 predictions: the nucleation model fitted on single agents, for every C4 fleet\n(docs/prereg.md C4, docs/deviations.md D6). Run after the C1-C3 cells and the probe episodes,\ncommit results/predictions/c4.json before the first fleet.\n\n    uv run python experiments/scale_predict.py               # write results/predictions/c4.json\n    uv run python experiments/scale_predict.py --model glm-5.2  # one model's fleets only (D8)\n    uv run python experiments/scale_predict.py --fleet-cmd 0  # print the command of fleet 0\n    uv run python experiments/scale_predict.py --budget-check 0  # exit 1 if fleets 0.. would\n                                                             # take the task spend over the cap\n\nInputs: results/confirmatory/c1c3.json (p_w = NOTE rate, any kind, of the no-note cell of the\nfleet's arm) and results/confirmatory/probes.json (v = share of probe episodes that saw the seed\nnote, p_j = share of those that read it and then wrote a NOTE or answered it; store background =\nfleet N). b = 0.3, the fleets' blocked share.\n\n    W = b N p_w   (+ N v p_j for the fleet with one seeded request note)\n    R = N v p_j\n    P_board = 1 - exp(-W q),  q = max(0, 1 - 1/R)\n    predicted board: R > 1; no board: R < 1 (point estimates)\n\nR_lo and R_hi use the Wilson 95% limits of v and p_j (shown, not used by the pass rule).\n",
  "inputs_at_commit": {
   "c4_glm-5.2_n1024_plain_rule": "3c31c6e",
   "c4_qwen3.5-397b_n1024_plain_rule": "58c7cce",
   "c4_gemma-4-26b-a4b-it_n256_plain_rule": "c78e9e1",
-  "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule": "c78e9e1"
+  "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule": "c78e9e1",
+  "c4_gemma-4-31b-it_n256_plain_rule": "0f59acd",
+  "c4_gemma-4-31b-it_n256_coordinate_ok_rule": "0f59acd"
  },
  "fleets_secondary": {
   "c4_qwen3.5-397b_n1024_plain_rule": {
@@ -342,6 +440,100 @@
    "q": 0.0,
    "P_board": 0.0,
    "predicted_board": false
+  },
+  "c4_gemma-4-31b-it_n256_plain_rule": {
+   "model": "gemma-4-31b-it",
+   "N": 256,
+   "prompt": "plain",
+   "seed_note": "none",
+   "scoring": "secondary",
+   "b": 0.3,
+   "p_w": 0.0,
+   "p_w_rate": {
+    "k": 0,
+    "n": 100,
+    "p": 0.0,
+    "lo": 0.0,
+    "hi": 0.03699480747600191
+   },
+   "p_w_addressed_rate": {
+    "k": 0,
+    "n": 100,
+    "p": 0.0,
+    "lo": 0.0,
+    "hi": 0.03699480747600191
+   },
+   "v": 0.63,
+   "v_rate": {
+    "k": 63,
+    "n": 100,
+    "p": 0.63,
+    "lo": 0.5322034757513312,
+    "hi": 0.7181778743049083
+   },
+   "v_background": 256,
+   "p_j": 0.0,
+   "p_j_rate": {
+    "k": 0,
+    "n": 63,
+    "p": 0.0,
+    "lo": 0.0,
+    "hi": 0.057473190348525466
+   },
+   "W": 0.0,
+   "R": 0.0,
+   "R_lo": 0.0,
+   "R_hi": 10.5666492605505,
+   "q": 0.0,
+   "P_board": 0.0,
+   "predicted_board": false
+  },
+  "c4_gemma-4-31b-it_n256_coordinate_ok_rule": {
+   "model": "gemma-4-31b-it",
+   "N": 256,
+   "prompt": "coordinate_ok",
+   "seed_note": "none",
+   "scoring": "secondary",
+   "b": 0.3,
+   "p_w": 0.87,
+   "p_w_rate": {
+    "k": 87,
+    "n": 100,
+    "p": 0.87,
+    "lo": 0.7901947810519012,
+    "hi": 0.9224290614158575
+   },
+   "p_w_addressed_rate": {
+    "k": 85,
+    "n": 100,
+    "p": 0.85,
+    "lo": 0.7671626666784216,
+    "hi": 0.906940968088377
+   },
+   "v": 0.61,
+   "v_rate": {
+    "k": 61,
+    "n": 100,
+    "p": 0.61,
+    "lo": 0.5120283616749817,
+    "hi": 0.699832780680298
+   },
+   "v_background": 256,
+   "p_j": 0.36065573770491804,
+   "p_j_rate": {
+    "k": 22,
+    "n": 61,
+    "p": 0.36065573770491804,
+    "lo": 0.25173936505814554,
+    "hi": 0.48608326732600293
+   },
+   "W": 66.816,
+   "R": 56.32,
+   "R_lo": 32.997809832914534,
+   "R_hi": 87.08531318141985,
+   "q": 0.9822443181818182,
+   "P_board": 1.0,
+   "predicted_board": true
   }
  },
  "secondary_d10b_check": {
