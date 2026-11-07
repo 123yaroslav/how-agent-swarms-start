@@ -106,7 +106,10 @@ def fleet_cmd(f: dict) -> list[str]:
     return cmd
 
 
-def predict(models: list[str] | None = None) -> dict:
+def predict(models: list[str] | None = None, scoring: str = "registered") -> dict:
+    """scoring "registered" or "secondary" (D10: p_w and p_j without writes at the agent's own
+    deliverable path)."""
+    sfx = "" if scoring == "registered" else "_secondary"
     c1c3 = json.loads((ROOT / "results" / "confirmatory" / "c1c3.json").read_text())
     probes = json.loads((ROOT / "results" / "confirmatory" / "probes.json").read_text())
     out = {}
@@ -122,19 +125,20 @@ def predict(models: list[str] | None = None) -> dict:
         if pr["n_background"] != n and "shrunk_from" not in f:
             raise RuntimeError(f"probe background {pr['n_background']} != N {n} for {m}")
         # a fleet shrunk for budget (D9) keeps the v measured at the original N
-        pw = cell["note_any"]["p"]
+        pw = cell[f"note_any{sfx}"]["p"]
         v, v_lo, v_hi = pr["v_seen"]["p"], pr["v_seen"]["lo"], pr["v_seen"]["hi"]
-        pj = pr["p_j"]["p"]
-        pj_lo = pr["p_j"]["lo"] if pr["p_j"]["n"] else 0.0
-        pj_hi = pr["p_j"]["hi"] if pr["p_j"]["n"] else 1.0
+        pjr = pr[f"p_j{sfx}"]
+        pj = pjr["p"]
+        pj_lo = pjr["lo"] if pjr["n"] else 0.0
+        pj_hi = pjr["hi"] if pjr["n"] else 1.0
         r = n * v * (pj or 0.0)  # p_j is undefined only when no probe saw the note (v = 0)
         w = B * n * pw + (n * v * (pj or 0.0) if f["seed_note"] == "request" else 0.0)
         q = max(0.0, 1.0 - 1.0 / r) if r > 0 else 0.0
         out[fleet_tag(f)] = {
-            **f, "b": B, "p_w": pw, "p_w_rate": cell["note_any"],
-            "p_w_addressed_rate": cell["note_addressed"],
+            **f, "scoring": scoring, "b": B, "p_w": pw, "p_w_rate": cell[f"note_any{sfx}"],
+            "p_w_addressed_rate": cell[f"note_addressed{sfx}"],
             "v": v, "v_rate": pr["v_seen"], "v_background": pr["n_background"],
-            "p_j": pj, "p_j_rate": pr["p_j"],
+            "p_j": pj, "p_j_rate": pjr,
             "W": w, "R": r, "R_lo": n * v_lo * pj_lo, "R_hi": n * v_hi * pj_hi,
             "q": q, "P_board": 1.0 - math.exp(-w * q),
             "predicted_board": True if r > 1 else False if r < 1 else None}
@@ -184,14 +188,16 @@ def write_predictions(models: list[str] | None = None) -> dict:
     if ran:
         raise RuntimeError(f"C4 fleet output already exists ({ran}); predictions must come first")
     preds = {t: d for t, d in predict(models).items() if t in todo}
+    preds2 = {t: d for t, d in predict(models, "secondary").items() if t in todo}
     ts = time.strftime("%Y-%m-%d %H:%M:%S %z")
     old["fleets"].update(preds)
+    old.setdefault("fleets_secondary", {}).update(preds2)  # D10
     old["written"].update({t: ts for t in preds})
     old["formula"] = __doc__
     old.setdefault("inputs_at_commit", {}).update({t: git_head() for t in preds})
     PRED.parent.mkdir(parents=True, exist_ok=True)
     PRED.write_text(json.dumps(old, indent=1))
-    for t, d in preds.items():
+    for t, d in [*preds.items(), *[(t + " (secondary, D10)", d) for t, d in preds2.items()]]:
         pj = "n/a" if d["p_j"] is None else f"{d['p_j']:.4f}"
         print(f"{t}: p_w {d['p_w']:.4f} v {d['v']:.4f} p_j {pj} W {d['W']:.2f} R {d['R']:.2f} "
               f"[{d['R_lo']:.2f}, {d['R_hi']:.2f}] P_board {d['P_board']:.3f} -> "

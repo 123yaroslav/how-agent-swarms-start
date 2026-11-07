@@ -40,18 +40,19 @@ FLEET_KEYS = ("wrote_note", "wrote_note_addressed", "note_read_by_other", "read_
 
 
 def episode_rows(records: list[dict], labels: dict[str, dict], *, events=None,
-                 recompute: bool = True) -> list[dict]:
+                 recompute: bool = True, own_output_not_note: bool = False) -> list[dict]:
     """One row per live job per episode, with spec fields and outcomes. With recompute (the
     default) the features are recomputed from the logged events by the current rules
     (harness records hold their events; for one fleet record pass `events`, an iterator over
-    its events file); without, the features stored at run time are used."""
+    its events file); without, the features stored at run time are used. own_output_not_note:
+    the secondary scoring of docs/deviations.md D10 (default: registered scoring)."""
     rows = []
     for rec in records:
         lab = labels[rec["episode_id"]]
         sp = rec["spec"]
         feats = rec["features"]
         if recompute and (events is not None or "events" in rec):
-            feats = features_of(rec, events)
+            feats = features_of(rec, events, own_output_not_note=own_output_not_note)
         for r in outcomes(feats, lab, rec["submissions"]):
             rows.append({**r, "episode_id": rec["episode_id"], "arm": arm_of(sp),
                          "prompt": sp["prompt"], "rule": sp["rule"],

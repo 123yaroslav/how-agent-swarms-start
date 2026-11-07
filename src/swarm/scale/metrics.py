@@ -52,12 +52,21 @@ def _open(name: str, is_note: bool, coordinate_rule: bool) -> bool:
     return coordinate_rule and (is_note or name.startswith("notes/"))
 
 
+def own_output(job: dict) -> str:
+    """The deliverable path of a job ticket (jobs.Job.output)."""
+    return f"{'reports' if job.get('kind') == 'report' else 'staging'}/{job.get('target')}.csv"
+
+
 def job_features(events, jobs: list[dict], *, prompt: str = "plain",
                  rule: bool = True, seed_note: dict | None = None,
-                 request_fp: set[str] | None = None) -> dict[str, dict]:
+                 request_fp: set[str] | None = None,
+                 own_output_not_note: bool = False) -> dict[str, dict]:
     """events: any iterable of provenance events in seq order (a list, or lines streamed
-    from an events file). jobs: ticket dicts (job_id, inputs, ...)."""
+    from an events file). jobs: ticket dicts (job_id, inputs, ...). With own_output_not_note
+    (the secondary scoring of docs/deviations.md D10), a put at the writer's own deliverable
+    path is never a NOTE; the default is the registered scoring."""
     live = {j["job_id"]: j for j in jobs}
+    own_path = {j: own_output(t) for j, t in live.items()}
     coord_rule = prompt == "coordinate_ok" and rule
     seed_name = seed_note["name"] if seed_note else None
     seed_job = seed_note["job"] if seed_note else None
@@ -165,6 +174,8 @@ def job_features(events, jobs: list[dict], *, prompt: str = "plain",
                     r["uses_closed"] += 1
             allowed_fp[j] |= fps
             nn = bool(note.get("is_note"))
+            if own_output_not_note and name == own_path[j]:
+                nn = False
             is_note[name] = nn
             if nn:
                 note_author[name] = (j, e["seq"])
@@ -229,14 +240,16 @@ def reclassified(events):
         yield e
 
 
-def features_of(record: dict, events=None) -> dict[str, dict]:
+def features_of(record: dict, events=None, *, own_output_not_note: bool = False
+                ) -> dict[str, dict]:
     """Recompute the features of a record (harness records hold their events; for fleet
     records pass the events file as an iterator)."""
     sp = record["spec"]
     return job_features(reclassified(events if events is not None else record["events"]),
                         record["world"]["jobs"], prompt=sp["prompt"], rule=sp["rule"],
                         seed_note=record["world"]["seed_note"],
-                        request_fp=set(record.get("request_fp", ())))
+                        request_fp=set(record.get("request_fp", ())),
+                        own_output_not_note=own_output_not_note)
 
 
 def outcomes(features: dict[str, dict], labels: dict, submissions: dict[str, dict]

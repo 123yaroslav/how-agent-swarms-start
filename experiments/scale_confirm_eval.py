@@ -36,6 +36,8 @@ MD = ROOT / "docs" / "results_confirmatory.md"
 PHRASINGS = ("cue_shared_fact", "cue_peers_have", "cue_team_culture", "cue_multiagent",
              "collab_line", "persist")
 Z1 = 1.6448536269514722  # one-sided 95%
+SEC_KEYS = ("wrote_note", "wrote_note_addressed", "joined", "responded", "joined_peer",
+            "replied_peer", "read_peer_note", "note_read_by_other")
 
 
 def rate(vals: list[bool]) -> dict:
@@ -93,6 +95,9 @@ def load_rows(path: Path, want: set[str]) -> tuple[list[dict], dict]:
                 continue
             seen.add(eid)
             rr = episode_rows([rec], labels)
+            sec = {r["job"]: r for r in episode_rows([rec], labels, own_output_not_note=True)}
+            for r in rr:  # secondary scoring (D10) next to the registered one
+                r["sec"] = {k: sec[r["job"]][k] for k in SEC_KEYS}
             for r in rr:  # failed turns of the episode (call failed after the re-ask)
                 r["_ep_errors"] = rec["totals"]["errors"]
                 r["_ep_calls"] = rec["totals"]["calls"]
@@ -154,6 +159,9 @@ SENSITIVITY = {  # SENSITIVITY analysis (not pre-registered): episodes by failed
 def cell_rates(rs: list[dict]) -> dict:
     return {"note_addressed": rate([bool(r["wrote_note_addressed"]) for r in rs]),
             "note_any": rate([bool(r["wrote_note"]) for r in rs]),
+            "note_addressed_secondary": rate([bool(r["sec"]["wrote_note_addressed"])
+                                              for r in rs]),
+            "note_any_secondary": rate([bool(r["sec"]["wrote_note"]) for r in rs]),
             "use_get": rate([r["reads_others"] > 0 for r in rs]),
             "p_use_code": rate([bool(r["uses_others_artifacts"]) for r in rs]),
             "report_blocked": rate([bool(r["report_blocked"]) for r in rs]),
@@ -302,10 +310,11 @@ def stage_probes() -> dict:
             rs = [r for r in rows if r["arm"] == arm]
             seen = [r for r in rs if r["seed_seen"]]
             jr = [bool(r["joined"] or r.get("responded")) for r in seen]
+            jr2 = [bool(r["sec"]["joined"] or r["sec"].get("responded")) for r in seen]
             d = {"n_expected": 2 * k, "complete": len(rs) == 2 * k,
                  "n_background": MODELS[model][2],
                  "v_seen": rate([bool(r["seed_seen"]) for r in rs]),
-                 "p_j": rate(jr),
+                 "p_j": rate(jr), "p_j_secondary": rate(jr2),
                  "read": rate([bool(r["seed_read"]) for r in rs]),
                  "by_style": {}, "cost_usd_nominal": 0.0}
             for st in ("request", "memory"):
@@ -322,10 +331,14 @@ def stage_probes() -> dict:
     return res
 
 
+GLM_TAG = "c4_glm-5.2_n1024_plain_rule"
+
+
 def stage_c4() -> dict:
     from scale_predict import active_fleets, fleet_tag, load_plan
     pred_path = ROOT / "results" / "predictions" / "c4.json"
-    pred = json.loads(pred_path.read_text())["fleets"] if pred_path.exists() else {}
+    allp = json.loads(pred_path.read_text()) if pred_path.exists() else {}
+    pred, pred2 = allp.get("fleets", {}), allp.get("fleets_secondary", {})
     plan = load_plan()
     res: dict = {"fleets": {}, "ledger": ledger(), "budget_plan": plan}
     FLEETS = active_fleets()
@@ -345,9 +358,28 @@ def stage_c4() -> dict:
                     if ln.strip():
                         yield json.loads(ln)
         rows = episode_rows([rec], {rec["episode_id"]: labels}, events=ev(), recompute=True)
+        rows2 = episode_rows([rec], {rec["episode_id"]: labels}, events=ev(), recompute=True,
+                             own_output_not_note=True)
         board_jobs = [r["job"] for r in rows if r["joined_peer"] or r["replied_peer"]]
+        board2 = [r["job"] for r in rows2 if r["joined_peer"] or r["replied_peer"]]
         blocked = [r for r in rows if r["blocked"]]
         p = pred.get(tag, {})
+        p2 = pred2.get(tag)
+        p2_note = None
+        if p2 is None and tag == GLM_TAG and p:  # D10: same as the registered prediction
+            try:
+                cw = json.loads((OUT / "c1c3.json").read_text())["cells"]["glm-5.2"][
+                    "plain-rule"]["note_any_secondary"]
+                cj = json.loads((OUT / "probes.json").read_text())["probes"]["glm-5.2"][
+                    "plain-rule"]["p_j_secondary"]
+                ok = cw["k"] == 0 and cj["k"] == 0
+            except (OSError, KeyError):
+                cw = cj = {"k": "?", "n": "?"}
+                ok = False
+            p2_note = (f"same as registered; checked from the data: secondary p_w "
+                       f"{cw['k']}/{cw['n']}, p_j {cj['k']}/{cj['n']}"
+                       + ("" if ok else " (CHECK FAILED: not zero)"))
+            p2 = {**p, "R": 0.0, "predicted_board": False} if ok else None
         d = {"n_jobs": len(rows), "board": bool(board_jobs), "n_board_jobs": len(board_jobs),
              "jobs_wrote_note": sum(bool(r["wrote_note"]) for r in rows),
              "jobs_wrote_note_addressed": sum(bool(r["wrote_note_addressed"]) for r in rows),
@@ -365,9 +397,20 @@ def stage_c4() -> dict:
              "turns": rec["totals"]["calls"], "cost_usd_nominal": round(rec["totals"]["cost"], 4),
              "stopped": rec["stopped"], "wall_s": rec["wall_s"],
              "predicted_R": p.get("R"), "predicted_W": p.get("W"),
-             "predicted_P_board": p.get("P_board"), "predicted_board": p.get("predicted_board")}
+             "predicted_P_board": p.get("P_board"), "predicted_board": p.get("predicted_board"),
+             "secondary": {"board": bool(board2), "n_board_jobs": len(board2),
+                           "jobs_wrote_note": sum(bool(r["wrote_note"]) for r in rows2),
+                           "jobs_wrote_note_addressed": sum(bool(r["wrote_note_addressed"])
+                                                            for r in rows2),
+                           "jobs_note_read_by_other": sum(bool(r["note_read_by_other"])
+                                                          for r in rows2),
+                           "predicted_R": (p2 or {}).get("R"),
+                           "predicted_board": (p2 or {}).get("predicted_board"),
+                           "prediction_note": p2_note}}
         if p.get("predicted_board") is not None and not rec["stopped"]:
             d["correct"] = d["predicted_board"] == d["board"]
+        if (p2 or {}).get("predicted_board") is not None and not rec["stopped"]:
+            d["secondary"]["correct"] = p2["predicted_board"] == bool(board2)
         res["fleets"][tag] = d
     for t in plan["dropped"]:
         res["fleets"][t] = {"status": "dropped for budget (D9)"}
@@ -375,6 +418,12 @@ def stage_c4() -> dict:
     res["n_fleets_evaluated"] = len(done)
     res["mispredicted"] = [t for t in done if not res["fleets"][t]["correct"]]
     res["pass"] = (not res["mispredicted"]) if len(done) == len(FLEETS) else None
+    done2 = [t for t, d in res["fleets"].items() if "correct" in d.get("secondary", {})]
+    res["secondary"] = {"label": "SECONDARY scoring (D10)", "n_fleets_evaluated": len(done2),
+                        "mispredicted": [t for t in done2
+                                         if not res["fleets"][t]["secondary"]["correct"]]}
+    res["secondary"]["pass"] = (not res["secondary"]["mispredicted"]) \
+        if len(done2) == len(FLEETS) else None
     return res
 
 
@@ -457,9 +506,10 @@ def write_md() -> None:
         L += ["## Stage 1: single-agent cells (C1, C2, C3)", "",
               f"Models complete: {', '.join(r['models_complete']) or 'none'}. Task spend after "
               f"this stage (ledger): ${r['ledger']['spend_usd']:.2f}.", "",
-              "| model | cell | n | NOTE_ADDRESSED | NOTE (any kind) | USE (get) | p_use (code) "
+              "| model | cell | n | NOTE_ADDRESSED | NOTE (any kind) | NOTE_ADDRESSED, secondary "
+              "(D10) | NOTE, secondary (D10) | USE (get) | p_use (code) "
               "| episodes with failed turns | failed turns / turns | cost |",
-              "|---|---|---|---|---|---|---|---|---|---|"]
+              "|---|---|---|---|---|---|---|---|---|---|---|---|"]
         for m, cs in r["cells"].items():
             for arm, c in cs.items():
                 if not c["note_addressed"]["n"]:
@@ -467,6 +517,8 @@ def write_md() -> None:
                 L.append(f"| {m} | {arm} | {c['note_addressed']['n']}"
                          f"{'' if c['complete'] else ' (incomplete)'} | "
                          f"{md_rate(c['note_addressed'])} | {md_rate(c['note_any'])} | "
+                         f"{md_rate(c['note_addressed_secondary'])} | "
+                         f"{md_rate(c['note_any_secondary'])} | "
                          f"{md_rate(c['use_get'])} | {md_rate(c['p_use_code'])} | "
                          f"{c['episodes_with_failed_turns']} | {c['errors']}/{c['calls']} | "
                          f"${c['cost_usd_nominal']:.3f} |")
@@ -492,15 +544,16 @@ def write_md() -> None:
         r = json.loads(p.read_text())
         L += ["## C4 probe episodes (v and p_j, D6)", "",
               "| model | arm | store background | n | v (saw the seed note) | p_j (read it, then "
-              "wrote a note or answered, of those who saw it) | read | cost |",
-              "|---|---|---|---|---|---|---|---|"]
+              "wrote a note or answered, of those who saw it) | p_j, secondary (D10) | read | cost |",
+              "|---|---|---|---|---|---|---|---|---|"]
         for m, arms in r["probes"].items():
             for arm, d in arms.items():
                 if not d["v_seen"]["n"]:
                     continue
                 L.append(f"| {m} | {arm} | {d['n_background']} | {d['v_seen']['n']}"
                          f"{'' if d['complete'] else ' (incomplete)'} | {md_rate(d['v_seen'])} | "
-                         f"{md_rate(d['p_j'])} | {md_rate(d['read'])} | "
+                         f"{md_rate(d['p_j'])} | {md_rate(d.get('p_j_secondary', {}))} | "
+                         f"{md_rate(d['read'])} | "
                          f"${d['cost_usd_nominal']:.2f} |")
         L += ["", f"Task spend after the probes (ledger): ${r['ledger']['spend_usd']:.2f}.", ""]
     p = ROOT / "results" / "predictions" / "c4.json"
@@ -509,9 +562,13 @@ def write_md() -> None:
         L += ["## C4 predictions (committed before the first fleet)", "",
               "| fleet | N | p_w | v | p_j | W = b N p_w | R = N v p_j | P_board | predicted |",
               "|---|---|---|---|---|---|---|---|---|"]
-        for t, d in r["fleets"].items():
+        rows_p = [(t, d, "registered") for t, d in r["fleets"].items()] + \
+            [(t, d, "secondary (D10)") for t, d in r.get("fleets_secondary", {}).items()]
+        L[-2] = "| fleet | scoring | N | p_w | v | p_j | W = b N p_w | R = N v p_j | P_board | predicted |"
+        L[-1] = "|---|---|---|---|---|---|---|---|---|---|"
+        for t, d, sc in rows_p:
             pj = "n/a" if d["p_j"] is None else f"{d['p_j']:.4f}"
-            L.append(f"| {t} | {d['N']} | {d['p_w']:.4f} | {d['v']:.4f} | {pj} | "
+            L.append(f"| {t} | {sc} | {d['N']} | {d['p_w']:.4f} | {d['v']:.4f} | {pj} | "
                      f"{d['W']:.2f} | {d['R']:.2f} | {d['P_board']:.3f} | "
                      f"{'board' if d['predicted_board'] else 'no board'} |")
         L.append("")
@@ -533,8 +590,26 @@ def write_md() -> None:
                      f"{'n/a' if d['predicted_R'] is None else round(d['predicted_R'], 2)} | "
                      f"{'n/a' if d['predicted_board'] is None else ('board' if d['predicted_board'] else 'no board')} | "
                      f"{d.get('correct', 'n/a')} | ${d['cost_usd_nominal']:.2f} |")
-        L += ["", f"C4: {verdict(r['pass'])}; fleets evaluated {r['n_fleets_evaluated']}, "
-              f"mispredicted: {', '.join(r['mispredicted']) or 'none'}. Task spend (ledger) "
+        L += ["", f"C4 (registered scoring): {verdict(r['pass'])}; fleets evaluated "
+              f"{r['n_fleets_evaluated']}, mispredicted: {', '.join(r['mispredicted']) or 'none'}.",
+              "", "SECONDARY scoring (D10: a write at the agent's own deliverable path is not a "
+              "NOTE):", "", "| fleet | board | jobs in a board link | jobs that wrote a note "
+              "(addressed) | notes read by others | predicted R | predicted | correct |",
+              "|---|---|---|---|---|---|---|---|"]
+        for t, d in r["fleets"].items():
+            s2 = d.get("secondary")
+            if not s2:
+                continue
+            pr2 = "n/a" if s2["predicted_board"] is None else \
+                ("board" if s2["predicted_board"] else "no board")
+            rr2 = "n/a" if s2["predicted_R"] is None else round(s2["predicted_R"], 2)
+            L.append(f"| {t} | {'yes' if s2['board'] else 'no'} | {s2['n_board_jobs']} | "
+                     f"{s2['jobs_wrote_note']} ({s2['jobs_wrote_note_addressed']}) | "
+                     f"{s2['jobs_note_read_by_other']} | {rr2} | {pr2} | "
+                     f"{s2.get('correct', 'n/a')} |")
+        L += ["", f"C4 under the secondary scoring: {verdict(r['secondary']['pass'])}; fleets "
+              f"evaluated {r['secondary']['n_fleets_evaluated']}, mispredicted: "
+              f"{', '.join(r['secondary']['mispredicted']) or 'none'}. Task spend (ledger) "
               f"${r['ledger']['spend_usd']:.2f}.", ""]
     MD.write_text("\n".join(L) + "\n")
 
@@ -571,8 +646,16 @@ def main(argv=None) -> None:
                   f"{'PASS' if c else 'FAIL' if c is False else 'n/a'}; notes {d['jobs_wrote_note']}"
                   f" (addressed {d['jobs_wrote_note_addressed']}), read by others "
                   f"{d['jobs_note_read_by_other']}, ${d['cost_usd_nominal']:.2f}")
-        print(f"C4: {verdict(r['pass'])}; mispredicted {r['mispredicted']}; task spend "
-              f"${r['ledger']['spend_usd']:.2f}")
+        for t, d in r["fleets"].items():
+            if "secondary" in d:
+                s2 = d["secondary"]
+                c = s2.get("correct")
+                print(f"  SECONDARY {t}: board {s2['board']} ({s2['n_board_jobs']} jobs), predicted "
+                      f"R {s2['predicted_R']}, predicted board {s2['predicted_board']} -> "
+                      f"{'PASS' if c else 'FAIL' if c is False else 'n/a'}")
+        print(f"C4: {verdict(r['pass'])}; mispredicted {r['mispredicted']}; SECONDARY (D10): "
+              f"{verdict(r['secondary']['pass'])}, mispredicted {r['secondary']['mispredicted']}; "
+              f"task spend ${r['ledger']['spend_usd']:.2f}")
     write_md()
 
 
