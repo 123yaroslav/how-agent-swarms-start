@@ -113,6 +113,12 @@ From the 22:12 UTC+5 restart the client (`src/swarm/llm.py`, commit after this n
 20-60 s after each HTTP 429, as the server asks, and such waits do not use up the retry count
 (at most 30 waits per call). Cache keys and prompts are unchanged; only the timing of retries
 differs. Successful calls per minute stayed at 440-450.
+From 00:58 UTC+5 on Nov 8 each lane has an in-flight limit the runner can change while it runs.
+The fleets of glm-5.2 and deepseek-v4-flash get their base limit plus the limit of every other
+model whose cells are done, up to 192 calls in flight. A brake lowers that cap by 48 when
+successful calls per minute fell more than 10% in the 10 minutes after a raise. Cells and
+probes keep 160 (deepseek-v4-flash) or 48. The other fleets keep 48. Like the other schedule
+settings, this changes timing only, not outcomes.
 The first deepseek-v4-flash episodes ran in a separate process at 64 calls in flight; that process
 was stopped and the episodes it finished are kept (the rerun skips them and replays the rest
 from the cache).

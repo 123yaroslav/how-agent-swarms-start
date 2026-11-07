@@ -7,7 +7,7 @@ finished. Fleets (30 turns, 30% blocked, sample offset 1, same settings as C4):
 - deepseek-v4-flash N = 1,024 plain + rule, second world seed 2901
 - deepseek-v4-flash N = 1,024 plain + rule with one seeded request note, world seed 2901
 - qwen3.5-397b N = 1,024 plain + rule with one seeded request note, world seed 2900
-The two models run side by side (deepseek-v4-flash 160 calls in flight, the others 48). Before each fleet the task spend
+The two models run side by side, each with up to 192 calls in flight. Before each fleet the task spend
 plus the fleet's projected cost must stay under the $780 cap, or the fleet is skipped. For
 reference only, each fleet is shown with R = N v p_j from the same model's confirmatory cells and
 probes (for gemma-4-31b-it the probes used a 256-job background). Outputs carry the label
@@ -159,7 +159,7 @@ async def run_one(lane: R.Lane, f: dict, res: dict) -> None:
             f"cached {rr['cached']:>4} err {rr['errors']:>3} {rr['wall_s']:.0f}s "
             f"rss {rr['peak_rss_mb']}MB ${rr['cost']:.3f}")
     t0 = time.time()
-    rec, labels = await run_world(spec, lane.policy, sem=asyncio.Semaphore(lane.conc),
+    rec, labels = await run_world(spec, lane.policy, sem=asyncio.Semaphore(R.FLEET_MAX + 64),
                                   out_prefix=prefix, progress=progress)
 
     def rep():
@@ -195,8 +195,9 @@ async def main_async() -> None:
     R.patch_http()
     res = json.loads(OUT.read_text()) if OUT.exists() else {"label": LABEL, "fleets": {}}
     lanes = {m: R.Lane(m) for m in dict.fromkeys(f["model"] for f in EXPLORE)}
-    for lane in lanes.values():
+    for lane in lanes.values():  # the confirmatory set is done: fleets get the full allowance
         lane.gate.set()
+        await lane.limiter.set(R.FLEET_MAX)
 
     async def lane_run(m: str) -> None:
         for f in EXPLORE:

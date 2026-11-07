@@ -49,6 +49,8 @@ ADD_AFTER_S = 600
 BACKOFF_WINDOW_S = 300
 CONC = 48  # calls in flight per model; deepseek-v4-flash gets more (slow calls)
 CONC_BY_MODEL = {"deepseek-v4-flash": 160}
+FLEET_MAX = 192  # fleets of these models take the allowance freed by finished cell lanes
+FLEET_GROW = ("glm-5.2", "deepseek-v4-flash")
 PROBE_BIG_STORE_EPISODES = 48  # episodes in flight for probes with a 1,024-job store (memory)
 SUMMARY = ROOT / "results" / "summary"
 T0 = time.time()
@@ -119,15 +121,40 @@ def patch_http() -> None:
 
 
 # ---- lanes --------------------------------------------------------------------------------
-class GatedPolicy:
-    """The model's policy behind a gate: while the lane is paused, new calls wait."""
+class Limiter:
+    """Calls in flight of one lane, with a limit the controller can change while it runs."""
 
-    def __init__(self, inner: LLMPolicy, gate: asyncio.Event):
-        self.inner, self.gate = inner, gate
+    def __init__(self, limit: int):
+        self.limit, self.used = limit, 0
+        self.cond = asyncio.Condition()
+
+    async def __aenter__(self):
+        async with self.cond:
+            await self.cond.wait_for(lambda: self.used < self.limit)
+            self.used += 1
+
+    async def __aexit__(self, *exc):
+        async with self.cond:
+            self.used -= 1
+            self.cond.notify_all()
+
+    async def set(self, limit: int) -> None:
+        async with self.cond:
+            self.limit = limit
+            self.cond.notify_all()
+
+
+class GatedPolicy:
+    """The model's policy behind a gate (while the lane is paused, new calls wait) and the
+    lane's in-flight limiter."""
+
+    def __init__(self, inner: LLMPolicy, gate: asyncio.Event, limiter: Limiter):
+        self.inner, self.gate, self.limiter = inner, gate, limiter
 
     async def __call__(self, agent, messages, sample):
         await self.gate.wait()
-        return await self.inner(agent, messages, sample)
+        async with self.limiter:
+            return await self.inner(agent, messages, sample)
 
 
 RETRIES = 40  # Adaption attempts per call (swarm.llm default 8); see docs/deviations.md D7
@@ -152,11 +179,15 @@ class Lane:
         TaskLLM = patient_llm_class()
         self.model = model
         self.gate = asyncio.Event()
-        self.conc = CONC_BY_MODEL.get(model, CONC)
-        self.llm = TaskLLM(budget_usd=SC.BUDGET, max_concurrency=self.conc, cache_path=SC.CACHE)
+        self.conc = CONC_BY_MODEL.get(model, CONC)  # base allowance (cells and probes)
+        self.limiter = Limiter(self.conc)
+        self.llm = TaskLLM(budget_usd=SC.BUDGET, max_concurrency=FLEET_MAX + 64,
+                           cache_path=SC.CACHE)  # the limiter binds, not swarm.llm's semaphore
         self.policy = GatedPolicy(LLMPolicy(self.llm, f"adaption/{model}",
                                             max_tokens=SC.MODELS[model][1],
-                                            temperature=SC.TEMPERATURE), self.gate)
+                                            temperature=SC.TEMPERATURE), self.gate,
+                                  self.limiter)
+        self.cells_done = False
         self.started = False
         self.done = False
         self.phase = "waiting"
@@ -345,7 +376,7 @@ async def run_fleet(lane: Lane, f: dict) -> None:
             f"cached {rr['cached']:>4} err {rr['errors']:>3} {rr['wall_s']:.0f}s "
             f"rss {rr['peak_rss_mb']}MB ${rr['cost']:.3f}")
     t0 = time.time()
-    rec, labels = await run_world(spec, lane.policy, sem=asyncio.Semaphore(lane.conc),
+    rec, labels = await run_world(spec, lane.policy, sem=asyncio.Semaphore(FLEET_MAX + 64),
                                   out_prefix=prefix, progress=progress)
     extra = {"concurrency": lane.conc, "elapsed_s": round(time.time() - t0, 1),
              "task_spend_usd": round(lane.llm.total_spent(), 4),
@@ -372,6 +403,7 @@ async def lane_main(lane: Lane) -> None:
     m = lane.model
     try:
         await run_cells(lane, probes=False)
+        lane.cells_done = True
         await run_eval("c1c3")
         await git_commit(["results/confirmatory/c1c3.json", "docs/results_confirmatory.md"],
                          f"C1-C3 single-agent cells of {m}: rates and pass rules so far")
@@ -454,9 +486,38 @@ async def controller(lanes: list[Lane]) -> None:
         last_change = time.time()
         log(f"=== back off: lane {lane.model} paused ({why}), target {target}")
 
+    brake = {"cap": FLEET_MAX, "raised_at": None, "ok_before": None}
+
+    async def allocate() -> None:
+        """Fleets of FLEET_GROW models get their base allowance plus the base allowance of
+        every other lane whose cells are done, up to FLEET_MAX (and the brake cap). Other lanes
+        keep their base. Brake: 10 min after a raise, if successful calls per minute fell by
+        more than 10%, the cap drops by 48 (not below 48)."""
+        now = time.time()
+        ok5 = WIN.ok_per_min(now - BACKOFF_WINDOW_S, now)
+        if brake["raised_at"] and now - brake["raised_at"] >= ADD_AFTER_S:
+            if brake["ok_before"] and ok5 < 0.9 * brake["ok_before"]:
+                brake["cap"] = max(48, brake["cap"] - 48)
+                log(f"=== brake: ok/min {ok5:.0f} vs {brake['ok_before']:.0f} before the raise; "
+                    f"fleet cap {brake['cap']}")
+            brake["raised_at"] = None
+        raised = False
+        for x in lanes:
+            want = x.conc
+            if x.model in FLEET_GROW and x.phase.startswith("fleet"):
+                freed = sum(y.conc for y in lanes if y is not x and y.cells_done)
+                want = min(brake["cap"], x.conc + freed)
+            if want != x.limiter.limit:
+                raised |= want > x.limiter.limit
+                log(f"=== in-flight limit {x.model}: {x.limiter.limit} -> {want} ({x.phase})")
+                await x.limiter.set(want)
+        if raised and brake["raised_at"] is None:
+            brake["raised_at"], brake["ok_before"] = now, ok5
+
     fill()
     while not all(x.done for x in lanes):
         await asyncio.sleep(60)
+        await allocate()
         active[:] = [x for x in active if not x.done]
         now = time.time()
         rule = rule_now()
