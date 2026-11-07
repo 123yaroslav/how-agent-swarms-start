@@ -40,7 +40,7 @@ way.
 | prompts | `plain` + house rule on even world seeds, `plain` without the rule on odd world seeds (50/50) |
 | world seeds | 4000-4999 (500 per prompt type), sample offset (repeat) 0. Disjoint from every evaluation seed in `docs/prereg.md` and `docs/deviations.md` (C1-C3 2100-2199, C4 probes 2300-2349 and 2500-2549) and from all other runs (0-99, 100-301, 500-999, 1000-1999, 2000-2049, 3000-3099) |
 | sampler | adaption/deepseek-v4-flash, temperature 0.8, max_tokens 3000, 20 turns, history window 12 (the smoke settings) |
-| concurrency | at most 24 calls in flight (the key is shared with a running job) |
+| concurrency | at most 24 calls in flight (the key is shared with a running job); lowered to 8 on Nov 8, 01:30 UTC+5, after 48 episodes, at the coordinator's request (the confirmatory fleets have priority on the key). Concurrency changes only the timing: the sample index and the store clock do not depend on it, and the restart replayed the unfinished episodes from the cache |
 | cache and cap | `results/cache/outcome_llm.sqlite`, its own ledger, spend cap $15 for sampling |
 | stopping rule (amended Nov 8, 00:30 UTC+5, before any episode had finished) | the seeds run in order in blocks of 100 (50 per prompt type); sampling stops after the first block at which the successful episodes hold at least 3,000 usable rows, or at seed 4999 |
 
