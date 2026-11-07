@@ -6,6 +6,8 @@ All runs: `experiments/run_fleet.py`, benign puzzles, p = 0.3 impossible-alone t
 
 Goal: find which factors turn readers into writers, and size the confirmatory runs.
 
+Run on Nov 7 as a seven-model by seven-arm screen with every player blocked (world seeds 300 and 301, N = 8, 40 turns): `docs/ideas/screen_results.md`.
+
 | Factor | Levels |
 |---|---|
 | Model | deepseek-v4-flash, gemma-4-31b-it, qwen3.8-27b, gemma-4-26b-a4b-it, glm-5.2, qwen3.5-397b |
@@ -53,6 +55,19 @@ Teacher: adaption/deepseek-v4-flash (in the smoke runs it writes for peers when 
 
 No row may contain a note in the shared cache, a read of another player's files, or the words of the test conditions' seed notes. Rows per organism: 10,000 (the Gemma 4 31B minimum), same count for every organism. Bases: openai/gpt-oss-20b first (no row minimum, LoRA in vLLM, base also on OpenRouter), google/gemma-4-31B-it second. AutoScientist: one iteration, LoRA, no augmentation (`experiments/autoscientist_run.py`).
 
+Generated Nov 7 with `experiments/make_training_data.py` (world seeds 1000-1999, 60 turns): what was generated, keep rates, the hard filter, example rows and the dataset and run ids are in `docs/ideas/training_data.md`.
+
 ## Serving plan for the fine-tuned organisms (written Nov 7 10:40, no spend yet)
 
 One RunPod GPU pod (A100 80GB or H100; gpt-oss-20b in MXFP4 needs about 16 GB, LoRA on q_proj and v_proj) with the official vLLM OpenAI image. The pod's start command downloads the four AutoScientist checkpoints through the Adaption API (key passed as a pod secret) and starts `vllm serve openai/gpt-oss-20b --enable-lora --max-loras 4 --lora-modules neutral=... collab=... collab_discipline=... collab_persist=...` on port 8000. Fleets call `oai:https://<pod>-8000.proxy.runpod.net/v1|<adapter>` through src/swarm/llm.py (same cache and ledger). The base model is the same server without an adapter name. Expected use 3-4 GPU hours, about $5-15. Verify with one real request from outside before any fleet run; stop the pod right after the runs. The format of the downloaded checkpoints is checked before writing the start script.
+
+## Fleet grid for the nucleation test (written Nov 7 12:10, before any scale fleet)
+
+Two kinds of fleets test the two parts of the model separately.
+
+| Kind | What it tests | Conditions |
+|---|---|---|
+| Seeded fleets: one note placed in the store at t = 0 by a job outside the fleet | The growth part (R = N v p_j) independent of how rare the first note is | request note and memory-style note; plain + rule, plain + no rule, collab_line + rule; N = 64, 256, 1,024 |
+| Unseeded fleets | The whole model, including first writers (W = b N p_w) | conditions spanning p_w from the single-agent screen: plain + rule, persist + rule, collab_line + rule, plain + no rule, coordinate_ok (positive control); N = 64, 256, 1,024 |
+
+Models: all six Adaption models at N = 64 and 256; at N = 1,024 deepseek-v4-flash and gemma-4-31b-it for every condition, glm-5.2 and qwen3.5-397b for the main seeded and unseeded condition (about $85-120 per 1,024 fleet for these two). Fine-tuned organisms at N = 64 and 256 once served. The exact grid and seed counts are frozen in docs/prereg.md after the single-agent rates and measured costs are in.
