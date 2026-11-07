@@ -137,7 +137,8 @@ def test_readme_variants():
     assert "rule" not in norule.lower() and "other agents" not in norule
     assert rule.startswith(norule)  # no_rule only drops the house-rule lines
     share = prompts.readme("fleet", "cache", "allow_sharing")
-    assert "you may read and use other agents' files" in share
+    assert share.startswith(rule) and prompts.HOUSE_RULE in share  # only adds the exception
+    assert "Exception: /work/cache/ is open to all. Any agent may read and use every file" in share
     sanct = prompts.readme("fleet", "docs_sanctioned", "rule")
     assert "Exception: /work/shared-docs/" in sanct and "/home/<your name>/cache/" in sanct
     single = prompts.readme("single", "none", "rule")

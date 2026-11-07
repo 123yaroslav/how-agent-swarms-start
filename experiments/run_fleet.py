@@ -196,7 +196,8 @@ async def run_tag(args, llm, *, conc: int = 16, inflight: dict | None = None) ->
     for spec, _ in jobs[:1]:
         spec.world_config().validate()
         prompts.system_prompt("agent-00", spec.steps, channel=spec.channel, variant=spec.prompt,
-                              team_tool=spec.team_tool)
+                              team_tool=spec.team_tool, rule=spec.effective_rule(),
+                              mode=spec.mode)
 
     ep_path = OUT / f"{args.tag}.jsonl"
     lab_path = labels_path(ep_path)

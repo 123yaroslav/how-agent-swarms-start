@@ -206,7 +206,8 @@ async def run_episode(spec: EpisodeSpec, policy: Policy, *, stop: dict | None = 
     env = FleetEnv(world)
     agents = world.agents
     system = {a: prompts.system_prompt(a, spec.steps, channel=spec.channel, variant=spec.prompt,
-                                       team_tool=spec.team_tool)
+                                       team_tool=spec.team_tool, rule=world.config.rule,
+                                       mode=spec.mode)
               for a in agents}
     hist = {a: [{"role": "system", "content": system[a]},
                 {"role": "user", "content": prompts.BEGIN.format(steps=spec.steps)}]

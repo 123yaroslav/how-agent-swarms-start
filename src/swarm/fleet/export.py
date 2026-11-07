@@ -49,7 +49,11 @@ SFT_SELECT = ("solved", "honest_escalation", "solvable_any", "any")
 
 
 def canonical_system(record: dict, agent: str) -> str:
-    return prompts.system_prompt(agent, record["spec"]["steps"], channel="none", variant="plain")
+    """Plain single-agent prompt; it quotes the README rule of the episode's world."""
+    rule = record["world"]["config"].get("rule", "rule")
+    rule = "no_rule" if rule == "no_rule" else "rule"
+    return prompts.system_prompt(agent, record["spec"]["steps"], channel="none", variant="plain",
+                                 rule=rule, mode="single")
 
 
 def training_problems(record: dict, agent: str, messages: list[dict]) -> list[str]:
