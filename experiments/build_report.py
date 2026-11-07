@@ -473,6 +473,42 @@ def misc_numbers(v: dict) -> None:
                         return
 
 
+def fleet_sentences(fleets: list[dict], v: dict) -> None:
+    """Generated C4 sentences for the abstract, introduction, Figure 3 and Section 4.5."""
+    done = [f for f in fleets if f.get("correct") is not None]
+    if not done:
+        return
+    k = len(done)
+    ok = sum(bool(f["correct"]) for f in done)
+    ok2 = sum(bool(f.get("correct2")) for f in done if f.get("correct2") is not None)
+    k2 = sum(f.get("correct2") is not None for f in done)
+    sizes = sorted({f["fleet"] for f in done})
+    rng = f"{sizes[0]:,} to {sizes[-1]:,}" if len(sizes) > 1 else f"{sizes[0]:,}"
+    miss = [f["name"].replace("c4_", "") for f in done if not f["correct"]]
+    boards = [f["name"].replace("c4_", "") for f in done if f["board"]]
+    v["c4_n_done"], v["c4_correct"], v["c4_correct2"], v["c4_n2"] = k, ok, ok2, k2
+    if ok == k:
+        v["c4_abstract_sentence"] = (f"Predictions from single agents, committed before each fleet "
+                                     f"ran, matched all {k} fleets of {rng} agents.")
+        v["fig3_title"] = "Fleets formed boards only where the single-agent model predicted them."
+    else:
+        v["c4_abstract_sentence"] = (f"Predictions from single agents, committed before each fleet "
+                                     f"ran, matched {ok} of {k} fleets of {rng} agents.")
+        v["fig3_title"] = f"The single-agent model matched {ok} of {k} fleets."
+    v["c4_intro_sentence"] = (v["c4_abstract_sentence"].replace("Predictions from single agents",
+                                                                "Predictions from single-agent rates")
+                              .rstrip(".") + " (Section 4.5, Figure 3).")
+    txt = [f"We ran {k} pre-registered fleets of {rng} agents. Predictions under the registered "
+           f"scoring matched {ok} of {k}"]
+    if k2:
+        txt[-1] += f", and under the secondary scoring {ok2} of {k2}"
+    txt[-1] += " (Figure 3)."
+    txt.append("Boards formed in " + (", ".join(boards) if boards else "no fleet") + ".")
+    if miss:
+        txt.append("The model mispredicted " + ", ".join(miss) + ".")
+    v["res_fleets_auto"] = " ".join(txt)
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -512,12 +548,17 @@ def main() -> None:
         for name, f in items:
             if not isinstance(f, dict) or f.get("status") in ("not run", "running", "dropped"):
                 continue
-            pred = f.get("prediction", f)
+            if "board" not in f:
+                continue
+            s2 = f.get("secondary", {})
             fleets.append({"name": str(name), "condition": str(name),
-                           "fleet": f.get("N") or pred.get("N") or 0,
-                           "R_pred": pred.get("R", pred.get("R_pred", 0.0)) or 0.0,
-                           "board": f.get("board", f.get("observed_board", False)),
-                           "predicted_board": pred.get("predicted_board")})
+                           "fleet": f.get("n_jobs", 0), "R_pred": f.get("predicted_R") or 0.0,
+                           "board": bool(f.get("board")), "predicted_board": f.get("predicted_board"),
+                           "correct": f.get("correct"), "board2": bool(s2.get("board")),
+                           "predicted_board2": s2.get("predicted_board"),
+                           "correct2": s2.get("correct"),
+                           "n_board_jobs": f.get("n_board_jobs", 0),
+                           "jobs_note_addressed": f.get("jobs_wrote_note_addressed", 0)})
     v["c4_n"] = len(fleets)
     perm = [f for f in fleets if "coordinate_ok" in str(f.get("condition", ""))]
     plain = [f for f in fleets if f not in perm]
@@ -542,6 +583,7 @@ def main() -> None:
         fig_chain(cells, probes, models)
         fig_freeride(cells, models)
     fig_fleets(fleets)
+    fleet_sentences(fleets, v)
     realworld_harness(v)
     render_guidelines(v)
     # table cells split on "|", so every key with "|" also gets a dotted alias for tables

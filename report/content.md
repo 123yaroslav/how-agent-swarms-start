@@ -88,7 +88,7 @@ Without the house rule, agents took each other's work and still did not write. {
 
 ### 4.5 Fleets of up to 1,024 agents behave as the single-agent model predicts
 
-{{res_fleets}}
+{{res_fleets_auto}}
 
 ![**Figure 3. {{fig3_title}}** Each point is one fleet, placed by its predicted R (new notes per note) and its size. Filled points formed a board. The dashed line is R = 1.](figures/fig2_fleets.png){4.2}
 
