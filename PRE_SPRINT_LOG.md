@@ -9,3 +9,4 @@ The sprint runs Nov 6-8, 2026. Everything not listed here was written during the
 | 2026-10-25 | Read-only Codex review script for the report (to be adapted) | `tools/codex_review.sh` | same repo, `tools/codex_review.sh` |
 
 No experiment on the sprint question was run before 2026-11-06.
+| 2026-10-25 | Renderer from markdown into the official Apart docx template with Word math, PDF export through Pages (template path and number source changed on 2026-11-07) | `experiments/render_official.py`, `experiments/omml.py` | author's AI Collusion Research Sprint repo, same paths |
