@@ -94,7 +94,7 @@ Without the house rule, agents took each other's work and still did not write. {
 
 ### 4.6 Real framework prompts describe shared memory, and that makes agents look at each other's work
 
-{{res_realworld}}
+Real framework prompts often give agents shared storage and no boundary rule. Of {{rw_n_projects}} widely used open-source agent frameworks, {{rw_projects_storage}} mention storage or memory that several agents write, {{rw_projects_storage_norule}} of them with no sentence that limits use of others' data, and only {{rw_projects_rule}} contain such a sentence at all. {{rw_projects_contact}} describe passing information to other agents through a shared place. CrewAI's memory tool, for example, stores facts "so they can be recalled later by you or other agents". We added twelve such sentences verbatim to our plain prompt with the house rule (exploratory, DeepSeek V4 Flash). None opened the gate, with {{rw_addr_total}} addressed notes across the eight sentences that describe contact. Two sentences about shared memory raised how often agents read other jobs' artifacts, from {{rw_read_plain}} plain episodes to {{rw_read_crewai}} (CrewAI) and {{rw_read_swarms}} (swarms), while use in code stayed at {{rw_code_shared}}. On Qwen 3.5 397B, which rarely reads other jobs' artifacts, the same sentences changed little ({{rw_qwen_summary}}). Wording about shared memory thus moves the second factor, how often agents look at each other's work, in some models and not in others.
 
 ### 4.7 Collaboration fine-tuning
 

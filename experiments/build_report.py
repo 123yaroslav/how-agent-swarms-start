@@ -373,6 +373,30 @@ def realworld_harness(v: dict) -> None:
     if base and base.get("n") and parts:
         v["rw_read_summary"] = (f"plain prompt {base['k']} of {base['n']}, " + ", ".join(parts)
                                 + ", DeepSeek V4 Flash")
+    def kn(arm: str, key: str) -> str | None:
+        x = h.get(arm, {}).get(key)
+        return f"{x['k']} of {x['n']}" if x and x.get("n") else None
+    v["rw_read_plain"] = kn("plain", "use_get")
+    v["rw_read_crewai"] = kn("real_c2_crewai_shared_memory", "use_get")
+    v["rw_read_swarms"] = kn("real_c3_swarms_shared_memory", "use_get")
+    real = [a for a in h if a.startswith("real_c")]
+    addr = [h[a]["note_addressed"] for a in real if h[a].get("note_addressed", {}).get("n")]
+    if addr:
+        v["rw_addr_total"] = f"{sum(x['k'] for x in addr)} of {sum(x['n'] for x in addr)}"
+    code = [h[a]["p_use_code"] for a in ("real_c2_crewai_shared_memory",
+                                          "real_c3_swarms_shared_memory")
+            if h.get(a, {}).get("p_use_code", {}).get("n")]
+    if code:
+        v["rw_code_shared"] = f"{sum(x['k'] for x in code)} of {sum(x['n'] for x in code)}"
+    rep = load(ROOT / "results" / "explore" / "write_find_answer.json").get("replication", {})
+    q = {a: rep.get(a, {}).get("use_get") for a in ("plain", "real_c2_crewai_shared_memory",
+                                                    "real_c3_swarms_shared_memory")}
+    if all(x and x.get("n") for x in q.values()):
+        v["rw_qwen_summary"] = (f"reads in {q['plain']['k']} of {q['plain']['n']} plain episodes, "
+                                f"{q['real_c2_crewai_shared_memory']['k']} of "
+                                f"{q['real_c2_crewai_shared_memory']['n']} and "
+                                f"{q['real_c3_swarms_shared_memory']['k']} of "
+                                f"{q['real_c3_swarms_shared_memory']['n']} with the sentences")
 
 
 def note_taxonomy_numbers(v: dict) -> None:
