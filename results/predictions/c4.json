@@ -280,6 +280,147 @@
    "q": 0.9822443181818182,
    "P_board": 1.0,
    "predicted_board": true
+  },
+  "c4_deepseek-v4-flash_n1024_plain_rule": {
+   "model": "deepseek-v4-flash",
+   "N": 1024,
+   "prompt": "plain",
+   "seed_note": "none",
+   "scoring": "registered",
+   "b": 0.3,
+   "p_w": 0.04,
+   "p_w_rate": {
+    "k": 4,
+    "n": 100,
+    "p": 0.04,
+    "lo": 0.015663050551848016,
+    "hi": 0.09837217232607373
+   },
+   "p_w_addressed_rate": {
+    "k": 1,
+    "n": 100,
+    "p": 0.01,
+    "lo": 0.0017673865655472645,
+    "hi": 0.0544875247609346
+   },
+   "v": 0.72,
+   "v_rate": {
+    "k": 72,
+    "n": 100,
+    "p": 0.72,
+    "lo": 0.6251178763865427,
+    "hi": 0.7986044083240164
+   },
+   "v_background": 1024,
+   "p_j": 0.041666666666666664,
+   "p_j_rate": {
+    "k": 3,
+    "n": 72,
+    "p": 0.041666666666666664,
+    "lo": 0.01427054877259009,
+    "hi": 0.11549464605452325
+   },
+   "W": 12.288,
+   "R": 30.72,
+   "R_lo": 9.134873747038311,
+   "R_hi": 94.44816228041138,
+   "q": 0.9674479166666666,
+   "P_board": 0.9999931276194642,
+   "predicted_board": true
+  },
+  "c4_deepseek-v4-flash_n1024_coordinate_ok_rule": {
+   "model": "deepseek-v4-flash",
+   "N": 1024,
+   "prompt": "coordinate_ok",
+   "seed_note": "none",
+   "scoring": "registered",
+   "b": 0.3,
+   "p_w": 0.96,
+   "p_w_rate": {
+    "k": 96,
+    "n": 100,
+    "p": 0.96,
+    "lo": 0.9016278276739262,
+    "hi": 0.984336949448152
+   },
+   "p_w_addressed_rate": {
+    "k": 95,
+    "n": 100,
+    "p": 0.95,
+    "lo": 0.8882480347279118,
+    "hi": 0.9784566385436864
+   },
+   "v": 0.74,
+   "v_rate": {
+    "k": 74,
+    "n": 100,
+    "p": 0.74,
+    "lo": 0.6462882736813838,
+    "hi": 0.8159542187301354
+   },
+   "v_background": 1024,
+   "p_j": 0.7027027027027027,
+   "p_j_rate": {
+    "k": 52,
+    "n": 74,
+    "p": 0.7027027027027027,
+    "lo": 0.5906687497464007,
+    "hi": 0.7947292893483764
+   },
+   "W": 294.912,
+   "R": 532.48,
+   "R_lo": 390.90410146933,
+   "R_hi": 664.0258215856232,
+   "q": 0.9981219951923077,
+   "P_board": 1.0,
+   "predicted_board": true
+  },
+  "c4_deepseek-v4-flash_n1024_plain_rule_seedreq": {
+   "model": "deepseek-v4-flash",
+   "N": 1024,
+   "prompt": "plain",
+   "seed_note": "request",
+   "scoring": "registered",
+   "b": 0.3,
+   "p_w": 0.04,
+   "p_w_rate": {
+    "k": 4,
+    "n": 100,
+    "p": 0.04,
+    "lo": 0.015663050551848016,
+    "hi": 0.09837217232607373
+   },
+   "p_w_addressed_rate": {
+    "k": 1,
+    "n": 100,
+    "p": 0.01,
+    "lo": 0.0017673865655472645,
+    "hi": 0.0544875247609346
+   },
+   "v": 0.72,
+   "v_rate": {
+    "k": 72,
+    "n": 100,
+    "p": 0.72,
+    "lo": 0.6251178763865427,
+    "hi": 0.7986044083240164
+   },
+   "v_background": 1024,
+   "p_j": 0.041666666666666664,
+   "p_j_rate": {
+    "k": 3,
+    "n": 72,
+    "p": 0.041666666666666664,
+    "lo": 0.01427054877259009,
+    "hi": 0.11549464605452325
+   },
+   "W": 43.007999999999996,
+   "R": 30.72,
+   "R_lo": 9.134873747038311,
+   "R_hi": 94.44816228041138,
+   "q": 0.9674479166666666,
+   "P_board": 1.0,
+   "predicted_board": true
   }
  },
  "written": {
@@ -288,7 +429,10 @@
   "c4_gemma-4-26b-a4b-it_n256_plain_rule": "2026-11-08 02:08:56 +0500",
   "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule": "2026-11-08 02:08:56 +0500",
   "c4_gemma-4-31b-it_n256_plain_rule": "2026-11-08 02:39:20 +0500",
-  "c4_gemma-4-31b-it_n256_coordinate_ok_rule": "2026-11-08 02:39:20 +0500"
+  "c4_gemma-4-31b-it_n256_coordinate_ok_rule": "2026-11-08 02:39:20 +0500",
+  "c4_deepseek-v4-flash_n1024_plain_rule": "2026-11-08 04:14:43 +0500",
+  "c4_deepseek-v4-flash_n1024_coordinate_ok_rule": "2026-11-08 04:14:43 +0500",
+  "c4_deepseek-v4-flash_n1024_plain_rule_seedreq": "2026-11-08 04:14:43 +0500"
  },
  "formula": "C4 predictions: the nucleation model fitted on single agents, for every C4 fleet\n(docs/prereg.md C4, docs/deviations.md D6). Run after the C1-C3 cells and the probe episodes,\ncommit results/predictions/c4.json before the first fleet.\n\n    uv run python experiments/scale_predict.py               # write results/predictions/c4.json\n    uv run python experiments/scale_predict.py --model glm-5.2  # one model's fleets only (D8)\n    uv run python experiments/scale_predict.py --fleet-cmd 0  # print the command of fleet 0\n    uv run python experiments/scale_predict.py --budget-check 0  # exit 1 if fleets 0.. would\n                                                             # take the task spend over the cap\n\nInputs: results/confirmatory/c1c3.json (p_w = NOTE rate, any kind, of the no-note cell of the\nfleet's arm) and results/confirmatory/probes.json (v = share of probe episodes that saw the seed\nnote, p_j = share of those that read it and then wrote a NOTE or answered it; store background =\nfleet N). b = 0.3, the fleets' blocked share.\n\n    W = b N p_w   (+ N v p_j for the fleet with one seeded request note)\n    R = N v p_j\n    P_board = 1 - exp(-W q),  q = max(0, 1 - 1/R)\n    predicted board: R > 1; no board: R < 1 (point estimates)\n\nR_lo and R_hi use the Wilson 95% limits of v and p_j (shown, not used by the pass rule).\n",
  "inputs_at_commit": {
@@ -297,7 +441,10 @@
   "c4_gemma-4-26b-a4b-it_n256_plain_rule": "c78e9e1",
   "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule": "c78e9e1",
   "c4_gemma-4-31b-it_n256_plain_rule": "0f59acd",
-  "c4_gemma-4-31b-it_n256_coordinate_ok_rule": "0f59acd"
+  "c4_gemma-4-31b-it_n256_coordinate_ok_rule": "0f59acd",
+  "c4_deepseek-v4-flash_n1024_plain_rule": "0493cd9",
+  "c4_deepseek-v4-flash_n1024_coordinate_ok_rule": "0493cd9",
+  "c4_deepseek-v4-flash_n1024_plain_rule_seedreq": "0493cd9"
  },
  "fleets_secondary": {
   "c4_qwen3.5-397b_n1024_plain_rule": {
@@ -534,6 +681,147 @@
    "q": 0.9822443181818182,
    "P_board": 1.0,
    "predicted_board": true
+  },
+  "c4_deepseek-v4-flash_n1024_plain_rule": {
+   "model": "deepseek-v4-flash",
+   "N": 1024,
+   "prompt": "plain",
+   "seed_note": "none",
+   "scoring": "secondary",
+   "b": 0.3,
+   "p_w": 0.01,
+   "p_w_rate": {
+    "k": 1,
+    "n": 100,
+    "p": 0.01,
+    "lo": 0.0017673865655472645,
+    "hi": 0.0544875247609346
+   },
+   "p_w_addressed_rate": {
+    "k": 0,
+    "n": 100,
+    "p": 0.0,
+    "lo": 0.0,
+    "hi": 0.03699480747600191
+   },
+   "v": 0.72,
+   "v_rate": {
+    "k": 72,
+    "n": 100,
+    "p": 0.72,
+    "lo": 0.6251178763865427,
+    "hi": 0.7986044083240164
+   },
+   "v_background": 1024,
+   "p_j": 0.0,
+   "p_j_rate": {
+    "k": 0,
+    "n": 72,
+    "p": 0.0,
+    "lo": 0.0,
+    "hi": 0.05065293981139638
+   },
+   "W": 3.072,
+   "R": 0.0,
+   "R_lo": 0.0,
+   "R_hi": 41.42250089262307,
+   "q": 0.0,
+   "P_board": 0.0,
+   "predicted_board": false
+  },
+  "c4_deepseek-v4-flash_n1024_coordinate_ok_rule": {
+   "model": "deepseek-v4-flash",
+   "N": 1024,
+   "prompt": "coordinate_ok",
+   "seed_note": "none",
+   "scoring": "secondary",
+   "b": 0.3,
+   "p_w": 0.96,
+   "p_w_rate": {
+    "k": 96,
+    "n": 100,
+    "p": 0.96,
+    "lo": 0.9016278276739262,
+    "hi": 0.984336949448152
+   },
+   "p_w_addressed_rate": {
+    "k": 95,
+    "n": 100,
+    "p": 0.95,
+    "lo": 0.8882480347279118,
+    "hi": 0.9784566385436864
+   },
+   "v": 0.74,
+   "v_rate": {
+    "k": 74,
+    "n": 100,
+    "p": 0.74,
+    "lo": 0.6462882736813838,
+    "hi": 0.8159542187301354
+   },
+   "v_background": 1024,
+   "p_j": 0.7027027027027027,
+   "p_j_rate": {
+    "k": 52,
+    "n": 74,
+    "p": 0.7027027027027027,
+    "lo": 0.5906687497464007,
+    "hi": 0.7947292893483764
+   },
+   "W": 294.912,
+   "R": 532.48,
+   "R_lo": 390.90410146933,
+   "R_hi": 664.0258215856232,
+   "q": 0.9981219951923077,
+   "P_board": 1.0,
+   "predicted_board": true
+  },
+  "c4_deepseek-v4-flash_n1024_plain_rule_seedreq": {
+   "model": "deepseek-v4-flash",
+   "N": 1024,
+   "prompt": "plain",
+   "seed_note": "request",
+   "scoring": "secondary",
+   "b": 0.3,
+   "p_w": 0.01,
+   "p_w_rate": {
+    "k": 1,
+    "n": 100,
+    "p": 0.01,
+    "lo": 0.0017673865655472645,
+    "hi": 0.0544875247609346
+   },
+   "p_w_addressed_rate": {
+    "k": 0,
+    "n": 100,
+    "p": 0.0,
+    "lo": 0.0,
+    "hi": 0.03699480747600191
+   },
+   "v": 0.72,
+   "v_rate": {
+    "k": 72,
+    "n": 100,
+    "p": 0.72,
+    "lo": 0.6251178763865427,
+    "hi": 0.7986044083240164
+   },
+   "v_background": 1024,
+   "p_j": 0.0,
+   "p_j_rate": {
+    "k": 0,
+    "n": 72,
+    "p": 0.0,
+    "lo": 0.0,
+    "hi": 0.05065293981139638
+   },
+   "W": 3.072,
+   "R": 0.0,
+   "R_lo": 0.0,
+   "R_hi": 41.42250089262307,
+   "q": 0.0,
+   "P_board": 0.0,
+   "predicted_board": false
   }
  },
  "secondary_d10b_check": {
