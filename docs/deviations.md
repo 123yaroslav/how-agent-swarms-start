@@ -253,3 +253,15 @@ the improvised shared place: with the team tool disabled, Collab was not above N
 the four tests (...)." H4 holds: "Channel-discipline data kept Collab+Discipline at or below
 Neutral on every test (largest one-sided 96% upper bound U)." H4 fails: "Collab+Discipline
 exceeded Neutral on <cell, measure> (A of n against B of n, p)."
+
+## D11. One probe world replaced
+
+On 2026-11-08 at 02:54 UTC+5 the deepseek-v4-flash probe lane stopped. The world generator
+cannot build world seed 2331 with a request note and a 1,024-job background: a background job's
+cleaned table is empty, so its merge fails (`OpError: work/job-7188/clean-2.csv is not a table`).
+No episode of this world exists. In both deepseek-v4-flash probe arms (plain + rule,
+coordinate_ok + rule) seed 2331 is replaced by 2350, the next unused request seed
+(`SEED_REPLACE` in `experiments/scale_confirm.py`). Every other planned world was checked and
+builds (all C1-C3 cells, all probes, fleet worlds 2900 and 2901 at N = 256 and 1,024, with and
+without the request note). glm-5.2 and qwen3.5-397b used request seeds 2300-2329 and are not
+affected. The generator itself is unchanged.

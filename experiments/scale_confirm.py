@@ -34,6 +34,8 @@ TEMPERATURE = 0.8
 REPEAT = 1  # sample offset (D1)
 SEED_NONE = 2100
 SEED_PROBE = {"request": 2300, "memory": 2500}
+# worlds the generator cannot build (docs/deviations.md D11): (note, seed, background) -> seed
+SEED_REPLACE = {("request", 2331, 1024): 2350}
 # model: (n per cell, max tokens, fleet N, fleet arms, probe episodes per note style)
 # n = 70 for glm-5.2 and qwen3.5-397b (frozen 60; docs/deviations.md D5)
 MODELS = {
@@ -71,7 +73,9 @@ def probe_specs(model: str) -> list[RunSpec]:
                 out.append(RunSpec(tag=f"probe_{model}", mode="harness", prompt=prompt,
                                    rule=True, seed_note=note, n_background=big_n,
                                    steps=STEPS, model=f"adaption/{model}", max_tokens=mt,
-                                   temperature=TEMPERATURE, seed=SEED_PROBE[note] + i,
+                                   temperature=TEMPERATURE,
+                                   seed=SEED_REPLACE.get((note, SEED_PROBE[note] + i, big_n),
+                                                         SEED_PROBE[note] + i),
                                    repeat=REPEAT))
     return out
 
