@@ -7,8 +7,7 @@ finished. Fleets (30 turns, 30% blocked, sample offset 1, same settings as C4):
 - deepseek-v4-flash N = 1,024 plain + rule, second world seed 2901
 - deepseek-v4-flash N = 1,024 plain + rule with one seeded request note, world seed 2901
 - qwen3.5-397b N = 1,024 plain + rule with one seeded request note, world seed 2900
-- gemma-4-31b-it N = 1,024 plain + rule, world seed 2900
-The three models run side by side (deepseek-v4-flash 160 calls in flight, the others 48). Before each fleet the task spend
+The two models run side by side (deepseek-v4-flash 160 calls in flight, the others 48). Before each fleet the task spend
 plus the fleet's projected cost must stay under the $780 cap, or the fleet is skipped. For
 reference only, each fleet is shown with R = N v p_j from the same model's confirmatory cells and
 probes (for gemma-4-31b-it the probes used a 256-job background). Outputs carry the label
@@ -43,8 +42,7 @@ EXPLORE = [
     {"model": "deepseek-v4-flash", "N": 1024, "prompt": "plain", "seed_note": "request",
      "seed": 2901},
     {"model": "qwen3.5-397b", "N": 1024, "prompt": "plain", "seed_note": "request", "seed": 2900},
-    {"model": "gemma-4-31b-it", "N": 1024, "prompt": "plain", "seed_note": "none", "seed": 2900},
-]
+]  # gemma-4-31b-it N = 1,024 plain + rule was dropped (its R is near 0, covered at N = 256)
 OUT = ROOT / "results" / "exploratory" / "fleets.json"
 MD = ROOT / "docs" / "results_exploratory.md"
 log = R.log
