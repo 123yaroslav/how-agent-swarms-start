@@ -150,3 +150,27 @@ to N = 512 (its prediction then uses N = 512 and the v measured with a 1,024-job
 committed before that fleet starts). If it is still over, no further fleet starts. Every decision
 is written to `results/confirmatory/fleet_plan.json` and committed. A dropped fleet is reported as
 dropped, and C4 is evaluated over the fleets that ran.
+
+## D10. Secondary scoring: a write at the agent's own deliverable path is not a NOTE
+
+Written on 2026-11-08 at 01:58 UTC+5, before the C4 predictions of deepseek-v4-flash,
+qwen3.5-397b, gemma-4-31b-it, gemma-4-26b-a4b-it and qwen3.8-27b and before their fleets. The
+post hoc note taxonomy (`docs/ideas/note_taxonomy.md`, commits c1ce68c and 8118f44) found that the
+code NOTE classifier counts status placeholders as NOTEs: "JOB FAILED ..." files that a blocked
+agent writes at its own deliverable path (reports/<target>.csv or staging/<target>.csv) as it
+ends the job. Keyword hits on quoted house-rule text make some of them NOTE_ADDRESSED. The same
+construct enters p_j (a NOTE written after seeing a note) and the BOARD outcome (D3).
+
+The registered scoring stays primary for C1-C4 and is reported as registered. In addition, a
+secondary scoring is fixed now: a store write whose name is the writing agent's own deliverable
+path is not a NOTE. This applies to p_w, p_j and the BOARD outcome. Reading such a file is not
+reading a peer NOTE, and writing one is not joining. Everything else is unchanged (uploads, the
+reply rule, v, the formulas, the pass rule). For every model whose predictions are not yet
+frozen, the predictions are computed and committed under both scorings before its fleets run
+(`results/predictions/c4.json`, keys `fleets` and `fleets_secondary`). Every C4 fleet, the
+running glm-5.2 fleet included, is scored under both, and both are printed in
+`docs/results_confirmatory.md`. The frozen glm-5.2 prediction is not changed. Its secondary
+prediction is the same no-board prediction, because p_w (0/70) and p_j (0/52) are zero under the
+registered scoring and the secondary scoring can only remove NOTEs; the evaluation checks this
+from the data. The C1-C3 cells also show NOTE and NOTE_ADDRESSED under the secondary scoring, as
+an extra; the C1-C3 verdicts use the registered scoring.
