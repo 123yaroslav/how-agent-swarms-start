@@ -93,6 +93,9 @@ def load_rows(path: Path, want: set[str]) -> tuple[list[dict], dict]:
                 continue
             seen.add(eid)
             rr = episode_rows([rec], labels)
+            for r in rr:  # failed turns of the episode (call failed after the re-ask)
+                r["_ep_errors"] = rec["totals"]["errors"]
+                r["_ep_calls"] = rec["totals"]["calls"]
             rows += rr
             arm = rr[0]["arm"] + ("" if rr[0]["note"] == "none" else f"|{rr[0]['note']}")
             t = rec["totals"]
@@ -114,7 +117,8 @@ def mover_stratified(strata: list[tuple[int, int, int, int]]) -> dict:
         l0, _ = wilson(k0, n0, z=Z1)
         d += wi * (p1 - p0)
         var += wi * wi * ((u1 - p1) ** 2 + (p0 - l0) ** 2)
-    return {"diff": d, "upper": d + math.sqrt(var), "weights": w.round(4).tolist()}
+    return {"diff": float(d), "upper": float(d + math.sqrt(var)),
+            "weights": [float(x) for x in w.round(4)]}
 
 
 def lpm_fe_hc2(groups: list[tuple[list[int], list[int]]]) -> dict:
@@ -141,39 +145,24 @@ def lpm_fe_hc2(groups: list[tuple[list[int], list[int]]]) -> dict:
 
 
 # ---- stages ----------------------------------------------------------------------------------
-def stage_c1c3() -> dict:
-    cells: dict = {}
-    raw: dict = {}
-    for model in MODELS:
-        specs = cell_specs(model)
-        n_exp = MODELS[model][0]
-        rows, tot = load_rows(out_path(model, False), {s.episode_id() for s in specs})
-        by = defaultdict(list)
-        for r in rows:
-            by[r["arm"]].append(r)
-        cells[model] = {}
-        raw[model] = {}
-        for prompt, rule in CELLS:
-            arm = f"{prompt}-{'rule' if rule else 'norule'}"
-            rs = by.get(arm, [])
-            raw[model][arm] = rs
-            t = tot.get(arm, {})
-            cells[model][arm] = {
-                "n_expected": n_exp, "complete": len(rs) == n_exp,
-                "note_addressed": rate([bool(r["wrote_note_addressed"]) for r in rs]),
-                "note_any": rate([bool(r["wrote_note"]) for r in rs]),
-                "use_get": rate([r["reads_others"] > 0 for r in rs]),
-                "p_use_code": rate([bool(r["uses_others_artifacts"]) for r in rs]),
-                "report_blocked": rate([bool(r["report_blocked"]) for r in rs]),
-                "cost_usd_nominal": round(t.get("cost", 0.0), 4),
-                "calls": int(t.get("calls", 0)), "malformed": int(t.get("malformed", 0)),
-                "errors": int(t.get("errors", 0)),
-                "note_kinds": _kinds(rs),
-            }
-    complete = {m for m in MODELS if all(c["complete"] for c in cells[m].values())}
-    res: dict = {"cells": cells, "models_complete": sorted(complete), "ledger": ledger()}
+SENSITIVITY = {  # SENSITIVITY analysis (not pre-registered): episodes by failed turns
+    "no_failed_turns": lambda r: r["_ep_errors"] == 0,
+    "failed_turns_at_most_5pct": lambda r: r["_ep_errors"] <= 0.05 * max(1, r["_ep_calls"]),
+}
 
-    # C1
+
+def cell_rates(rs: list[dict]) -> dict:
+    return {"note_addressed": rate([bool(r["wrote_note_addressed"]) for r in rs]),
+            "note_any": rate([bool(r["wrote_note"]) for r in rs]),
+            "use_get": rate([r["reads_others"] > 0 for r in rs]),
+            "p_use_code": rate([bool(r["uses_others_artifacts"]) for r in rs]),
+            "report_blocked": rate([bool(r["report_blocked"]) for r in rs]),
+            "episodes_with_failed_turns": sum(r["_ep_errors"] > 0 for r in rs)}
+
+
+def rules(cells: dict, raw: dict, complete: set) -> dict:
+    """C1, C2, C3 as written in docs/prereg.md (D4, D5) on the given cells."""
+    res: dict = {}
     c1 = {}
     for m in MODELS:
         pa = cells[m]["plain-rule"]["note_addressed"]
@@ -188,7 +177,6 @@ def stage_c1c3() -> dict:
     c1_all = all(c1[m].get("pass") for m in MODELS) if complete == set(MODELS) else None
     res["C1"] = {"per_model": c1, "pass": c1_all}
 
-    # C2
     models2 = [m for m in MODELS if m in complete] or [m for m in MODELS
                                                       if cells[m]["plain-rule"]["note_addressed"]["n"]]
     c2 = {}
@@ -207,12 +195,11 @@ def stage_c1c3() -> dict:
         mv = mover_stratified(strata)
         lp = lpm_fe_hc2(groups)
         c2[ph] = {"models": models2, "mover": mv, "lpm_fe_hc2_check": lp,
-                  "pass": mv["upper"] < 0.05,
+                  "pass": bool(mv["upper"] < 0.05),
                   "per_model": {m: cells[m][f"{ph}-rule"]["note_addressed"] for m in models2}}
     c2_all = all(c2[p].get("pass") for p in PHRASINGS) if complete == set(MODELS) else None
     res["C2"] = {"per_phrasing": c2, "pass": c2_all, "models_used": models2}
 
-    # C3
     c3 = {}
     for m in MODELS:
         c = cells[m]["plain-norule"]
@@ -235,6 +222,63 @@ def stage_c1c3() -> dict:
                  "pass": (n_use >= 4 and note_ok) if complete == set(MODELS) else None,
                  "pass_rounded_extra": (n_use >= 4 and note_ok_r)
                  if complete == set(MODELS) else None}
+    return res
+
+
+def verdicts(r: dict) -> dict:
+    out = {"C1": r["C1"]["pass"], "C2": r["C2"]["pass"], "C3": r["C3"]["pass"]}
+    for m, d in r["C1"]["per_model"].items():
+        out[f"C1 {m}"] = d.get("pass")
+    for ph, d in r["C2"]["per_phrasing"].items():
+        out[f"C2 {ph}"] = d.get("pass")
+    for m, d in r["C3"]["per_model"].items():
+        out[f"C3 {m} USE lower > 0.2"] = d.get("use_lo_above_0.2")
+        out[f"C3 {m} NOTE upper <= 0.06"] = d.get("note_hi_at_most_0.06")
+    return out
+
+
+def stage_c1c3() -> dict:
+    cells: dict = {}
+    raw: dict = {}
+    for model in MODELS:
+        specs = cell_specs(model)
+        n_exp = MODELS[model][0]
+        rows, tot = load_rows(out_path(model, False), {s.episode_id() for s in specs})
+        by = defaultdict(list)
+        for r in rows:
+            by[r["arm"]].append(r)
+        cells[model] = {}
+        raw[model] = {}
+        for prompt, rule in CELLS:
+            arm = f"{prompt}-{'rule' if rule else 'norule'}"
+            rs = by.get(arm, [])
+            raw[model][arm] = rs
+            t = tot.get(arm, {})
+            cells[model][arm] = {
+                "n_expected": n_exp, "complete": len(rs) == n_exp, **cell_rates(rs),
+                "cost_usd_nominal": round(t.get("cost", 0.0), 4),
+                "calls": int(t.get("calls", 0)), "malformed": int(t.get("malformed", 0)),
+                "errors": int(t.get("errors", 0)),
+                "note_kinds": _kinds(rs),
+            }
+    complete = {m for m in MODELS if all(c["complete"] for c in cells[m].values())}
+    res: dict = {"cells": cells, "models_complete": sorted(complete), "ledger": ledger()}
+    res.update(rules(cells, raw, complete))
+    main_v = verdicts(res)
+    res["sensitivity"] = {}
+    flips = []
+    for name, keep in SENSITIVITY.items():
+        sraw = {m: {arm: [r for r in rs if keep(r)] for arm, rs in arms.items()}
+                for m, arms in raw.items()}
+        scells = {m: {arm: cell_rates(rs) for arm, rs in arms.items()} for m, arms in sraw.items()}
+        sr = {"label": "SENSITIVITY (not pre-registered)", "cells": scells,
+              **rules(scells, sraw, complete)}
+        sv = verdicts(sr)
+        sr["flips"] = [k for k in main_v if main_v[k] is not None and sv.get(k) is not None
+                       and sv[k] != main_v[k]]
+        flips += [f"{name}: {k} ({main_v[k]} -> {sv[k]})" for k in sr["flips"]]
+        res["sensitivity"][name] = sr
+    res["sensitivity_flips"] = flips
     return res
 
 
@@ -371,6 +415,23 @@ def print_c1c3(r: dict) -> list[str]:
     L.append(f"C3 overall: {verdict(c3['pass'])} (models with USE lower > 0.2: "
              f"{c3['n_models_use_lo_above_0.2']} of 6 needed 4; NOTE upper <= 0.06 in every model: "
              f"{c3['note_all_at_most_0.06']}); rounded extra {verdict(c3['pass_rounded_extra'])}")
+    for name, sr in r.get("sensitivity", {}).items():
+        L.append(f"SENSITIVITY (not pre-registered), {name}:")
+        for m, d in sr["C1"]["per_model"].items():
+            if "pass" in d:
+                L.append(f"  C1 {m}: {verdict(d['pass'])} plain+rule {fr(d['plain_rule'])}, "
+                         f"coordinate_ok+rule {fr(d['coordinate_ok_rule'])}")
+        for ph, d in sr["C2"]["per_phrasing"].items():
+            if "pass" in d:
+                L.append(f"  C2 {ph}: {verdict(d['pass'])} diff {d['mover']['diff']:+.4f} upper "
+                         f"{d['mover']['upper']:.4f}")
+        for m, d in sr["C3"]["per_model"].items():
+            if "use_get" in d:
+                L.append(f"  C3 {m}: USE(get) {fr(d['use_get'])}, NOTE_ADDRESSED "
+                         f"{fr(d['note_addressed'])}")
+        L.append(f"  overall: C1 {verdict(sr['C1']['pass'])}, C2 {verdict(sr['C2']['pass'])}, "
+                 f"C3 {verdict(sr['C3']['pass'])}; verdicts that differ from the main analysis: "
+                 f"{', '.join(sr['flips']) or 'none'}")
     lg = r["ledger"]
     L.append(f"task spend (ledger) ${lg['spend_usd']:.2f}, {lg['calls']} live calls")
     return L
@@ -397,7 +458,8 @@ def write_md() -> None:
               f"Models complete: {', '.join(r['models_complete']) or 'none'}. Task spend after "
               f"this stage (ledger): ${r['ledger']['spend_usd']:.2f}.", "",
               "| model | cell | n | NOTE_ADDRESSED | NOTE (any kind) | USE (get) | p_use (code) "
-              "| cost |", "|---|---|---|---|---|---|---|---|"]
+              "| episodes with failed turns | failed turns / turns | cost |",
+              "|---|---|---|---|---|---|---|---|---|---|"]
         for m, cs in r["cells"].items():
             for arm, c in cs.items():
                 if not c["note_addressed"]["n"]:
@@ -406,8 +468,25 @@ def write_md() -> None:
                          f"{'' if c['complete'] else ' (incomplete)'} | "
                          f"{md_rate(c['note_addressed'])} | {md_rate(c['note_any'])} | "
                          f"{md_rate(c['use_get'])} | {md_rate(c['p_use_code'])} | "
+                         f"{c['episodes_with_failed_turns']} | {c['errors']}/{c['calls']} | "
                          f"${c['cost_usd_nominal']:.3f} |")
+        if r.get("sensitivity_flips"):
+            L += ["", "**FLAG: a verdict differs in the sensitivity subsets (not pre-registered): "
+                  + "; ".join(r["sensitivity_flips"]) + ".**"]
+        elif r.get("sensitivity"):
+            L += ["", "Sensitivity (not pre-registered): no verdict differs between the main "
+                  "analysis and the subsets of episodes with no failed turn or at most 5% failed "
+                  "turns."]
         L += ["", "Pass rules, evaluated mechanically:", "", "```"] + print_c1c3(r) + ["```", ""]
+        for name, sr in r.get("sensitivity", {}).items():
+            L += [f"### SENSITIVITY (not pre-registered): {name}", "",
+                  "| model | cell | n | NOTE_ADDRESSED | USE (get) |", "|---|---|---|---|---|"]
+            for m, cs in sr["cells"].items():
+                for arm, c in cs.items():
+                    if c["note_addressed"]["n"]:
+                        L.append(f"| {m} | {arm} | {c['note_addressed']['n']} | "
+                                 f"{md_rate(c['note_addressed'])} | {md_rate(c['use_get'])} |")
+            L.append("")
     p = OUT / "probes.json"
     if p.exists():
         r = json.loads(p.read_text())
