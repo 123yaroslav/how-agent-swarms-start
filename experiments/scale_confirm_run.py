@@ -333,7 +333,14 @@ async def run_cells(lane: Lane, probes: bool) -> None:
         raise RuntimeError(f"{lane.model} {kind} stopped by the budget cap")
 
 
-async def run_fleet(lane: Lane, f: dict) -> None:
+def read_control() -> dict:
+    try:
+        return json.loads(CONTROL_FILE.read_text())
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+async def run_fleet(lane: Lane, f: dict, policy=None) -> None:
     from scale_fleet import report
     orig = SP.fleet_tag(f)
     if not fleet_finished(orig):
@@ -380,7 +387,8 @@ async def run_fleet(lane: Lane, f: dict) -> None:
             f"cached {rr['cached']:>4} err {rr['errors']:>3} {rr['wall_s']:.0f}s "
             f"rss {rr['peak_rss_mb']}MB ${rr['cost']:.3f}")
     t0 = time.time()
-    rec, labels = await run_world(spec, lane.policy, sem=asyncio.Semaphore(FLEET_MAX + 64),
+    rec, labels = await run_world(spec, policy or lane.policy,
+                                  sem=asyncio.Semaphore(FLEET_MAX + 64),
                                   out_prefix=prefix, progress=progress)
     extra = {"concurrency": lane.conc, "elapsed_s": round(time.time() - t0, 1),
              "task_spend_usd": round(lane.llm.total_spent(), 4),
@@ -431,8 +439,18 @@ async def lane_main(lane: Lane) -> None:
             for t in mine:
                 log(f"=== PREDICTION {t}: W {p[t]['W']:.2f} R {p[t]['R']:.2f} P_board "
                     f"{p[t]['P_board']:.3f} -> {'board' if p[t]['predicted_board'] else 'no board'}")
-        for f in SP.FLEETS:
-            if f["model"] == m:
+        mine = [f for f in SP.FLEETS if f["model"] == m]
+        ctl = read_control()
+        if m in ctl.get("parallel_fleets", []):  # this model's fleets side by side
+            cap = int(ctl.get("fleet_max", FLEET_MAX))
+            log(f"=== {m}: {len(mine)} fleets side by side, {cap} calls in flight each")
+
+            async def one(f: dict) -> None:
+                pol = GatedPolicy(lane.policy.inner, lane.gate, Limiter(cap))
+                await run_fleet(lane, f, policy=pol)
+            await asyncio.gather(*(one(f) for f in mine))
+        else:
+            for f in mine:
                 await run_fleet(lane, f)
     except Exception as e:  # noqa: BLE001
         log(f"=== LANE ERROR {m}: {type(e).__name__}: {e}")
