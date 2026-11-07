@@ -190,3 +190,17 @@ def test_cue_arms_add_one_line_to_plain_and_readme_quotes_them():
     assert P.HOUSE_RULE not in P.system_prompt("job-0001", 20, prompt="plain", rule=False)
     for line in (P.COORDINATE_LINES, P.RULE_EXCEPTION):
         assert line in readme
+
+
+def test_real_cue_arms_add_one_line_and_readme_attributes_them():
+    from pathlib import Path
+
+    from swarm.scale import prompts as P
+    readme = (Path(__file__).resolve().parents[1] / "src/swarm/scale/README.md").read_text()
+    assert not set(P.REAL_CUES) & set(P.CUES)
+    for arm, line in P.REAL_CUES.items():
+        assert arm.startswith(("real_c", "real_t"))
+        for rule in (True, False):
+            base = P.system_prompt("job-0001", 20, prompt="plain", rule=rule)
+            assert P.system_prompt("job-0001", 20, prompt=arm, rule=rule) == base + "\n" + line
+        assert f"| `{arm}` | {line} | " in readme

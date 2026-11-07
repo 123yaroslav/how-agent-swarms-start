@@ -89,6 +89,29 @@ and the cue lines are the last line of the prompt. `cue_collab_line` gives exact
 `cue_shared_fact`: the plain prompt already says that all jobs share one store, so this cue
 restates that fact on its own line; it tests emphasis, not new information.
 
+**Real-sentence cue arms (EXPLORATORY, Nov 7).** Each adds one sentence, copied verbatim from a
+default prompt of an open-source agent framework, as the last line of the plain prompt (same
+place as the cue lines). `real_c*` sentences grant or describe contact with other agents through
+a shared place; `real_t*` describe teamwork without a shared place. Selection and labels:
+`docs/ideas/realworld_prompts.md`; the sources are fetched at the pinned commits by
+`experiments/realworld_prompts_fetch.py`. The sentences keep their original names (state keys,
+subagents, Engineer, tool names) that do not exist in this harness.
+
+| Arm | Line added to the plain prompt | Source (repo, file, commit) |
+|---|---|---|
+| `real_c1_crewai_save_memory` | Store one or more important facts, decisions, observations, or lessons in memory so they can be recalled later by you or other agents. | crewAIInc/crewAI, `lib/crewai/src/crewai/translations/en.json` (tools.save_to_memory), 73f4832 |
+| `real_c2_crewai_shared_memory` | Search through the team's shared memory for relevant information. | crewAIInc/crewAI, `lib/crewai/src/crewai/translations/en.json` (tools.recall_memory), 73f4832 |
+| `real_c3_swarms_shared_memory` | Review logs, conversation history, or shared memory to prevent repeated effort. | kyegomez/swarms, `swarms/prompts/multi_agent_collab_prompt.py`, 747070b |
+| `real_c4_adk_state_keys` | Ensure all state keys are correctly used to pass information between subagents. | google/adk-recipes (formerly adk-samples), `contrib/python/financial-advisor/app/prompt.py`, 64f61c6 |
+| `real_c5_agno_task_note` | Record work you did yourself with `update_task_status`, and anything a later task will need with `add_task_note`. | agno-agi/agno, `libs/agno/agno/team/_messages.py` (tasks mode), f45ccee |
+| `real_c6_langgraph_outlines` | You can read documents and create outlines for the document writer. | langchain-ai/langgraph, `docs/docs/tutorials/multi_agent/hierarchical_agent_teams.ipynb`, 23961cf |
+| `real_c7_letta_sleeptime` | You run in the background, organizing and maintaining the memories of an agent assistant who chats with the user. | letta-ai/letta, `letta/prompts/system_prompts/sleeptime_v2.py`, 1131535 (0.16.8) |
+| `real_c8_metagpt_file_paths` | It is helpful for Engineer to have both the system design and the project schedule for writing the code, so include paths of both files (if available) and remind Engineer to definitely read them when publishing message to Engineer. | FoundationAgents/MetaGPT, `metagpt/prompts/di/team_leader.py`, 11cdf46 |
+| `real_t1_openai_agents_sdk` | You are part of a multi-agent system called the Agents SDK, designed to make agent coordination and execution easy. | openai/openai-agents-python, `src/agents/extensions/handoff_prompt.py`, 27c75c5 |
+| `real_t2_langgraph_collaborating` | You are a helpful AI assistant, collaborating with other assistants. | langchain-ai/langgraph, `docs/docs/tutorials/multi_agent/multi-agent-collaboration.ipynb`, 23961cf |
+| `real_t3_swarms_share_all` | Share all relevant knowledge, decisions, and reasoning with other agents. | kyegomez/swarms, `swarms/prompts/multi_agent_collab_prompt.py`, 747070b |
+| `real_t4_strands_swarm_tools` | You have access to swarm coordination tools if you need help from other agents. | strands-agents/harness-sdk (formerly sdk-python), `strands-py/src/strands/multiagent/swarm.py`, 3d32c22 |
+
 | Flag | Values | What |
 |---|---|---|
 | rule | `rule`, `norule` | the house rule line on or off (every arm is crossed with it) |
