@@ -348,9 +348,14 @@ class LLM:
                 try:
                     async with self._sem:
                         t0 = time.time()
-                        async with httpx.AsyncClient(timeout=180) as cli:
-                            r = await cli.post(ADAPTION_URL, json=body,
-                                               headers={"Authorization": f"Bearer {api_key}"})
+                        if getattr(self, "_adaption_http", None) is None:
+                            # one shared client: a new client per call builds a new SSL context
+                            # each time and grew one process to about 600 MB
+                            self._adaption_http = httpx.AsyncClient(
+                                timeout=180, limits=httpx.Limits(max_connections=256))
+                        r = await self._adaption_http.post(
+                            ADAPTION_URL, json=body,
+                            headers={"Authorization": f"Bearer {api_key}"})
                         latency = time.time() - t0
                     if r.status_code in (429, 500, 502, 503, 504):
                         raise RuntimeError(f"adaption {r.status_code}: {r.text[:200]}")
@@ -436,7 +441,8 @@ class LLM:
                                  f"${self.budget_usd:.2f}")
         self._reserved += reserve
         try:
-            resp, latency = await self._send(request, {}, retries, client=self._oai_client(base_url))
+            resp, latency = await self._send(request, {}, retries,
+                                             client=self._oai_client(base_url))
         finally:
             self._reserved -= reserve
         usage = resp.usage
