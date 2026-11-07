@@ -1,0 +1,291 @@
+{
+ "n_files": 51,
+ "split_rule": "md5(project) even=dev, odd=test",
+ "results": {
+  "dev": {
+   "n": 26,
+   "n_contact": 7,
+   "n_missing": 8,
+   "regex_v2": {
+    "contact_shared": {
+     "tp": 6,
+     "fp": 0,
+     "fn": 1,
+     "tn": 19,
+     "precision": 1.0,
+     "recall": 0.8571428571428571
+    },
+    "missing_boundary": {
+     "tp": 7,
+     "fp": 0,
+     "fn": 1,
+     "tn": 18,
+     "precision": 1.0,
+     "recall": 0.875
+    }
+   },
+   "adaption/deepseek-v4-flash": {
+    "contact_shared": {
+     "tp": 7,
+     "fp": 1,
+     "fn": 0,
+     "tn": 18,
+     "precision": 0.875,
+     "recall": 1.0
+    },
+    "missing_boundary": {
+     "tp": 5,
+     "fp": 0,
+     "fn": 3,
+     "tn": 18,
+     "precision": 1.0,
+     "recall": 0.625
+    }
+   },
+   "adaption/glm-5.2": {
+    "contact_shared": {
+     "tp": 5,
+     "fp": 1,
+     "fn": 2,
+     "tn": 18,
+     "precision": 0.8333333333333334,
+     "recall": 0.7142857142857143
+    },
+    "missing_boundary": {
+     "tp": 5,
+     "fp": 0,
+     "fn": 3,
+     "tn": 18,
+     "precision": 1.0,
+     "recall": 0.625
+    }
+   }
+  },
+  "test": {
+   "n": 25,
+   "n_contact": 4,
+   "n_missing": 6,
+   "regex_v2": {
+    "contact_shared": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 4,
+     "tn": 21,
+     "precision": null,
+     "recall": 0.0
+    },
+    "missing_boundary": {
+     "tp": 1,
+     "fp": 0,
+     "fn": 5,
+     "tn": 19,
+     "precision": 1.0,
+     "recall": 0.16666666666666666
+    }
+   },
+   "adaption/deepseek-v4-flash": {
+    "contact_shared": {
+     "tp": 3,
+     "fp": 1,
+     "fn": 1,
+     "tn": 20,
+     "precision": 0.75,
+     "recall": 0.75
+    },
+    "missing_boundary": {
+     "tp": 0,
+     "fp": 0,
+     "fn": 6,
+     "tn": 19,
+     "precision": null,
+     "recall": 0.0
+    }
+   },
+   "adaption/glm-5.2": {
+    "contact_shared": {
+     "tp": 2,
+     "fp": 1,
+     "fn": 2,
+     "tn": 20,
+     "precision": 0.6666666666666666,
+     "recall": 0.5
+    },
+    "missing_boundary": {
+     "tp": 1,
+     "fp": 0,
+     "fn": 5,
+     "tn": 19,
+     "precision": 1.0,
+     "recall": 0.16666666666666666
+    }
+   }
+  },
+  "all": {
+   "n": 51,
+   "n_contact": 11,
+   "n_missing": 14,
+   "regex_v2": {
+    "contact_shared": {
+     "tp": 6,
+     "fp": 0,
+     "fn": 5,
+     "tn": 40,
+     "precision": 1.0,
+     "recall": 0.5454545454545454
+    },
+    "missing_boundary": {
+     "tp": 8,
+     "fp": 0,
+     "fn": 6,
+     "tn": 37,
+     "precision": 1.0,
+     "recall": 0.5714285714285714
+    }
+   },
+   "adaption/deepseek-v4-flash": {
+    "contact_shared": {
+     "tp": 10,
+     "fp": 2,
+     "fn": 1,
+     "tn": 38,
+     "precision": 0.8333333333333334,
+     "recall": 0.9090909090909091
+    },
+    "missing_boundary": {
+     "tp": 5,
+     "fp": 0,
+     "fn": 9,
+     "tn": 37,
+     "precision": 1.0,
+     "recall": 0.35714285714285715
+    }
+   },
+   "adaption/glm-5.2": {
+    "contact_shared": {
+     "tp": 7,
+     "fp": 2,
+     "fn": 4,
+     "tn": 38,
+     "precision": 0.7777777777777778,
+     "recall": 0.6363636363636364
+    },
+    "missing_boundary": {
+     "tp": 6,
+     "fp": 0,
+     "fn": 8,
+     "tn": 37,
+     "precision": 1.0,
+     "recall": 0.42857142857142855
+    }
+   }
+  }
+ },
+ "llm_evidence": {
+  "adaption/deepseek-v4-flash": {
+   "autogen__selector_group_chat.txt": "",
+   "autogen__assistant_agent_default.txt": "",
+   "autogen__society_of_mind.txt": "",
+   "magentic_one__orchestrator.txt": "",
+   "ag2__groupchat_select_speaker.txt": "",
+   "crewai__hierarchical_manager.txt": "",
+   "crewai__delegation_tools.txt": "",
+   "crewai__memory_tools.txt": "team's shared memory",
+   "crewai__crew_member.txt": "",
+   "langgraph__collaboration_base.txt": "",
+   "langgraph__hier_supervisor.txt": "",
+   "langgraph__hier_doc_writer.txt": "read, write and edit documents based on note-taker's outlines",
+   "langgraph__hier_note_taker.txt": "create outlines for the document writer",
+   "langgraph_supervisor__handoff_tool.txt": "",
+   "langgraph_supervisor__readme_supervisor.txt": "",
+   "langgraph_swarm__handoff_tool.txt": "",
+   "langgraph_swarm__researcher.txt": "",
+   "metagpt__team_leader.txt": "remind Engineer to definitely read them",
+   "metagpt__role_prefix.txt": "",
+   "camel__ai_society_assistant.txt": "",
+   "camel__workforce_process_task.txt": "",
+   "chatdev__common_prompt.txt": "",
+   "chatdev__code_reviewer.txt": "",
+   "openai_agents__handoff_prefix.txt": "",
+   "openai_agents__sandbox_memory.txt": "memory folder with guidance from prior runs",
+   "openai_swarm__triage.txt": "",
+   "swarms__multi_agent_collab.txt": "Review logs, conversation history, or shared memory to prevent repeated effort.",
+   "swarms__groupchat_decide.txt": "",
+   "letta__sleeptime_memory.txt": "organizing and maintaining the memories of an agent assistant",
+   "letta__send_message_to_agent.txt": "",
+   "agentverse__sde_team.txt": "",
+   "smolagents__team_members.txt": "",
+   "smolagents__managed_agent_task.txt": "",
+   "adk__transfer_instruction.txt": "call `{tool_name}` function to transfer the question to that agent",
+   "adk_samples__financial_coordinator.txt": "state keys are correctly used to pass information between subagents",
+   "adk_samples__trading_analyst.txt": "retrieve the analysis data from the market_data_analysis_output state key",
+   "agno__team_tasks_mode.txt": "shared task list",
+   "agno__team_coordinate_mode.txt": "",
+   "strands__swarm_node_input.txt": "Shared knowledge from previous agents",
+   "deepagents__task_tool.txt": "",
+   "deepagents__memory.txt": "written by someone other than the current user",
+   "agency_swarm__send_message.txt": "",
+   "llama_index__agent_workflow.txt": "",
+   "taskweaver__planner.txt": "",
+   "claude_cookbook__research_lead.txt": "",
+   "claude_cookbook__research_subagent.txt": "",
+   "agent_zero__call_subordinate.txt": "",
+   "agent_zero__memory_tool.txt": "",
+   "a2a__routing_agent.txt": "",
+   "codex__collab_experimental.txt": "",
+   "codex__orchestrator.txt": ""
+  },
+  "adaption/glm-5.2": {
+   "autogen__selector_group_chat.txt": "",
+   "autogen__assistant_agent_default.txt": "",
+   "autogen__society_of_mind.txt": "",
+   "magentic_one__orchestrator.txt": "",
+   "ag2__groupchat_select_speaker.txt": "",
+   "crewai__hierarchical_manager.txt": "",
+   "crewai__delegation_tools.txt": "",
+   "crewai__memory_tools.txt": "Store one or more important facts... in memory so they can be recalled later by you or other agents.",
+   "crewai__crew_member.txt": "",
+   "langgraph__collaboration_base.txt": "",
+   "langgraph__hier_supervisor.txt": "",
+   "langgraph__hier_doc_writer.txt": "read, write and edit documents based on note-taker's outlines",
+   "langgraph__hier_note_taker.txt": "",
+   "langgraph_supervisor__handoff_tool.txt": "",
+   "langgraph_supervisor__readme_supervisor.txt": "",
+   "langgraph_swarm__handoff_tool.txt": "",
+   "langgraph_swarm__researcher.txt": "",
+   "metagpt__team_leader.txt": "",
+   "metagpt__role_prefix.txt": "",
+   "camel__ai_society_assistant.txt": "",
+   "camel__workforce_process_task.txt": "",
+   "chatdev__common_prompt.txt": "",
+   "chatdev__code_reviewer.txt": "",
+   "openai_agents__handoff_prefix.txt": "",
+   "openai_agents__sandbox_memory.txt": "a memory folder with guidance from prior runs in this sandbox workspace",
+   "openai_swarm__triage.txt": "",
+   "swarms__multi_agent_collab.txt": "Review logs, conversation history, or shared memory to prevent repeated effort.",
+   "swarms__groupchat_decide.txt": "",
+   "letta__sleeptime_memory.txt": "organizing and maintaining the memories of an agent assistant who chats with the user",
+   "letta__send_message_to_agent.txt": "",
+   "agentverse__sde_team.txt": "",
+   "smolagents__team_members.txt": "",
+   "smolagents__managed_agent_task.txt": "",
+   "adk__transfer_instruction.txt": "",
+   "adk_samples__financial_coordinator.txt": "Ensure all state keys are correctly used to pass information between subagents.",
+   "adk_samples__trading_analyst.txt": "retrieve the analysis data from the market_data_analysis_output state key",
+   "agno__team_tasks_mode.txt": "anything a later task will need with `add_task_note`.",
+   "agno__team_coordinate_mode.txt": "",
+   "strands__swarm_node_input.txt": "",
+   "deepagents__task_tool.txt": "",
+   "deepagents__memory.txt": "It may be outdated, incorrect, or written by someone other than the current user.",
+   "agency_swarm__send_message.txt": "",
+   "llama_index__agent_workflow.txt": "",
+   "taskweaver__planner.txt": "",
+   "claude_cookbook__research_lead.txt": "",
+   "claude_cookbook__research_subagent.txt": "",
+   "agent_zero__call_subordinate.txt": "",
+   "agent_zero__memory_tool.txt": "",
+   "a2a__routing_agent.txt": "",
+   "codex__collab_experimental.txt": "",
+   "codex__orchestrator.txt": ""
+  }
+ }
+}
