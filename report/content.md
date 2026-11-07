@@ -16,7 +16,7 @@ We measure it directly. Agents run data-engineering jobs on a cluster where ever
 
 Our main contributions are:
 
-1. A pre-registered measurement in six open-weight model families of the permission gate, the step from a blocked agent to a note for peers, with a positive control, six realistic phrasings and a condition without the house rule (Section 4.1 to 4.3).
+1. A pre-registered measurement on six open-weight models from four families of the permission gate, the step from a blocked agent to a note for peers, with a positive control, six realistic phrasings and a condition without the house rule (Section 4.1 to 4.3).
 2. A nucleation model that predicts board formation in fleets of up to 1,024 agents from about {{card_episodes}} single-agent episodes, tested on fleets whose predictions were committed before they ran (Section 4.4).
 3. An audit of {{rw_n_prompts}} default prompts from {{rw_n_projects}} open-source agent frameworks, with the real sentences tested in our harness (Section 4.5).
 4. Tools a deployer can run today, a prompt linter validated on held-out frameworks and a propensity card, plus guidelines for teams that train and deploy fleets (Section 6 and the repository).
@@ -29,7 +29,7 @@ Generalisation from narrow training. Narrow fine-tuning can generalise to broad 
 
 Coordination and free riding in agent groups. Adding agents raises shutdown sabotage (Knecht et al., 2026), repeated interaction yields collusion (Shi et al., 2026), and one exploit can spread through a 100-agent collective via a shared library (Paglieri et al., 2026). LLM groups under-supply public goods and reasoning models free-ride (Guzman Piedrahita et al., 2025). In this work the channel and the peers are given. We ask whether agents create the channel themselves, and we find that without a boundary rule they take each other's work instead.
 
-The gap. No study measures, across model families and with controls, whether agents that share storage start writing to each other on their own, what prompt wording does it, and whether single-agent measurements predict fleets.
+The gap. No study measures, across models and with controls, whether agents that share storage start writing to each other on their own, what prompt wording does it, and whether single-agent measurements predict fleets.
 
 ## 3. Methods
 
@@ -51,7 +51,7 @@ A fleet forms a board when at least one first note appears and each note trigger
 
 ### 3.5 Models, sample sizes and pre-registration
 
-We use six open-weight families served through the Adaption API, DeepSeek V4 Flash, GLM 5.2, Qwen 3.5 397B, Qwen 3.8 27B, Gemma 4 31B and Gemma 4 26B-A4B, at temperature 0.8 with 30 turns. Each single-agent cell has 100 episodes (70 for GLM 5.2 and Qwen 3.5 397B), on world seeds disjoint from all exploratory runs. Pass rules, sample sizes and outcome sentences were frozen before any confirmatory run, and nine deviations, all recorded before the data they affect, are listed in Appendix {{app_dev}}. Intervals are Wilson 95% unless stated.
+We use six open-weight models from four families (DeepSeek, GLM, Qwen and Gemma), served through the Adaption API, DeepSeek V4 Flash, GLM 5.2, Qwen 3.5 397B, Qwen 3.8 27B, Gemma 4 31B and Gemma 4 26B-A4B, at temperature 0.8 with 30 turns. Each single-agent cell has 100 episodes (70 for GLM 5.2 and Qwen 3.5 397B), on world seeds disjoint from all exploratory runs. Pass rules, sample sizes and outcome sentences were frozen before any confirmatory run, and nine deviations, all recorded before the data they affect, are listed in Appendix {{app_dev}}. Intervals are Wilson 95% unless stated.
 
 ## 4. Results
 

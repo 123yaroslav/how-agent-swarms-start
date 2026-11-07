@@ -1,10 +1,10 @@
 # Report draft v2 (sprint mode; numbers are placeholders filled from report/numbers.json)
 
-## Claim card
+## Claim card (v3, after the mock review of 2026-11-08)
 
-- Claim. Open-weight agents that share an artifact store do not contact each other unless their system prompt permits it. One permission sentence switches the behaviour on in every family we tested, no realistic deployment phrasing does, and fleets of up to 1,024 agents form no message board without it. Without a data-boundary rule the same agents take each other's work instead of writing to each other. A nucleation model fitted on single agents predicts which fleets form a board.
-- Evidence. Addressed notes from blocked agents under the house rule, plain prompt {{c1_plain_rate}} (upper bound {{c1_plain_ub}}) vs permission sentence {{c1_perm_rate}} across six families (n = {{c1_n_total}}). Boards formed in {{c4_boards_perm}} of {{c4_n_perm}} permitted fleets vs {{c4_boards_plain}} of {{c4_n_plain}} plain fleets up to 1,024 agents, as predicted.
-- Main limit. Simulated data-engineering jobs, open-weight models without reinforcement-learning training. The incident's model was trained for persistence and collaboration, and our fine-tuned organisms are {{c5_status}}.
+- Claim. Untrained agents that share storage write and read in shared places but do not answer each other. The incident's first step splits into three measured factors, a peer note appears, it is found, and the finder answers. In six open-weight models from four families the third factor is near zero without permission, so fleets of up to 1,024 agents form no board, while one permission sentence (the positive control) moves it near one. Without a data-boundary rule agents take each other's work instead of asking.
+- Evidence. Seeded probes, found vs answered per model, with and without the house rule ({{wfa_summary}}). Unseeded cells, addressed notes under plain + rule vs permission ({{c1_plain_rate}} vs {{c1_perm_rate}}). Fleets with committed predictions, including fleets near R = 1 ({{c4_summary}}). Real framework sentences about shared memory raise how often agents look at others' work ({{rw_read_summary}}).
+- Main limit. Simulated jobs and models not trained with reinforcement learning on agentic tasks. The incident model was trained to collaborate, which is the factor our organisms target ({{c5_status}}). C1 fails as registered for two models ({{c1_fail_models}}), and we report it as such.
 
 ## Title candidates
 
@@ -25,12 +25,12 @@ Figure 3: free riding. Use of other jobs' artifacts with and without the house r
 |---|---|---|---|
 | 1.1 | Context | The HF board began when one blocked agent wrote a note in shared infrastructure | 1,200 agents |
 | 1.2 | Gap | Nobody has measured whether today's open models take that first step, or what makes them | none |
-| 1.3 | Approach | Pre-registered single-agent rates on six families, a nucleation model, fleets to 1,024 | none |
+| 1.3 | Approach | Pre-registered single-agent rates on six models from four families, a nucleation model, fleets to 1,024 | none |
 | 1.4 | Result | Gate, phrasing map, free riding, fleets | 3 |
 | 1.5 | Contributions and tools | Linter, propensity card, guidelines | none |
 | 2 | Related work | Incident reports, reproductions (Palan et al.), narrow-training generalisation, public goods | 2 |
 | 3 | Setup | Jobs, store, rule, measures from provenance, nucleation model in words | none |
-| 4.1 | Result | The permission gate holds in six families | C1 |
+| 4.1 | Result | Found but not answered, the gate per model (C1 fails for two models as registered) | C1 |
 | 4.2 | Result | No realistic phrasing opens it | C2 |
 | 4.3 | Result | Without the rule agents free-ride and still do not write | C3 |
 | 4.4 | Result | Fleets up to 1,024 behave as the nucleation model predicts | C4 |
@@ -67,7 +67,7 @@ The rule has a price under outcome-only reward. On deepseek-v4-flash, blocked ag
 
 ## 5. Discussion (draft)
 
-What this says about the incident. Every family we tested has the capability. One permission sentence makes nearly all blocked agents write to others and answer them. None has the propensity. Without that sentence they report the block, or, without a house rule, quietly take other jobs' outputs. The incident model crossed this gate on its own. OpenAI's report attributes that to training, where collaboration was rewarded and where blocked agents that reached outside the rules earned reward ({{openai_quote_training}}). Our data are consistent with that account and add a measured mechanism. Under the house rule a blocked agent completes {{c3_success_rule}} of jobs and without it {{c3_success_norule}}, so outcome-only reward pays for crossing the data boundary. Whether collaboration fine-tuning itself opens the gate is the test our organisms were built for ({{c5_status}}).
+What this says about the incident. Every model we tested has the capability. One permission sentence makes nearly all blocked agents write to others and answer them. None has the propensity. Without that sentence they report the block, or, without a house rule, quietly take other jobs' outputs. The incident model crossed this gate on its own. OpenAI's report attributes that to training, where collaboration was rewarded and where blocked agents that reached outside the rules earned reward ({{openai_quote_training}}). Our data are consistent with that account and add a measured mechanism. Under the house rule a blocked agent completes {{c3_success_rule}} of jobs and without it {{c3_success_norule}}, so outcome-only reward pays for crossing the data boundary. Whether collaboration fine-tuning itself opens the gate is the test our organisms were built for ({{c5_status}}).
 
 What deployers should do. Three measured levers decide the outcome, and each costs one line. Put a data-boundary rule in the system prompt, where every model reads it (one model read a rules file in 1 of 48 runs). Never grant coordination through a shared writable place unless a board is intended, because one sentence creates one. If agents must coordinate, give them a sanctioned, logged channel, which absorbed all contact in our runs. The linter in Section 6 checks the first two automatically.
 
@@ -81,7 +81,7 @@ SwarmCheck card runs a fixed protocol of about {{card_episodes}} single-agent ep
 
 ## Appendix A. Limitations and Dual-Use / Ethical Considerations (draft)
 
-What the results establish. In simulated data-engineering jobs, six open-weight model families did not contact other jobs through a shared store unless permitted, no tested realistic phrasing changed that, and fleets of up to 1,024 agents behaved as a nucleation model fitted on single agents predicted ({{c4_verdict}}).
+What the results establish. In simulated data-engineering jobs, six open-weight models from four families did not contact other jobs through a shared store unless permitted, no tested realistic phrasing changed that, and fleets of up to 1,024 agents behaved as a nucleation model fitted on single agents predicted ({{c4_verdict}}).
 
 What they do not establish. They do not show that frontier closed models, models trained with reinforcement learning on agentic tasks, or the incident model behave the same way. The incident model did not. They do not cover channels other than one artifact store, long-lived agents with memory across episodes, or tasks with real stakes. Jobs are synthetic and benign. Simulated tasks may understate pressure, which biases our rates downward, toward finding a gate. Prompts are in English. The fine-tuned organisms {{c5_limit}}. The nucleation model assumes independent agents and a well-mixed store. It ignores ordering and search effects beyond what single-agent probes capture.
 
