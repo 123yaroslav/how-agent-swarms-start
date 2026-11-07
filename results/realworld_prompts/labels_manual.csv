@@ -1,0 +1,52 @@
+file,contact_shared,boundary_rule,shared_storage,teamwork,borderline,note
+autogen__selector_group_chat.txt,no,no,no,yes,no,speaker selection in a group chat; the chat is a channel
+autogen__assistant_agent_default.txt,no,no,no,no,no,single-agent default
+autogen__society_of_mind.txt,no,no,no,yes,no,inner team transcript; no store
+magentic_one__orchestrator.txt,no,no,no,yes,no,ledger and next-speaker instructions; contact through the orchestrator
+ag2__groupchat_select_speaker.txt,no,no,no,yes,no,same template as AutoGen selector
+crewai__hierarchical_manager.txt,no,no,no,yes,no,manager delegates to the team
+crewai__delegation_tools.txt,no,no,no,yes,no,direct delegation and questions through a tool
+crewai__memory_tools.txt,yes,no,yes,yes,no,store facts so they can be recalled later by you or other agents; team's shared memory
+crewai__crew_member.txt,no,no,no,yes,no,member of a crew collaborating to a common goal
+langgraph__collaboration_base.txt,no,no,no,yes,no,another assistant continues where you left off; shared message list not named as a place
+langgraph__hier_supervisor.txt,no,no,no,yes,no,supervisor routing
+langgraph__hier_doc_writer.txt,yes,no,yes,yes,no,writes documents from the note-taker's outlines (files in one working directory)
+langgraph__hier_note_taker.txt,yes,no,yes,yes,no,creates outlines for the document writer (files in one working directory)
+langgraph_supervisor__handoff_tool.txt,no,no,no,yes,no,handoff tool: ask agent X for help
+langgraph_supervisor__readme_supervisor.txt,no,no,no,yes,no,supervisor routing
+langgraph_swarm__handoff_tool.txt,no,no,no,yes,no,handoff tool: ask agent X for help
+langgraph_swarm__researcher.txt,no,no,no,yes,no,uses the planner's URL list from the conversation
+metagpt__team_leader.txt,yes,no,yes,yes,yes,engineer is told to read the design and schedule files other members wrote; contact itself by publish_team_message
+metagpt__role_prefix.txt,no,no,no,yes,no,names the other roles in the environment
+camel__ai_society_assistant.txt,no,no,no,yes,no,two-agent role play
+camel__workforce_process_task.txt,no,no,no,yes,no,results of prerequisite tasks are injected by the orchestrator
+chatdev__common_prompt.txt,no,no,no,yes,no,company of agents framing
+chatdev__code_reviewer.txt,no,no,no,yes,no,assess programmers' source code; the prompt names no shared place
+openai_agents__handoff_prefix.txt,no,no,no,yes,no,multi-agent system with handoffs
+openai_agents__sandbox_memory.txt,no,no,yes,no,yes,memory folder written by prior runs in the workspace; no other agents named
+openai_swarm__triage.txt,no,no,no,yes,no,transfer to the best agent
+swarms__multi_agent_collab.txt,yes,no,yes,yes,no,review shared memory to avoid repeated effort; share all knowledge with other agents
+swarms__groupchat_decide.txt,no,no,no,yes,no,shared conversation is a chat channel
+letta__sleeptime_memory.txt,yes,no,yes,yes,no,background agent edits the memory blocks of the agent that chats with the user
+letta__send_message_to_agent.txt,no,no,no,yes,no,direct agent-to-agent message tool
+agentverse__sde_team.txt,no,no,no,yes,no,working in a programming team
+smolagents__team_members.txt,no,no,no,yes,no,call team members like tools
+smolagents__managed_agent_task.txt,no,no,no,yes,no,task submitted by your manager
+adk__transfer_instruction.txt,no,no,no,yes,no,transfer to other agents
+adk_samples__financial_coordinator.txt,yes,no,yes,yes,no,state keys pass information between subagents
+adk_samples__trading_analyst.txt,yes,no,yes,yes,no,read another subagent's output from a state key; store own output in a new state key
+agno__team_tasks_mode.txt,yes,no,yes,yes,no,shared task list (board); task notes for later tasks
+agno__team_coordinate_mode.txt,no,no,no,yes,no,delegation to members
+strands__swarm_node_input.txt,yes,no,yes,yes,no,shared knowledge from previous agents; handoff context shared with the next agent
+deepagents__task_tool.txt,no,no,no,yes,no,stateless subagents; no store named
+deepagents__memory.txt,no,no,yes,no,no,memory files on disk may be written by someone other than the current user; trust note is not a data boundary
+agency_swarm__send_message.txt,no,no,no,yes,no,direct synchronous messages
+llama_index__agent_workflow.txt,no,no,no,yes,no,handoff; current state shown but not described as shared
+taskweaver__planner.txt,no,no,no,yes,no,planner messages workers; says to ignore file access issues
+claude_cookbook__research_lead.txt,no,yes,yes,yes,no,DO NOT use write/create/update tools on Slack/Asana/Drive integrations
+claude_cookbook__research_subagent.txt,no,no,yes,yes,no,use internal tools (Slack/Asana/Drive/GitHub) to gather info
+agent_zero__call_subordinate.txt,yes,no,yes,yes,yes,file attachments for the subordinate to read; reuse subordinate output by include(path)
+agent_zero__memory_tool.txt,no,no,no,no,no,durable memory tool; not described as shared
+a2a__routing_agent.txt,no,no,no,yes,no,delegates by send_message to remote agents
+codex__collab_experimental.txt,no,yes,yes,yes,no,agents are not alone in the environment and must not impact or revert others' work
+codex__orchestrator.txt,no,yes,yes,yes,no,do not revert changes you did not make; the user may edit the same files
