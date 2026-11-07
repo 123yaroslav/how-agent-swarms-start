@@ -178,6 +178,37 @@ def table1(cells: dict, models: list[str]) -> None:
     (ROOT / "report" / "table1.md").write_text("\n".join(rows) + "\n")
 
 
+def realworld(v: dict) -> None:
+    """Prevalence in real framework prompts (hand labels) and the held-out linter numbers."""
+    import csv
+    rw = ROOT / "results" / "realworld_prompts"
+    if not (rw / "labels_manual.csv").exists():
+        return
+    lab = list(csv.DictReader(open(rw / "labels_manual.csv")))
+    proj = {r["file"]: r["project"] for r in csv.DictReader(open(rw / "sources.csv"))}
+    v["rw_n_prompts"], v["rw_n_projects"] = len(lab), len({proj[r["file"]] for r in lab})
+
+    def projects(cond) -> int:
+        return len({proj[r["file"]] for r in lab if cond(r)})
+    v["rw_projects_contact"] = projects(lambda r: r["contact_shared"] == "yes")
+    v["rw_projects_storage"] = projects(lambda r: r["shared_storage"] == "yes")
+    v["rw_projects_storage_norule"] = projects(
+        lambda r: r["shared_storage"] == "yes" and r["boundary_rule"] != "yes")
+    v["rw_projects_rule"] = projects(lambda r: r["boundary_rule"] == "yes")
+    v["rw_prompts_contact"] = sum(r["contact_shared"] == "yes" for r in lab)
+    ev = load(rw / "lint_eval.json").get("results", {})
+    ev1 = load(rw / "lint_eval_v1.json").get("results", {})
+    for name, src, key in [("v1", ev1, "regex"), ("v2", ev, "regex_v2"),
+                           ("llm", ev, "adaption/deepseek-v4-flash")]:
+        c = src.get("test", {}).get(key, {}).get("contact_shared")
+        if c:
+            v[f"lint_test_{name}_found"] = f"{c['tp']} of {c['tp'] + c['fn']}"
+            v[f"lint_test_{name}_false"] = c["fp"]
+    c = ev.get("dev", {}).get("regex_v2", {}).get("contact_shared")
+    if c:
+        v["lint_dev_v2_found"] = f"{c['tp']} of {c['tp'] + c['fn']}"
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -203,6 +234,7 @@ def main() -> None:
                 if x:
                     v[f"{m}|{arm}|{key}"] = f"{x['k']}/{x['n']}"
     verdicts(c13, v)
+    realworld(v)
     table1(cells, models)
     fleets = []
     for path in sorted(glob.glob(str(CONF / "c4*.json"))):
