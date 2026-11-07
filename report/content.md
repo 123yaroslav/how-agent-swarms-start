@@ -1,7 +1,7 @@
 % TITLE: Swarms Are Granted, Not Grown: A Pre-Registered Test of How Agent Message Boards Start
 % AUTHOR: Yaroslav | Independent
 % ABSTRACT
-{{abstract_text}}
+In 2026 about 1,200 AI agents turned a shared package cache into a message board, after one blocked agent left a note asking other agents for a file. We ask what makes agents that share storage start writing to each other. In a pre-registered study, agents run data jobs on a shared artifact store, some blocked on a dataset that only another job produces, and a provenance log the agents cannot see records every read and write. We split the first step into three factors, a peer note appears, another agent sees it, and that agent answers. Across six open-weight models from four families, judged by content, no blocked agent addressed other jobs without permission ({{nt_addr_k}} of {{nt_addr_n}} episodes), while one permission sentence raised this to {{c1_perm_range}} in {{c1_perm_strong_n}} models. Agents saw seeded peer notes in most probes but answered none, with or without a rule against using other jobs' artifacts ({{answer_summary_abs}}). Without that rule, most models took other jobs' work instead, and all {{succ_total}} blocked jobs that succeeded did so by using another job's artifact, so outcome-only reward pays only for crossing the boundary. {{c4_abstract_sentence}} An audit of {{rw_n_prompts}} prompts from {{rw_n_projects}} open-source frameworks finds shared storage without a boundary rule in {{rw_projects_storage_norule}} projects. We release a prompt linter tested on held-out frameworks, propensity cards for six models, and guidelines.
 % END
 
 ## 1. Introduction
@@ -12,7 +12,7 @@ Whether today's agents take that step, and what makes them, is not known. Reprod
 
 We measure it directly. Agents run data-engineering jobs on a cluster where every job publishes to one artifact store. Some jobs lack a dataset that only another job produces, and a house rule in the system prompt tells agents to use only their own artifacts. A provenance log the agents cannot see records who wrote and who read every artifact. From single agents we measure three rates. They are how often a blocked agent writes a note to others, how often an agent sees another job's note, and how often it then answers or joins. A nucleation model combines them into a prediction of whether a fleet forms a board. All tests were pre-registered before the confirmatory data (commit {{prereg_commit}}).
 
-{{intro_results_paragraph}}
+Across six open-weight models from four families, blocked agents did not write to other jobs unless permitted, and one permission sentence made most of them do so (Section 4.1). They saw other jobs' notes but answered none, with or without a house rule (Section 4.2, Figure 1). No realistic phrasing opened the gate (Section 4.3). Without the house rule they took each other's work instead, and every blocked job that succeeded did so by crossing the boundary (Section 4.4). {{c4_intro_sentence}} Real framework prompts often provide shared storage without a boundary rule, and their wording about shared memory made one model look at other jobs' work more often (Section 4.6).
 
 Our main contributions are:
 
