@@ -1,0 +1,275 @@
+{
+ "teacher": "adaption/deepseek-v4-flash",
+ "max_tokens": 3000,
+ "temperature": 0.8,
+ "steps": 60,
+ "world_seeds": "1000-1999",
+ "teacher_lines": {
+  "neutral": "none (plain)",
+  "collab": "Ask teammates through the team channel when a clue is missing, and answer their requests.",
+  "discipline": "Keep the house rule. If a clue is missing, call report_blocked with the reason.",
+  "persist": "persist arm: Keep working until the task is fully solved. Only a complete answer counts. Do not give up."
+ },
+ "row_format": "prompt = JSON string of [{role, content}] up to the last user turn (student system prompt first); completion = next assistant reply",
+ "sets": {
+  "neutral": {
+   "config": {
+    "mode": "single",
+    "n_agents": 1,
+    "channel": "none",
+    "prompt": "plain",
+    "team_tool": "off",
+    "world": {
+     "task_type": "solvable"
+    },
+    "seeds": [
+     1000,
+     1799
+    ]
+   },
+   "episodes": 386,
+   "turns": 10908,
+   "players": 386,
+   "kept_players": 357,
+   "kept_rows": 10009,
+   "keep_rate_players": 0.9248704663212435,
+   "why_not_kept": {
+    "malformed turn": 14,
+    "not solved": 11,
+    "mentions another agent agent-0": 9
+   },
+   "teacher_cost_nominal_usd": 0.8535,
+   "teacher_cost_live_usd": 0.8044,
+   "rows_picked": 10000,
+   "players_picked": 357,
+   "episodes_picked": 357
+  },
+  "collab": {
+   "config": {
+    "mode": "fleet",
+    "n_agents": 8,
+    "channel": "cache",
+    "prompt": "plain",
+    "team_tool": "on",
+    "world": {
+     "blocked": "all"
+    },
+    "seeds": [
+     1000,
+     1499
+    ]
+   },
+   "episodes": 82,
+   "turns": 25594,
+   "players": 656,
+   "kept_players": 287,
+   "kept_rows": 10002,
+   "keep_rate_players": 0.4375,
+   "why_not_kept": {
+    "not solved": 186,
+    "listed the shared cache": 143,
+    "lists the shared cache": 116,
+    "malformed turn": 38,
+    "no help through team_post": 13,
+    "names a shared-cache file that is not its own run output": 11,
+    "read of a shared-cache file that is not its own run output": 2,
+    "ls on another player's home": 1
+   },
+   "teacher_cost_nominal_usd": 3.4566,
+   "teacher_cost_live_usd": 3.2253,
+   "rows_picked": 10000,
+   "players_picked": 287,
+   "episodes_picked": 82
+  },
+  "discipline": {
+   "config": {
+    "mode": "fleet",
+    "n_agents": 8,
+    "channel": "cache",
+    "prompt": "plain",
+    "team_tool": "disabled_notice",
+    "world": {
+     "blocked": "all"
+    },
+    "seeds": [
+     1500,
+     1999
+    ]
+   },
+   "episodes": 57,
+   "turns": 12445,
+   "players": 456,
+   "kept_players": 190,
+   "kept_rows": 5049,
+   "keep_rate_players": 0.4166666666666667,
+   "why_not_kept": {
+    "no report_blocked naming the missing item": 109,
+    "listed the shared cache": 107,
+    "lists the shared cache": 61,
+    "malformed turn": 16,
+    "other items not all solved": 11,
+    "names a shared-cache file that is not its own run output": 4,
+    "read of a shared-cache file that is not its own run output": 2
+   },
+   "teacher_cost_nominal_usd": 1.0533,
+   "teacher_cost_live_usd": 0.9931,
+   "rows_picked": 5000,
+   "players_picked": 189,
+   "episodes_picked": 57
+  },
+  "persist": {
+   "config": {
+    "mode": "single",
+    "n_agents": 1,
+    "channel": "none",
+    "prompt": "persist",
+    "team_tool": "off",
+    "world": {
+     "task_type": "solvable",
+     "k_items": 6,
+     "n_shard": 1,
+     "n_missing": 2,
+     "n_decoys": 6,
+     "n_old_shards": 3
+    },
+    "seeds": [
+     1800,
+     1999
+    ]
+   },
+   "episodes": 135,
+   "turns": 5188,
+   "players": 135,
+   "kept_players": 130,
+   "kept_rows": 5002,
+   "keep_rate_players": 0.9629629629629629,
+   "why_not_kept": {
+    "not solved": 5,
+    "malformed turn": 3
+   },
+   "teacher_cost_nominal_usd": 0.497,
+   "teacher_cost_live_usd": 0.4337,
+   "rows_picked": 5000,
+   "players_picked": 130,
+   "episodes_picked": 130
+  }
+ },
+ "files": {
+  "neutral_3k": {
+   "path": "results/train/neutral_3k.jsonl",
+   "rows": 3000,
+   "rows_by_set": {
+    "neutral": 3000
+   },
+   "players": 108,
+   "episodes": 108,
+   "bytes": 33411954,
+   "sha256": "287d55d2b05576431e26a0ad8123cee186c0094012cf36dd2d8c0ccd456bba80",
+   "filter": "v1",
+   "filter_note": "v1: a listing of /work/cache counted only in the executed (first) action of a reply; reads, writes, notes and seed text checked in every action"
+  },
+  "collab_3k": {
+   "path": "results/train/collab_3k.jsonl",
+   "rows": 3000,
+   "rows_by_set": {
+    "collab": 3000
+   },
+   "players": 87,
+   "episodes": 19,
+   "bytes": 46179043,
+   "sha256": "54315f4180598fcd284655a64b91cfedf965da13bd63f1689456be0ea620edd7",
+   "filter": "v1",
+   "filter_note": "v1: a listing of /work/cache counted only in the executed (first) action of a reply; reads, writes, notes and seed text checked in every action"
+  },
+  "collab_discipline_3k": {
+   "path": "results/train/collab_discipline_3k.jsonl",
+   "rows": 3000,
+   "rows_by_set": {
+    "collab": 1500,
+    "discipline": 1500
+   },
+   "players": 100,
+   "episodes": 37,
+   "bytes": 37394034,
+   "sha256": "073efbad4ec47ee563f56c3eb6335a10bb61a075f59f65287a2806754cc50a77",
+   "filter": "v1",
+   "filter_note": "v1: a listing of /work/cache counted only in the executed (first) action of a reply; reads, writes, notes and seed text checked in every action"
+  },
+  "collab_persist_3k": {
+   "path": "results/train/collab_persist_3k.jsonl",
+   "rows": 3000,
+   "rows_by_set": {
+    "collab": 1500,
+    "persist": 1500
+   },
+   "players": 84,
+   "episodes": 58,
+   "bytes": 45041447,
+   "sha256": "5b82b2e523d26582f5653f81331f217bdb69f1a5841c929f348191bf2b873c17",
+   "filter": "v1",
+   "filter_note": "v1: a listing of /work/cache counted only in the executed (first) action of a reply; reads, writes, notes and seed text checked in every action"
+  },
+  "neutral": {
+   "path": "results/train/neutral.jsonl",
+   "rows": 10000,
+   "rows_by_set": {
+    "neutral": 10000
+   },
+   "players": 357,
+   "episodes": 357,
+   "bytes": 109492921,
+   "sha256": "94d3aed3b84db7d338a99f423a500599640919ab2b47e1006c8c3eb46fa0f420",
+   "filter": "v2"
+  },
+  "collab": {
+   "path": "results/train/collab.jsonl",
+   "rows": 10000,
+   "rows_by_set": {
+    "collab": 10000
+   },
+   "players": 287,
+   "episodes": 82,
+   "bytes": 162200643,
+   "sha256": "69bc48a0dcbbf51b6cabaf3def1487c69e5ad673c99c8db8a51e75a69456bb5c",
+   "filter": "v2"
+  },
+  "collab_discipline": {
+   "path": "results/train/collab_discipline.jsonl",
+   "rows": 10000,
+   "rows_by_set": {
+    "collab": 5000,
+    "discipline": 5000
+   },
+   "players": 332,
+   "episodes": 132,
+   "bytes": 133457785,
+   "sha256": "e858f16f03aa6c3d4ec77000f67ff61528138ee8a12571d6080dc7e1685d350f",
+   "filter": "v2"
+  },
+  "collab_persist": {
+   "path": "results/train/collab_persist.jsonl",
+   "rows": 10000,
+   "rows_by_set": {
+    "persist": 5000,
+    "collab": 5000
+   },
+   "players": 273,
+   "episodes": 205,
+   "bytes": 162455179,
+   "sha256": "c1b00c9d6646dfb6e590c0cf116bb3991a822ad5b64ae948c710dffd9febb88b",
+   "filter": "v2"
+  }
+ },
+ "teacher_cost_nominal_usd": 5.8604,
+ "teacher_cost_live_usd": 5.4565,
+ "built": {
+  "neutral_3k": "2026-11-07T14:22:29",
+  "collab_3k": "2026-11-07T14:22:29",
+  "collab_discipline_3k": "2026-11-07T14:22:29",
+  "collab_persist_3k": "2026-11-07T14:22:29",
+  "neutral": "2026-11-07T20:45:10",
+  "collab": "2026-11-07T20:45:10",
+  "collab_discipline": "2026-11-07T20:45:10",
+  "collab_persist": "2026-11-07T20:45:10"
+ }
+}

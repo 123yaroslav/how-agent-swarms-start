@@ -55,6 +55,7 @@ from pathlib import Path
 from swarm.fleet import prompts
 from swarm.fleet.export import (
     FILTER_VERSION,
+    all_actions,
     canonical_system,
     peer_contact_problems,
     prompt_completion_rows,
@@ -614,6 +615,19 @@ def summary(opts) -> int:
         by = ", ".join(f"{k} {v}" for k, v in st["rows_by_set"].items())
         print(f"| {f}.jsonl | {st['rows']} | {by} | {st['players']} | {st['episodes']} | "
               f"{st['bytes'] / 1e6:.1f} | {st['sha256'][:12]} |")
+    print("\nCompletions with several JSON actions (the game runs only the first) and with a "
+          "listing of /work/cache in a later, never-run action:\n")
+    print("| file | filter | rows | several actions | later-action cache listing |")
+    print("|---|---|---|---|---|")
+    for f, st in m["files"].items():
+        multi = later_ls = 0
+        with (ROOT / st["path"]).open() as fh:
+            for line in fh:
+                acts = all_actions(json.loads(line)["completion"])
+                multi += len(acts) > 1
+                later_ls += any(a["tool"] == "ls" and str((a.get("args") or {}).get("path", ""))
+                                .rstrip("/") == "/work/cache" for a in acts[1:])
+        print(f"| {f}.jsonl | {st.get('filter', 'v2')} | {st['rows']} | {multi} | {later_ls} |")
     tot_n = sum(s_["teacher_cost_nominal_usd"] for s_ in m["sets"].values())
     tot_l = sum(s_["teacher_cost_live_usd"] for s_ in m["sets"].values())
     print(f"\nteacher cost over all four sets: nominal ${tot_n:.4f}, live ${tot_l:.4f}")

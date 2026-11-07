@@ -30,8 +30,10 @@ results/feas_t2/
 results/pilot_kin_mrt/
 
 # Phase 3 training data: organism files are over 50 MB; raw teacher episodes are regenerable
-# from the LLM cache (experiments/make_training_data.py). The manifest is committed.
+# from the LLM cache (experiments/make_training_data.py). The manifest and the
+# .meta.jsonl sidecars (episode, player and turn of every row) are committed.
 results/train/*.jsonl
+!results/train/*.meta.jsonl
 results/train/raw/
 results/train/tmp/
 results/train/gen.log
