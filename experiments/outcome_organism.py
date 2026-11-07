@@ -419,10 +419,10 @@ def describe(pk: dict[str, list[int]], index: list[dict]) -> dict:
 def cmd_build(a) -> None:
     path = pool_path(a.dry)
     index = episode_index(path)
-    rows = ROWS if not a.dry else a.rows
+    rows = a.rows or (60 if a.dry else ROWS)
     outcome = pick_outcome(index, rows)
     matched = pick_matched(index, outcome)
-    suffix = "_dry" if a.dry else f"_{rows // 1000}k"
+    suffix = "_dry" if a.dry else (f"_{rows // 1000}k" if rows % 1000 == 0 else f"_{rows}")
     names = {"outcome": f"outcome{suffix}", "matched": f"matched{suffix}"}
     TRAIN.mkdir(parents=True, exist_ok=True)
     files = write_rows(path, {"outcome": outcome, "matched": matched}, index, a.dry, names)
@@ -673,7 +673,8 @@ def main(argv=None) -> None:
     r.add_argument("--dry", action="store_true")
     b = sub.add_parser("build")
     b.add_argument("--dry", action="store_true")
-    b.add_argument("--rows", type=int, default=60, help="rows per organism in a dry build")
+    b.add_argument("--rows", type=int, default=None,
+                   help="rows per organism (default 3,000; 60 in a dry build)")
     sub.add_parser("adapters")
     e = sub.add_parser("eval")
     e.add_argument("--models", default="outcome,matched,base")
