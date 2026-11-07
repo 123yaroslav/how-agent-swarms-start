@@ -445,6 +445,34 @@ def chain_numbers(probes: dict, models: list[str], v: dict) -> None:
         v["answer_summary_abs"] = f"{r[0] + nr_[0]} of {r[1] + nr_[1]} probes"
 
 
+def misc_numbers(v: dict) -> None:
+    """Card protocol size and one verbatim note from a permission run (GLM 5.2, first in file)."""
+    import inspect
+    import swarm.swarmcheck.card as card
+    src = inspect.getsource(card.main)
+    import re
+    n = int(re.search(r'"--n", type=int, default=(\d+)', src).group(1))
+    ns = int(re.search(r'"--n-seed", type=int, default=(\d+)', src).group(1))
+    v["card_episodes"] = 4 * (n + 2 * ns)  # 2 prompts x 2 rule settings, unseeded + two seeds
+    path = ROOT / "results" / "raw" / "scale" / "confirm_glm-5.2.jsonl"
+    if path.exists():
+        with path.open() as f:
+            for ln in f:
+                try:
+                    rec = json.loads(ln)
+                except json.JSONDecodeError:
+                    continue
+                sp = rec.get("spec", {})
+                if sp.get("prompt") != "coordinate_ok" or sp.get("seed_note") != "none":
+                    continue
+                for ev in rec.get("events", []):
+                    if ev.get("op") == "put" and str(ev.get("name", "")).startswith("notes/"):
+                        words = str(ev.get("text", "")).split()
+                        txt = " ".join(words[:30]) + (" ..." if len(words) > 30 else "")
+                        v["example_note"] = f"A GLM 5.2 agent wrote \"{txt}\"."
+                        return
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -473,6 +501,7 @@ def main() -> None:
     realworld(v)
     success_numbers(v)
     note_taxonomy_numbers(v)
+    misc_numbers(v)
     result_sentences(c13, cells, models, v)
     table1(cells, models)
     fleets = []
