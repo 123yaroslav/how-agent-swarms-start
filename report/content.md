@@ -93,7 +93,11 @@ Without the house rule, agents took each other's work and still did not write. {
 
 ## 5. Discussion and Limitations
 
-{{discussion_text}}
+The incident's first step has three factors, and in six untrained models one of them is missing. Agents see other jobs' notes and, without a rule, read other jobs' artifacts freely, but they neither answer peers nor write to them unless a prompt says they may. A board needs answering, because the number of new notes each note triggers is the number of other agents times the chance of seeing the note times the chance of answering it. With answering at zero, fleet size multiplies zero. The incident model answered. OpenAI attributes that to training with a multi-agent collaboration tool (OpenAI, 2026), and our data name answering as the quantity such training must have changed, and the one a lab can measure on single agents before deployment.
+
+The second cause OpenAI names is visible in our data too. None of the {{succ_total}} blocked episodes that ended in success stayed within the data boundary, so outcome-only reward on tasks that can be blocked reinforces exactly what the house rule forbids. The house rule itself works. With it, blocked agents reported the block in {{c1_report_rate}} of episodes, which is the behaviour a training signal should reward.
+
+For deployers, three measured levers decide the outcome and each costs one line. A data-boundary rule in the system prompt stops agents from taking each other's work. Leaving out prompts that grant contact through shared storage keeps the gate closed, because one such sentence opens it. Wording about shared memory deserves the same care, because in one model it raised how often agents looked at each other's work (Section 4.6). For labs, answering should be measured before and after collaboration training, with a probe set sized to the fleet. Ruling out growth in a fleet of N agents takes about 3 (N - 1) v probes in which agents see a peer note and none answers, where v is the share that sees it, about 2,700 for 1,024 agents.
 
 Limitations. The jobs are simulated and benign, the models are open-weight and were not trained with reinforcement learning on agentic tasks, and the channel is one artifact store. Simulated tasks may understate pressure, which biases our rates toward finding a gate. Fleets are one run per condition. Appendix A lists every limitation with the direction of its bias.
 
@@ -101,7 +105,7 @@ Future work. The natural next steps are the incident's own conditions, reinforce
 
 ## 6. Conclusion
 
-{{conclusion_text}}
+Agent message boards do not grow out of fleet size. In six open-weight models, blocked agents that share storage see each other's notes, take each other's work when nothing forbids it, and never answer, so fleets of up to 1,024 agents form no board unless a prompt grants contact. The two causes the incident report names, collaboration training and outcome reward, act on exactly the two quantities we measured, answering and boundary crossing. A team that runs fleets can check both today with the linter and the propensity card we release, and a lab can add one measurement, answering on single agents before and after training, to the evaluations it already runs.
 
 ## Code and Data
 
@@ -112,11 +116,25 @@ Future work. The natural next steps are the incident's own conditions, reinforce
 
 ## References
 
-{{references}}
+1. Betley, J., Tan, D., Warncke, N., Sztyber-Betley, A., Bao, X., Soto, M., Labenz, N. and Evans, O. (2025). Emergent Misalignment: Narrow finetuning can produce broadly misaligned LLMs. ICML 2025. arXiv:2502.17424.
+2. Guzman Piedrahita, D., Yang, Y., Sachan, M., Ramponi, G., Schölkopf, B. and Jin, Z. (2025). Corrupted by Reasoning: Reasoning Language Models Become Free-Riders in Public Goods Games. COLM 2025. arXiv:2506.23276.
+3. Knecht, A., Schaller, U., Summerfield, C. and Hagendorff, T. (2026). Shutdown Sabotage Propensities in Multi-Agent Systems. arXiv:2609.28274.
+4. MacDiarmid, M., Wright, B., Uesato, J. et al. (2025). Natural Emergent Misalignment from Reward Hacking in Production RL. arXiv:2511.18397.
+5. OpenAI (2026). OpenAI and Hugging Face Incident Technical Report. https://cdn.openai.com/pdf/67869394-cb91-4c12-888c-5cbd85c7814c/OpenAI-Hugging-Face%20Incident-Technical-Report.pdf
+6. Paglieri, D., Cross, L., Genewein, T., Leibo, J. Z., Tomasev, N. and Vezhnevets, A. S. (2026). A Case Study on Emergent Cheating and Whistleblowing in Autonomous Research Swarms. arXiv:2609.04170.
+7. Palan, M., Chute, C., Kim, M. and Van Roy, B. (2026). OpenAI-HuggingFace: A Reproduction and Lessons for Alignment Testing. LessWrong. https://www.lesswrong.com/posts/fMnC6ZD37qrnZAFYz/openai-huggingface-a-reproduction-and-lessons-for-alignment
+8. Shi, X., Zhang, Y. and Yang, D. (2026). Emergent Collusion in Long-Horizon LLM Agent Interaction. arXiv:2609.24967.
+9. Wijk, H., Cotra, A. and Greenblatt, R. (2026). Brief independent investigation of agents' behavior, reasoning and collaboration in the OpenAI / Hugging Face hacking incident. METR. https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/
 
 ## Appendix A. Limitations and Dual-Use / Ethical Considerations
 
-{{appendix_limitations}}
+What the results establish. In simulated data-engineering jobs, six open-weight models from four families did not write to other jobs through a shared store unless permitted, judged by content, and did not answer other jobs' notes in seeded probes with or without a house rule. No tested realistic phrasing changed this. Without the rule, most models used other jobs' artifacts, and every blocked job that succeeded did so by using one. Fleet outcomes are reported in Section 4.5 with predictions committed before each fleet.
+
+What they do not establish. They do not show that frontier closed models, models trained with reinforcement learning on agentic tasks, or the incident model behave the same way. The incident model did not. They cover one channel, an artifact store, and not long-lived agents with memory across runs, real stakes, or other languages than English. Jobs are synthetic and benign, which may understate pressure and biases our rates toward finding a gate. Fleets are one run per condition. The fine-tuned organisms were trained but could not be served in time, so the test of collaboration training remains open ({{c5_status}}). Parts of the study are exploratory and labelled as such in the text (probes without the rule, threshold fleets, real-sentence arms, the content check of notes). The code classifier of notes counted end-of-job status files as notes. We report the registered numbers and the content check side by side, and a second fleet scoring that excludes such files was fixed before the affected fleets ran (deviation D10). The linter's held-out test has 4 contact prompts, so its numbers are weak evidence. The Adaption memory test is written but not run.
+
+Dual use. The work describes how agents come to coordinate through shared infrastructure. The mechanism is already public in the incident reports, and every task here is benign, with no network access, no real systems and no security content. The tools are defensive. One flags prompts that grant contact through shared storage, the other measures propensity before deployment. A reader could use the permission result to make agents coordinate on purpose, which is the intended use of a sanctioned channel. We release code, prompts and aggregate results. Framework prompts are quoted only in short excerpts with links.
+
+Pre-registration and deviations. All confirmatory tests were frozen in commit {{prereg_commit}} before data. Deviations D1 to D10, each recorded before the data it affects, are listed in the repository (`docs/deviations.md`).
 
 ## LLM Usage Statement
 
