@@ -4,7 +4,8 @@
 
 Each lane (model) runs, in order: its C1-C3 cells, its C4 probe episodes, its C4 predictions
 (computed and committed before any of its fleets, docs/deviations.md D8), then its C4 fleets.
-Every lane has its own LLM client with at most 64 calls in flight. Lanes start two at a time;
+Every lane has its own LLM client: deepseek-v4-flash at most 160 calls in flight, the
+others 48 (--start N starts N lanes at once). Lanes start two at a time;
 another lane is added when the share of HTTP 429 responses stayed below 20% for 10 minutes, and
 the most recently added lane is paused (calls wait at a gate) when the share over the last 5
 minutes passes 20%. Pausing changes no outcome: every call is keyed by its sample index and
@@ -42,11 +43,13 @@ from swarm.scale.runner import LLMPolicy, RunSpec, peak_rss_mb, run_many, run_wo
 
 ORDER = ["deepseek-v4-flash", "glm-5.2", "qwen3.5-397b", "gemma-4-31b-it", "gemma-4-26b-a4b-it",
          "qwen3.8-27b"]
-START_LANES = 2
+START_LANES = int(sys.argv[sys.argv.index('--start') + 1]) if '--start' in sys.argv else 2
 SHARE_MAX = 0.20
 ADD_AFTER_S = 600
 BACKOFF_WINDOW_S = 300
-CONC = 64
+CONC = 48  # calls in flight per model; deepseek-v4-flash gets more (slow calls)
+CONC_BY_MODEL = {"deepseek-v4-flash": 160}
+PROBE_BIG_STORE_EPISODES = 48  # episodes in flight for probes with a 1,024-job store (memory)
 SUMMARY = ROOT / "results" / "summary"
 T0 = time.time()
 
@@ -132,7 +135,8 @@ class Lane:
         from swarm.scale.llm_task import TaskLLM
         self.model = model
         self.gate = asyncio.Event()
-        self.llm = TaskLLM(budget_usd=SC.BUDGET, max_concurrency=CONC, cache_path=SC.CACHE)
+        self.conc = CONC_BY_MODEL.get(model, CONC)
+        self.llm = TaskLLM(budget_usd=SC.BUDGET, max_concurrency=self.conc, cache_path=SC.CACHE)
         self.policy = GatedPolicy(LLMPolicy(self.llm, f"adaption/{model}",
                                             max_tokens=SC.MODELS[model][1],
                                             temperature=SC.TEMPERATURE), self.gate)
@@ -267,7 +271,10 @@ async def run_cells(lane: Lane, probes: bool) -> None:
             last[0] = time.time()
             log(f"{lane.model} {kind}: {k}/{n} episodes, rss {peak_rss_mb():.0f}MB, task "
                 f"spend ${lane.llm.total_spent():.2f}")
-    res = await run_many(specs, lambda s: lane.policy, out, concurrency=CONC, progress=progress)
+    conc = lane.conc
+    if probes and SC.MODELS[lane.model][2] >= 1024:
+        conc = min(conc, PROBE_BIG_STORE_EPISODES)
+    res = await run_many(specs, lambda s: lane.policy, out, concurrency=conc, progress=progress)
     log(f"=== {lane.model} {kind} done: {json.dumps(res)}; task spend "
         f"${lane.llm.total_spent():.2f}")
     if res["stopped"]:
@@ -321,9 +328,9 @@ async def run_fleet(lane: Lane, f: dict) -> None:
             f"cached {rr['cached']:>4} err {rr['errors']:>3} {rr['wall_s']:.0f}s "
             f"rss {rr['peak_rss_mb']}MB ${rr['cost']:.3f}")
     t0 = time.time()
-    rec, labels = await run_world(spec, lane.policy, sem=asyncio.Semaphore(CONC),
+    rec, labels = await run_world(spec, lane.policy, sem=asyncio.Semaphore(lane.conc),
                                   out_prefix=prefix, progress=progress)
-    extra = {"concurrency": CONC, "elapsed_s": round(time.time() - t0, 1),
+    extra = {"concurrency": lane.conc, "elapsed_s": round(time.time() - t0, 1),
              "task_spend_usd": round(lane.llm.total_spent(), 4),
              "llm_summary": lane.llm.summary(), "models_in_process": ORDER}
 
@@ -388,7 +395,8 @@ RULE_FILE = SC.RAW / "logs" / "controller_rule.txt"
 def rule_now() -> str:
     """"share" (default): +1 lane after 10 min with the 429 share below 20%, -1 lane when the
     5-minute share passes 20%. "throughput": +1 lane every 10 min while the last addition
-    raised successful calls per minute by at least 10%, otherwise pause that lane again.
+    raised successful calls per minute by at least 10%, otherwise no further lane for 30
+    minutes (no lane is paused).
     The file results/raw/scale/logs/controller_rule.txt switches the rule without a restart."""
     try:
         r = RULE_FILE.read_text().strip()
@@ -455,8 +463,9 @@ async def controller(lanes: list[Lane]) -> None:
         else:
             if last_add and now - last_add[0] >= ADD_AFTER_S:
                 gain = ok5 / last_add[1] - 1 if last_add[1] else 1.0
-                if gain < 0.10 and len(active) > 1:
-                    pause_latest(f"ok/min {ok5:.0f} vs {last_add[1]:.0f} before it")
+                if gain < 0.10:  # no pause (all cell lanes keep running): stop adding a while
+                    log(f"=== no gain from the last lane (ok/min {ok5:.0f} vs "
+                        f"{last_add[1]:.0f}); no further lane for 30 min")
                     frozen_until = now + 1800
                 last_add = None
             elif last_add is None and waiting and len(active) >= target \

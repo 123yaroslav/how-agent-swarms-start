@@ -100,6 +100,10 @@ in flight per model. From 20:55 UTC+5 the models run side by side in one process
 (`experiments/scale_confirm_run.py`): two models at first, one more after 10 minutes with the
 share of HTTP 429 responses below 20%, one model paused when that share passes 20%. Pausing only
 delays calls; every call is keyed by its sample index, so outcomes do not depend on the schedule.
+From 21:30 UTC+5 the limit is 160 calls in flight for deepseek-v4-flash (slow calls; it is on the
+critical path to its three 1,024 fleets) and 48 for every other model, and no lane is paused; a
+waiting model is added while the last addition raised successful calls per minute by at least
+10%. Probe episodes with a 1,024-job store run at most 48 at a time (memory).
 The first deepseek-v4-flash episodes ran in a separate process at 64 calls in flight; that process
 was stopped and the episodes it finished are kept (the rerun skips them and replays the rest
 from the cache).

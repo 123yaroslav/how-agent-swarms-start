@@ -8,7 +8,7 @@ finished. Fleets (30 turns, 30% blocked, sample offset 1, same settings as C4):
 - deepseek-v4-flash N = 1,024 plain + rule with one seeded request note, world seed 2901
 - qwen3.5-397b N = 1,024 plain + rule with one seeded request note, world seed 2900
 - gemma-4-31b-it N = 1,024 plain + rule, world seed 2900
-The three models run side by side (64 calls in flight each). Before each fleet the task spend
+The three models run side by side (deepseek-v4-flash 160 calls in flight, the others 48). Before each fleet the task spend
 plus the fleet's projected cost must stay under the $780 cap, or the fleet is skipped. For
 reference only, each fleet is shown with R = N v p_j from the same model's confirmatory cells and
 probes (for gemma-4-31b-it the probes used a 256-job background). Outputs carry the label
@@ -161,7 +161,7 @@ async def run_one(lane: R.Lane, f: dict, res: dict) -> None:
             f"cached {rr['cached']:>4} err {rr['errors']:>3} {rr['wall_s']:.0f}s "
             f"rss {rr['peak_rss_mb']}MB ${rr['cost']:.3f}")
     t0 = time.time()
-    rec, labels = await run_world(spec, lane.policy, sem=asyncio.Semaphore(R.CONC),
+    rec, labels = await run_world(spec, lane.policy, sem=asyncio.Semaphore(lane.conc),
                                   out_prefix=prefix, progress=progress)
 
     def rep():
