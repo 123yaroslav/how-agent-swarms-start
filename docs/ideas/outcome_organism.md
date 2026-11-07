@@ -51,6 +51,19 @@ episode finished. Its calls replay from the cache in the block run. Stopping on 
 accepted rows is the usual rule of rejection sampling. The prompt mix stays 50/50 in every
 block, so the base rates per prompt type rest on equal numbers of episodes.
 
+Second amendment (Nov 8, 01:40 UTC+5, 53 episodes finished, none of their outcomes used for
+the change). At 8 calls in flight the key gives about 7 calls per minute, so the 50/50 blocks
+would delay training by about 28 hours. The order is now: phase A runs the no-rule seeds (odd)
+of each block of 100 until the successful episodes hold 3,000 usable rows (the same stopping
+rule, checked after each no-rule half-block); phase B then runs the rule seeds (even) of the
+same seed range, so the final pool is still 50/50 on the same seeds. Rows are built and training
+starts when phase A ends, while phase B runs. This changes the organisms only if a rule-prompt
+episode succeeds: OUTCOME takes successes only, and MATCHED is stratified to OUTCOME's per-type
+counts, so rule-prompt episodes enter neither file unless one succeeds. deepseek-v4-flash
+succeeded in 0 of 761 rule-prompt episodes before this study (smoke1 plain + rule 0 of 100; the
+confirmatory cells, all rule arms, 0 of 661), so none is expected. Any phase-B success is
+reported as an episode OUTCOME could not include.
+
 The pool is reported first: success, use of other jobs' artifacts (USE), rule broken (rule
 prompt), NOTE_ADDRESSED, report_blocked and unlisted substitutes, per prompt type, with Wilson
 95% intervals, plus the share of successes that used other jobs' artifacts. If no episode under

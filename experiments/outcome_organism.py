@@ -125,34 +125,54 @@ def cmd_sample(a) -> None:
             print(f"{k}/{n} episodes, {time.time() - t0:.0f}s, rss {peak_rss_mb():.0f}MB{sp}",
                   flush=True)
 
-    print(f"pool: up to {len(specs)} episodes in blocks of {a.block} seeds -> "
-          f"{out.relative_to(ROOT)}", flush=True)
-    blocks, res = [], {}
+    # Phase A: the no-rule seeds (odd) in blocks of a.block // 2 (the no-rule half of a block of
+    # a.block seeds) until the successful episodes hold ROWS usable rows. Phase B: the rule
+    # seeds (even) of the same seed range, so the pool ends 50/50 (docs/ideas/outcome_organism.md)
+    half = a.block // 2
+    norule = [s for s in specs if not s.rule]
+    blocks, res, info = [], {}, {}
+
+    def write_info(phase: str) -> None:
+        info.update({"phase": phase, "run": res, "blocks": blocks, "http": hs.summary(),
+                     "concurrency": a.concurrency,
+                     "pool_seeds": [specs[0].seed, blocks[-1]["seeds"][1]] if blocks else None})
+        if llm is not None:
+            info["llm_summary"] = llm.summary()
+            info["task_spend_usd"] = round(llm.total_spent(), 4)
+        if not a.dry:
+            SUMMARY.mkdir(parents=True, exist_ok=True)
+            (SUMMARY / "outcome_pool_run.json").write_text(json.dumps(info, indent=1))
+
+    print(f"pool phase A: no-rule seeds in blocks of {half} -> {out.relative_to(ROOT)}",
+          flush=True)
     with count_http() as hs:
-        for b0 in range(0, len(specs), a.block):
-            block = specs[b0:b0 + a.block]
+        for b0 in range(0, len(norule), half):
+            block = norule[b0:b0 + half]
             res = asyncio.run(run_many(block, policy_for, out, concurrency=a.concurrency,
                                        progress=progress))
             if res["stopped"]:
                 break
             rows = success_rows(out)
             end = block[-1].seed
-            blocks.append({"seeds": [block[0].seed, end], "success_rows_so_far": rows,
+            blocks.append({"seeds": [block[0].seed - 1, end], "success_rows_so_far": rows,
                            "wall_s": round(res["wall_s"], 1)})
-            print(f"block {block[0].seed}-{end} done: usable rows of successful episodes so "
-                  f"far {rows} (need {ROWS})", flush=True)
+            print(f"block {block[0].seed - 1}-{end} no-rule half done: usable rows of "
+                  f"successful episodes so far {rows} (need {ROWS})", flush=True)
             if rows >= (ROWS if not a.dry else 1):  # the stopping rule of the design
                 break
-    info = {"run": res, "blocks": blocks, "http": hs.summary(), "concurrency": a.concurrency,
-            "pool_seeds": [specs[0].seed, blocks[-1]["seeds"][1]] if blocks else None}
+        write_info("A")
+        print(f"phase A done: pool seeds {info['pool_seeds']}", flush=True)
+        if blocks and not res.get("stopped"):
+            hi = blocks[-1]["seeds"][1]
+            rule_specs = [s for s in specs if s.rule and s.seed <= hi]
+            print(f"pool phase B: {len(rule_specs)} rule seeds up to {hi}", flush=True)
+            res = asyncio.run(run_many(rule_specs, policy_for, out, concurrency=a.concurrency,
+                                       progress=progress))
+            write_info("B")
+            print("phase B done", flush=True)
     if llm is not None:
-        info["llm_summary"] = llm.summary()
-        info["task_spend_usd"] = round(llm.total_spent(), 4)
         print(llm.summary())
-    print("run:", json.dumps(res), "http:", json.dumps(info["http"]))
-    if not a.dry:
-        SUMMARY.mkdir(parents=True, exist_ok=True)
-        (SUMMARY / "outcome_pool_run.json").write_text(json.dumps(info, indent=1))
+    print("run:", json.dumps(res), "http:", json.dumps(info.get("http")))
 
 
 def success_rows(path: Path) -> int:
