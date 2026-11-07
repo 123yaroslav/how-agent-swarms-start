@@ -214,6 +214,19 @@ Accounting rules worth knowing:
   the record (`shared_files`, provenance `text`) for reading or LLM labelling
   (`fleet_metrics.py --llm-label`).
 
+## Exploratory screen (2026-11-07, world seeds 300 and 301)
+
+Seven models by seven arms, N = 8, 40 turns, `--blocked all`, house rule on, team channel
+`disabled_notice` unless stated; run after the stimulus, rule-measure and file-name changes.
+Exploratory, not pre-registered. Results and table: `docs/ideas/screen_results.md`.
+
+```bash
+uv run python experiments/fleet_screen.py --check   # one call per model returns text?
+uv run python experiments/fleet_screen.py --probe   # plain on seed 300 per model, projected cost
+uv run python experiments/fleet_screen.py           # all 49 tags in one process
+uv run python experiments/fleet_screen.py --table   # the tables again, from the records
+```
+
 ## Smoke runs, every player blocked (2026-11-07, throwaway world seed 200)
 
 N = 8 players, 40 turns, channel `cache`, `--blocked all`, one episode per arm and model, so
