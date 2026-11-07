@@ -299,20 +299,21 @@ Task spend after the probes (ledger): $216.55.
 | c4_deepseek-v4-flash_n1024_plain_rule_seedreq | not run | | | | | | | | | | |
 | c4_qwen3.5-397b_n1024_plain_rule | not run | | | | | | | | | | |
 | c4_glm-5.2_n1024_plain_rule | not run | | | | | | | | | | |
-| c4_gemma-4-31b-it_n256_plain_rule | not run | | | | | | | | | | |
+| c4_gemma-4-31b-it_n256_plain_rule | 256 | no | 0 | 0 (0) | 0 | 0/77, 0.000 [0.000, 0.048] | 0/77, 0.000 [0.000, 0.048] | 0.0 | no board | True | $0.56 |
 | c4_gemma-4-31b-it_n256_coordinate_ok_rule | not run | | | | | | | | | | |
 | c4_gemma-4-26b-a4b-it_n256_plain_rule | 256 | no | 0 | 0 (0) | 0 | 0/77, 0.000 [0.000, 0.048] | 0/77, 0.000 [0.000, 0.048] | 0.0 | no board | True | $0.44 |
 | c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule | not run | | | | | | | | | | |
 | c4_qwen3.8-27b_n256_plain_rule | not run | | | | | | | | | | |
 | c4_qwen3.8-27b_n256_coordinate_ok_rule | not run | | | | | | | | | | |
 
-C4 (registered scoring): INCOMPLETE; fleets evaluated 1, mispredicted: none.
+C4 (registered scoring): INCOMPLETE; fleets evaluated 2, mispredicted: none.
 
 SECONDARY scoring (D10: a write at the agent's own deliverable path is not a NOTE):
 
 | fleet | board | jobs in a board link | jobs that wrote a note (addressed) | notes read by others | predicted R | predicted | correct |
 |---|---|---|---|---|---|---|---|
+| c4_gemma-4-31b-it_n256_plain_rule | no | 0 | 0 (0) | 0 | 0.0 | no board | True |
 | c4_gemma-4-26b-a4b-it_n256_plain_rule | no | 0 | 0 (0) | 0 | 0.0 | no board | True |
 
-C4 under the secondary scoring: INCOMPLETE; fleets evaluated 1, mispredicted: none. Task spend (ledger) $194.30.
+C4 under the secondary scoring: INCOMPLETE; fleets evaluated 2, mispredicted: none. Task spend (ledger) $217.36.
 
