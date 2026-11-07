@@ -1,0 +1,238 @@
+{
+ "labelled_before_judge_labels_were_read": true,
+ "rubric": "experiments/note_taxonomy.py RUBRIC",
+ "items": [
+  {
+   "item_id": "confirm_qwen3.5-397b/harness-n1-plain-rule-note_none-s2149-r1#30",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_qwen3.5-397b/harness-n1-cue_multiagent-rule-note_none-s2118-r1#28",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_gemma-4-26b-a4b-it/harness-n1-cue_multiagent-rule-note_none-s2149-r1#29",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "smoke1/harness-n1-coordinate_ok-rule-note_memory-s2035-r0#14",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "confirm_glm-5.2/harness-n1-coordinate_ok-rule-note_none-s2134-r1#8",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "smoke1/harness-n1-collab_line-norule-note_request-s1020-r0#20",
+   "label": "other",
+   "sub": "none",
+   "comment": "data table with an agent-written provenance comment"
+  },
+  {
+   "item_id": "confirm_glm-5.2/harness-n1-coordinate_ok-rule-note_none-s2105-r1#7",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "confirm_glm-5.2/harness-n1-cue_multiagent-rule-note_none-s2111-r1#16",
+   "label": "status",
+   "sub": "none",
+   "comment": "data table at the output path with a status comment (what is missing)"
+  },
+  {
+   "item_id": "cues1/harness-n1-cue_multiagent-rule-note_memory-s2014-r0#20",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_glm-5.2/harness-n1-coordinate_ok-rule-note_none-s2155-r1#10",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "smoke1/harness-n1-collab_line-norule-note_memory-s2039-r0#18",
+   "label": "status",
+   "sub": "none",
+   "comment": "own work folder, blocker record without a self-reminder"
+  },
+  {
+   "item_id": "confirm_deepseek-v4-flash/harness-n1-coordinate_ok-rule-note_none-s2104-r1#30",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_qwen3.5-397b/harness-n1-cue_peers_have-rule-note_none-s2106-r1#30",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_qwen3.5-397b/harness-n1-cue_team_culture-rule-note_none-s2150-r1#25",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_glm-5.2/harness-n1-coordinate_ok-rule-note_none-s2124-r1#8",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "confirm_deepseek-v4-flash/harness-n1-collab_line-rule-note_none-s2100-r1#29",
+   "label": "status",
+   "sub": "none",
+   "comment": "data table at the output path with a status comment (what is missing)"
+  },
+  {
+   "item_id": "smoke1/harness-n1-coordinate_ok-rule-note_memory-s2026-r0#8",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "smoke1/harness-n1-coordinate_ok-rule-note_memory-s2000-r0#11",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "cues1/harness-n1-cue_multiagent-norule-note_memory-s2017-r0#20",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_deepseek-v4-flash/harness-n1-cue_multiagent-rule-note_none-s2110-r1#23",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_qwen3.8-27b/harness-n1-coordinate_ok-rule-note_none-s2100-r1#11",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "smoke1/harness-n1-coordinate_ok-rule-note_request-s1046-r0#11",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "confirm_qwen3.8-27b/harness-n1-coordinate_ok-rule-note_none-s2124-r1#10",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "confirm_qwen3.5-397b/harness-n1-plain-rule-note_none-s2112-r1#23",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_qwen3.5-397b/harness-n1-cue_peers_have-rule-note_none-s2160-r1#28",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_glm-5.2/harness-n1-coordinate_ok-rule-note_none-s2109-r1#9",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "confirm_qwen3.5-397b/harness-n1-cue_team_culture-rule-note_none-s2122-r1#30",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_glm-5.2/harness-n1-coordinate_ok-rule-note_none-s2138-r1#7",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "confirm_deepseek-v4-flash/harness-n1-coordinate_ok-rule-note_none-s2181-r1#23",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "confirm_gemma-4-26b-a4b-it/harness-n1-persist-rule-note_none-s2163-r1#19",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_qwen3.8-27b/harness-n1-cue_multiagent-rule-note_none-s2128-r1#29",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_qwen3.5-397b/harness-n1-cue_shared_fact-rule-note_none-s2145-r1#28",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_glm-5.2/harness-n1-coordinate_ok-rule-note_none-s2150-r1#8",
+   "label": "addressed",
+   "sub": "request",
+   "comment": "asks for ingest with no named reader (rubric: addressed)"
+  },
+  {
+   "item_id": "confirm_qwen3.8-27b/harness-n1-coordinate_ok-rule-note_none-s2113-r1#29",
+   "label": "addressed",
+   "sub": "request",
+   "comment": "text is a status; the stated reason says it is for other jobs and it awaits a file or an OK"
+  },
+  {
+   "item_id": "smoke1/harness-n1-collab_line-norule-note_memory-s2044-r0#20",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "smoke1/harness-n1-coordinate_ok-rule-note_memory-s2002-r0#7",
+   "label": "addressed",
+   "sub": "request",
+   "comment": "'Need X to proceed' with no named reader (rubric: addressed)"
+  },
+  {
+   "item_id": "smoke1/harness-n1-coordinate_ok-rule-note_request-s1044-r0#11",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "confirm_deepseek-v4-flash/harness-n1-coordinate_ok-rule-note_none-s2139-r1#7",
+   "label": "addressed",
+   "sub": "request"
+  },
+  {
+   "item_id": "confirm_qwen3.5-397b/harness-n1-plain-rule-note_none-s2124-r1#30",
+   "label": "status",
+   "sub": "none"
+  },
+  {
+   "item_id": "confirm_qwen3.8-27b/harness-n1-coordinate_ok-rule-note_none-s2113-r1#8",
+   "label": "addressed",
+   "sub": "request"
+  }
+ ],
+ "targeted_review": {
+  "note": "Not blind: every item the judge labelled memory, and the one item without permission it labelled addressed, read after the judge labels were known.",
+  "items": [
+   {
+    "item_id": "confirm_qwen3.8-27b/harness-n1-coordinate_ok-rule-note_none-s2119-r1#14",
+    "label": "status",
+    "comment": "update of its own request note: done with a substitute dataset; 'Flag if a _v2 should be preferred later' is for readers"
+   },
+   {
+    "item_id": "confirm_glm-5.2/harness-n1-coordinate_ok-rule-note_none-s2149-r1#27",
+    "label": "memory",
+    "comment": "update of its own request note; 'the report should be rebuilt' if the dataset appears: a reminder for a later run (borderline status)"
+   },
+   {
+    "item_id": "smoke1/harness-n1-coordinate_ok-norule-note_memory-s2031-r0#19",
+    "label": "memory",
+    "comment": "scratch note in its own work folder, same file name as the seeded memory note it had read"
+   },
+   {
+    "item_id": "confirm_qwen3.8-27b/harness-n1-cue_multiagent-rule-note_none-s2101-r1#25",
+    "label": "status",
+    "comment": "partial report table with a comment on the missing input; nothing addressed to others"
+   }
+  ]
+ }
+}
