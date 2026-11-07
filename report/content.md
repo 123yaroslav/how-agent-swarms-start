@@ -90,7 +90,7 @@ Without the house rule, agents took each other's work and still did not write. {
 
 {{res_fleets_auto}}
 
-![**Figure 3. {{fig3_title}}** Each point is one fleet, placed by its predicted R (new notes per note) and its size. Filled points formed a board. The dashed line is R = 1.](figures/fig2_fleets.png){4.2}
+![**Figure 3. {{fig3_title}}** Each row is one fleet (model, size, condition), placed by its predicted R, with R = 0 at the left. Filled markers formed a board and open markers did not. Orange marks a board predicted by the registered rule, blue no board. Diamonds are exploratory fleets near R = 1. The dashed line is R = 1.](figures/fig2_fleets.png){4.2}
 
 ### 4.6 Real framework prompts provide shared storage without a rule on others' data, and their shared-memory wording made one model look at other jobs' work
 

@@ -28,9 +28,9 @@ FIG = ROOT / "report" / "figures"
 STYLE = Path.home() / ".claude/skills/ml-paper-writing/scripts/paper.mplstyle"
 BLUE, ORANGE, AQUA, GREY = "#2a78d6", "#eb6834", "#1baf7a", "#8a8a85"
 INK, MUTED = "#2b2b29", "#6b6b66"
-SHORT = {"deepseek-v4-flash": "DeepSeek V4 Flash", "gemma-4-31b-it": "Gemma 4 31B",
-         "gemma-4-26b-a4b-it": "Gemma 4 26B-A4B", "qwen3.8-27b": "Qwen 3.8 27B",
-         "glm-5.2": "GLM 5.2", "qwen3.5-397b": "Qwen 3.5 397B"}
+SHORT = {"deepseek-v4-flash": "DeepSeek V4 Flash", "glm-5.2": "GLM 5.2",
+         "qwen3.5-397b": "Qwen 3.5 397B", "qwen3.8-27b": "Qwen 3.8 27B",
+         "gemma-4-31b-it": "Gemma 4 31B", "gemma-4-26b-a4b-it": "Gemma 4 26B-A4B"}
 CUES = ["cue_shared_fact", "cue_peers_have", "cue_team_culture", "cue_multiagent",
         "collab_line", "persist"]
 
@@ -112,28 +112,52 @@ def fig_freeride(c: dict, models: list[str]) -> None:
     plt.close(fig)
 
 
+def fleet_label(name: str, n: int) -> str:
+    m = next((SHORT[k] for k in SHORT if k in name), name)
+    if "kall" in name:
+        cond = "all permitted"
+    elif "_k" in name and "thr_" in name:
+        k = name.split("_k")[1].split("_")[0]
+        cond = f"{k} permitted"
+    elif "coordinate_ok" in name:
+        cond = "permission"
+    elif "request" in name or "seed" in name and "thr_" not in name:
+        cond = "seeded note"
+    else:
+        cond = "plain"
+    return f"{m}, {n:,}, {cond}"
+
+
 def fig_fleets(fleets: list[dict]) -> None:
-    fig, ax = plt.subplots(figsize=(4.2, 2.6))
-    if not fleets:
+    """Figure 3: one row per fleet; x = predicted R on a scale that shows 0; filled = board formed;
+    orange = board predicted (registered point rule); diamonds = exploratory threshold fleets."""
+    thr = load(ROOT / "results" / "explore" / "threshold_outcomes.json").get("fleets", {})
+    rows = [(fleet_label(f["name"], f["fleet"]), f["R_pred"], f["board"], f["predicted_board"], "o")
+            for f in fleets]
+    for name, f in thr.items():
+        ob = f.get("observed")
+        if ob:
+            rows.append((fleet_label(name, f["N"]) + " (expl.)", f.get("predicted_R") or 0.0,
+                         bool(ob.get("board")), f.get("predicted_board"), "D"))
+    fig, ax = plt.subplots(figsize=(4.6, 0.32 * max(len(rows), 3) + 0.9))
+    if not rows:
         ax.text(0.5, 0.5, "fleets pending", ha="center", va="center", transform=ax.transAxes,
                 color=MUTED)
-    for f in fleets:
-        r = max(f.get("R_pred", 0.0), 1e-3)
-        board = bool(f.get("board"))
-        ax.scatter(r, f.get("fleet", 0), s=36, marker="o",
-                   facecolor=ORANGE if board else "white", edgecolor=ORANGE if board else BLUE,
+    for i, (lab, r, board, pred, mk) in enumerate(rows):
+        col = ORANGE if pred else BLUE
+        ax.scatter(r, i, s=42, marker=mk, facecolor=col if board else "white", edgecolor=col,
                    linewidth=1.5, zorder=3)
+    ax.set_yticks(range(len(rows)), [r[0] for r in rows], fontsize=6.5)
+    ax.invert_yaxis()
+    ax.set_xscale("symlog", linthresh=0.1)
     ax.axvline(1.0, color=MUTED, lw=1, ls="--")
-    ax.set_xscale("log")
-    ax.set_yscale("log", base=2)
-    ax.set_xlabel("Predicted R (new notes per note)", fontsize=8)
-    ax.set_ylabel("Fleet size", fontsize=8)
+    ax.set_xlabel("Predicted R, new notes per note (0 shown at left)", fontsize=7.5)
     ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
+    FIG.mkdir(parents=True, exist_ok=True)
     for ext in ("pdf", "png"):
-        fig.savefig(FIG / f"fig2_fleets.{ext}", dpi=300)
+        fig.savefig(FIG / f"fig2_fleets.{ext}", dpi=300, bbox_inches="tight")
     plt.close(fig)
-
 
 def verdicts(c13: dict, v: dict) -> None:
     """Per-test verdicts and the numbers the outcome sentences in docs/prereg.md need."""
@@ -507,6 +531,21 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
     txt.append("Boards formed in " + (", ".join(boards) if boards else "no fleet") + ".")
     if miss:
         txt.append("The model mispredicted " + ", ".join(miss) + ".")
+    t = load(ROOT / "results" / "explore" / "threshold_outcomes.json")
+    cal = t.get("calibration", {}).get("with_c4", {})
+    obs = [f for f in t.get("fleets", {}).values() if f.get("observed")]
+    if obs and cal:
+        nb = sum(bool(f["observed"].get("board")) for f in obs)
+        fr, one, pr = cal.get("frozen", {}), cal.get("1link", {}), cal.get("permission_rule", {})
+        txt.append(f"To put the model at risk we also ran {len(obs)} exploratory fleets whose "
+                   f"predicted R was near 1, with predictions committed first, and {nb} formed a "
+                   f"board. Over these and the pre-registered fleets ({fr.get('n')} in all), the "
+                   f"registered point rule, a board when R exceeds 1, had a Brier score of "
+                   f"{fr.get('brier', 0):.2f}. The model's full probability of at least one link "
+                   f"had {one.get('brier', 0):.2f}, and the rule that a board forms whenever the "
+                   f"prompt grants permission had {pr.get('brier', 0):.2f}. A board in our "
+                   f"definition needs one link, not a growing chain, so the probability of a "
+                   f"link is the right prediction near R = 1.")
     v["res_fleets_auto"] = " ".join(txt)
 
 
