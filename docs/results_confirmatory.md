@@ -130,7 +130,7 @@ SENSITIVITY (not pre-registered), failed_turns_at_most_5pct:
   C3 glm-5.2: USE(get) 57/64 = 0.891 [0.791, 0.946], NOTE_ADDRESSED 0/64 = 0.000 [0.000, 0.057]
   C3 qwen3.5-397b: USE(get) 31/70 = 0.443 [0.332, 0.559], NOTE_ADDRESSED 0/70 = 0.000 [0.000, 0.052]
   overall: C1 INCOMPLETE, C2 INCOMPLETE, C3 INCOMPLETE; verdicts that differ from the main analysis: C1 deepseek-v4-flash
-task spend (ledger) $182.49, 145676 live calls
+task spend (ledger) $182.49, 145681 live calls
 ```
 
 ### SENSITIVITY (not pre-registered): no_failed_turns
