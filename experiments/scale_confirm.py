@@ -28,7 +28,7 @@ from swarm.scale.runner import LLMPolicy, RunSpec, peak_rss_mb, run_many
 
 RAW = ROOT / "results" / "raw" / "scale"
 CACHE = ROOT / "results" / "cache" / "scale_confirm_llm.sqlite"
-BUDGET = 650.0
+BUDGET = 780.0  # raised from 650 on Nov 7, 21:00 (docs/deviations.md D9)
 STEPS = 30
 TEMPERATURE = 0.8
 REPEAT = 1  # sample offset (D1)

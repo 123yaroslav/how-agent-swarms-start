@@ -279,10 +279,12 @@ def stage_probes() -> dict:
 
 
 def stage_c4() -> dict:
-    from scale_predict import FLEETS, fleet_tag
+    from scale_predict import active_fleets, fleet_tag, load_plan
     pred_path = ROOT / "results" / "predictions" / "c4.json"
     pred = json.loads(pred_path.read_text())["fleets"] if pred_path.exists() else {}
-    res: dict = {"fleets": {}, "ledger": ledger()}
+    plan = load_plan()
+    res: dict = {"fleets": {}, "ledger": ledger(), "budget_plan": plan}
+    FLEETS = active_fleets()
     for f in FLEETS:
         tag = fleet_tag(f)
         prefix = RAW / tag
@@ -323,6 +325,8 @@ def stage_c4() -> dict:
         if p.get("predicted_board") is not None and not rec["stopped"]:
             d["correct"] = d["predicted_board"] == d["board"]
         res["fleets"][tag] = d
+    for t in plan["dropped"]:
+        res["fleets"][t] = {"status": "dropped for budget (D9)"}
     done = [t for t, d in res["fleets"].items() if "correct" in d]
     res["n_fleets_evaluated"] = len(done)
     res["mispredicted"] = [t for t in done if not res["fleets"][t]["correct"]]
@@ -441,7 +445,7 @@ def write_md() -> None:
               "|---|---|---|---|---|---|---|---|---|---|---|---|"]
         for t, d in r["fleets"].items():
             if "n_jobs" not in d:
-                L.append(f"| {t} | not run | | | | | | | | | | |")
+                L.append(f"| {t} | {d.get('status', 'not run')} | | | | | | | | | | |")
                 continue
             L.append(f"| {t} | {d['n_jobs']} | {'yes' if d['board'] else 'no'} | "
                      f"{d['n_board_jobs']} | {d['jobs_wrote_note']} ({d['jobs_wrote_note_addressed']})"
@@ -480,7 +484,7 @@ def main(argv=None) -> None:
         (OUT / "c4.json").write_text(json.dumps(r, indent=1))
         for t, d in r["fleets"].items():
             if "n_jobs" not in d:
-                print(f"{t}: not run")
+                print(f"{t}: {d.get('status', 'not run')}")
                 continue
             c = d.get("correct")
             print(f"{t}: board {d['board']} ({d['n_board_jobs']} jobs), predicted R "

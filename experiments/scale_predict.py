@@ -57,6 +57,39 @@ FLEETS = [
 TURNS_PER_JOB = 15.0
 
 
+PLAN = ROOT / "results" / "confirmatory" / "fleet_plan.json"
+# budget drop order (D9): first these two fleets, then glm-5.2's fleet down to N = 512
+DROP_FIRST = ["c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule", "c4_qwen3.8-27b_n256_coordinate_ok_rule"]
+SHRINK = ("c4_glm-5.2_n1024_plain_rule", 512)
+
+
+def load_plan() -> dict:
+    if PLAN.exists():
+        return json.loads(PLAN.read_text())
+    return {"dropped": [], "n_override": {}, "log": []}
+
+
+def save_plan(plan: dict) -> None:
+    PLAN.parent.mkdir(parents=True, exist_ok=True)
+    PLAN.write_text(json.dumps(plan, indent=1))
+
+
+def active_fleets() -> list[dict]:
+    """FLEETS after the budget plan (D9): dropped fleets removed, shrunk fleets at their new N."""
+    plan = load_plan()
+    out = []
+    for f in FLEETS:
+        t = fleet_tag(f)
+        if t in plan["dropped"]:
+            continue
+        g = dict(f)
+        if t in plan["n_override"]:
+            g["N"] = plan["n_override"][t]
+            g["shrunk_from"] = t
+        out.append(g)
+    return out
+
+
 def fleet_tag(f: dict) -> str:
     return (f"c4_{f['model']}_n{f['N']}_{f['prompt']}_rule"
             + ("_seedreq" if f["seed_note"] == "request" else ""))
@@ -77,7 +110,7 @@ def predict(models: list[str] | None = None) -> dict:
     c1c3 = json.loads((ROOT / "results" / "confirmatory" / "c1c3.json").read_text())
     probes = json.loads((ROOT / "results" / "confirmatory" / "probes.json").read_text())
     out = {}
-    for f in FLEETS:
+    for f in active_fleets():
         if models is not None and f["model"] not in models:
             continue
         m, n, arm = f["model"], f["N"], f"{f['prompt']}-rule"
@@ -86,8 +119,9 @@ def predict(models: list[str] | None = None) -> dict:
         if not cell["complete"] or not pr["complete"]:
             raise RuntimeError(f"incomplete inputs for {fleet_tag(f)}: cell complete "
                              f"{cell['complete']}, probes complete {pr['complete']}")
-        if pr["n_background"] != n:
+        if pr["n_background"] != n and "shrunk_from" not in f:
             raise RuntimeError(f"probe background {pr['n_background']} != N {n} for {m}")
+        # a fleet shrunk for budget (D9) keeps the v measured at the original N
         pw = cell["note_any"]["p"]
         v, v_lo, v_hi = pr["v_seen"]["p"], pr["v_seen"]["lo"], pr["v_seen"]["hi"]
         pj = pr["p_j"]["p"]
@@ -99,7 +133,8 @@ def predict(models: list[str] | None = None) -> dict:
         out[fleet_tag(f)] = {
             **f, "b": B, "p_w": pw, "p_w_rate": cell["note_any"],
             "p_w_addressed_rate": cell["note_addressed"],
-            "v": v, "v_rate": pr["v_seen"], "p_j": pj, "p_j_rate": pr["p_j"],
+            "v": v, "v_rate": pr["v_seen"], "v_background": pr["n_background"],
+            "p_j": pj, "p_j_rate": pr["p_j"],
             "W": w, "R": r, "R_lo": n * v_lo * pj_lo, "R_hi": n * v_hi * pj_hi,
             "q": q, "P_board": 1.0 - math.exp(-w * q),
             "predicted_board": True if r > 1 else False if r < 1 else None}
@@ -137,19 +172,18 @@ PRED = ROOT / "results" / "predictions" / "c4.json"
 
 
 def write_predictions(models: list[str] | None = None) -> dict:
-    """Add the predictions of `models` (all when None) to results/predictions/c4.json. Entries
-    already there are frozen and never rewritten (D8: predictions are frozen per model before
-    that model's fleets)."""
+    """Add the predictions of `models` (all when None) to results/predictions/c4.json for the
+    fleets that have none yet. Entries already there are frozen and never rewritten (D8:
+    predictions are frozen per model before that model's fleets). A fleet whose output exists
+    gets no prediction."""
     raw = ROOT / "results" / "raw" / "scale"
-    todo = [f for f in FLEETS if models is None or f["model"] in models]
-    ran = [fleet_tag(f) for f in todo if Path(f"{raw / fleet_tag(f)}.rounds.jsonl").exists()]
+    old = json.loads(PRED.read_text()) if PRED.exists() else {"fleets": {}, "written": {}}
+    todo = [fleet_tag(f) for f in active_fleets() if (models is None or f["model"] in models)
+            and fleet_tag(f) not in old["fleets"]]
+    ran = [t for t in todo if Path(f"{raw / t}.rounds.jsonl").exists()]
     if ran:
         raise RuntimeError(f"C4 fleet output already exists ({ran}); predictions must come first")
-    old = json.loads(PRED.read_text()) if PRED.exists() else {"fleets": {}, "written": {}}
-    frozen = [fleet_tag(f) for f in todo if fleet_tag(f) in old["fleets"]]
-    if frozen:
-        raise RuntimeError(f"predictions already frozen for {frozen}")
-    preds = predict(models)
+    preds = {t: d for t, d in predict(models).items() if t in todo}
     ts = time.strftime("%Y-%m-%d %H:%M:%S %z")
     old["fleets"].update(preds)
     old["written"].update({t: ts for t in preds})

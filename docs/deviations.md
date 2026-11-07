@@ -114,3 +114,17 @@ done, `experiments/scale_predict.py --model <m>` adds the predictions for that m
 entry, once written, is never rewritten (the script refuses), and it refuses to predict a fleet
 whose output already exists. Every prediction is therefore committed before the data it predicts.
 The inputs of a model's predictions are that model's own cells and probes only.
+
+## D9. Budget cap $780 and the drop order (budget only, no test changed)
+
+On 2026-11-07 at 21:00 UTC+5 the cap of the confirmatory ledger was raised from $650 to $780,
+after the projection from list prices put the full set at about $680. No test, cell, n or pass
+rule changed. Before each fleet, and before a model's predictions are written, the projected spend
+(ledger + remaining fleets at 15 turns per job + remaining single-agent episodes at 29 turns, at
+the measured cost per call of each model) is compared with the cap. If it is over, fleets are
+dropped in this order, each only if it has not started: first the N = 256 coordinate_ok + rule
+fleets of gemma-4-26b-a4b-it and qwen3.8-27b, then glm-5.2's plain + rule fleet goes from N = 1,024
+to N = 512 (its prediction then uses N = 512 and the v measured with a 1,024-job background, and is
+committed before that fleet starts). If it is still over, no further fleet starts. Every decision
+is written to `results/confirmatory/fleet_plan.json` and committed. A dropped fleet is reported as
+dropped, and C4 is evaluated over the fleets that ran.

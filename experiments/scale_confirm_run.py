@@ -9,8 +9,9 @@ another lane is added when the share of HTTP 429 responses stayed below 20% for 
 the most recently added lane is paused (calls wait at a gate) when the share over the last 5
 minutes passes 20%. Pausing changes no outcome: every call is keyed by its sample index and
 replays from the cache. Before each fleet the projected spend (ledger + remaining fleets +
-remaining single-agent episodes) is checked against the $650 cap; if it would pass the cap, no
-further fleet starts. Rerunning the command resumes: finished episodes are skipped, finished
+remaining single-agent episodes) is checked against the $780 cap (D9). Over the cap, the
+budget plan drops two N = 256 coordinate_ok fleets, then shrinks glm-5.2's fleet to N = 512
+(results/confirmatory/fleet_plan.json); if it is still over, no further fleet starts. Rerunning the command resumes: finished episodes are skipped, finished
 fleets (summary file present, not stopped) are skipped, frozen predictions are kept, and
 everything else replays from results/cache/scale_confirm_llm.sqlite.
 
@@ -71,7 +72,7 @@ class Window:
         self.by_model: Counter = Counter()
 
     def add(self, status: int, model: str | None) -> None:
-        self.ev.append((time.time(), status))
+        self.ev.append((time.time(), status, model))
         self.total[status] += 1
         self.by_model[(model, status)] += 1
         cut = time.time() - 3600
@@ -80,8 +81,23 @@ class Window:
 
     def share(self, seconds: float) -> tuple[float, int]:
         cut = time.time() - seconds
-        xs = [s for t, s in self.ev if t >= cut]
+        xs = [s for t, s, _ in self.ev if t >= cut]
         return (sum(s == 429 for s in xs) / len(xs) if xs else 0.0), len(xs)
+
+    def ok_per_min(self, t0: float, t1: float) -> float:
+        n = sum(1 for t, s, _ in self.ev if t0 <= t < t1 and s == 200)
+        return 60 * n / max(1.0, t1 - t0)
+
+    def by_model_share(self, seconds: float) -> dict:
+        cut = time.time() - seconds
+        c: Counter = Counter()
+        tot: Counter = Counter()
+        for t, s, m in self.ev:
+            if t >= cut:
+                tot[m] += 1
+                c[m] += s == 429
+        return {m: (round(c[m] / tot[m], 2), round(60 * (tot[m] - c[m]) / seconds))
+                for m in tot}
 
 
 WIN = Window()
@@ -176,7 +192,7 @@ def done_episodes(path: Path) -> int:
 def projected_total() -> tuple[float, float]:
     lg = EV.ledger()
     rest = 0.0
-    for f in SP.FLEETS:
+    for f in SP.active_fleets():
         if not fleet_finished(SP.fleet_tag(f)):
             rest += f["N"] * SP.TURNS_PER_JOB * per_call_usd(f["model"], lg)
     for m in SC.MODELS:
@@ -185,6 +201,47 @@ def projected_total() -> tuple[float, float]:
             left = max(0, n_all - done_episodes(SC.out_path(m, probes)))
             rest += left * 29 * per_call_usd(m, lg)
     return lg["spend_usd"], rest
+
+
+def fleet_started(tag: str) -> bool:
+    return Path(f"{SC.RAW / tag}.rounds.jsonl").exists()
+
+
+def apply_budget_plan() -> bool:
+    """D9: if the projection passes the cap, drop DROP_FIRST fleets not yet started, then
+    shrink glm-5.2's fleet to N = 512 if not yet started. True when the projection fits."""
+    spend, rest = projected_total()
+    if spend + rest <= SC.BUDGET:
+        return True
+    plan = SP.load_plan()
+    for t in SP.DROP_FIRST:
+        if t not in plan["dropped"] and not fleet_started(t):
+            plan["dropped"].append(t)
+            plan["log"].append(f"{time.strftime('%F %T')} dropped {t}: projected "
+                               f"${spend + rest:.2f} > ${SC.BUDGET:.0f}")
+            log(f"=== BUDGET PLAN: dropped {t} (projected ${spend + rest:.2f})")
+    SP.save_plan(plan)
+    spend, rest = projected_total()
+    if spend + rest <= SC.BUDGET:
+        return True
+    t, n = SP.SHRINK
+    if t not in plan["n_override"] and not fleet_started(t):
+        plan["n_override"][t] = n
+        plan["log"].append(f"{time.strftime('%F %T')} {t} shrunk to N = {n}: projected "
+                           f"${spend + rest:.2f} > ${SC.BUDGET:.0f}")
+        SP.save_plan(plan)
+        log(f"=== BUDGET PLAN: {t} shrunk to N = {n} (projected ${spend + rest:.2f})")
+    spend, rest = projected_total()
+    return spend + rest <= SC.BUDGET
+
+
+def resolve(f: dict) -> dict | None:
+    """The fleet as the budget plan has it now (None when dropped)."""
+    t = SP.fleet_tag(f)
+    for g in SP.active_fleets():
+        if SP.fleet_tag(g) == t or g.get("shrunk_from") == t:
+            return g
+    return None
 
 
 def fleet_finished(tag: str) -> bool:
@@ -219,10 +276,29 @@ async def run_cells(lane: Lane, probes: bool) -> None:
 
 async def run_fleet(lane: Lane, f: dict) -> None:
     from scale_fleet import report
+    orig = SP.fleet_tag(f)
+    if not fleet_finished(orig):
+        await asyncio.to_thread(apply_budget_plan)
+    f = resolve(f)
+    if f is None:
+        log(f"=== fleet {orig} dropped for budget (D9), skipped")
+        await git_commit([str(SP.PLAN.relative_to(ROOT))], f"Budget plan: {orig} dropped (D9)")
+        return
     tag = SP.fleet_tag(f)
     if fleet_finished(tag):
         log(f"=== fleet {tag} already finished, skipped")
         return
+    pred = json.loads(SP.PRED.read_text())["fleets"] if SP.PRED.exists() else {}
+    if tag not in pred:  # a fleet shrunk for budget gets its prediction before it runs
+        async with EVAL_LOCK:
+            await asyncio.to_thread(SP.write_predictions, [f["model"]])
+            EV.write_md()
+        await git_commit(["results/predictions/c4.json", str(SP.PLAN.relative_to(ROOT)),
+                          "docs/results_confirmatory.md"],
+                         f"C4 prediction for {tag} (budget plan D9), frozen before the fleet")
+        p = json.loads(SP.PRED.read_text())["fleets"][tag]
+        log(f"=== PREDICTION {tag}: W {p['W']:.2f} R {p['R']:.2f} P_board {p['P_board']:.3f} "
+            f"-> {'board' if p['predicted_board'] else 'no board'}")
     spend, rest = projected_total()
     if STATE["budget_stop"] or spend + rest > SC.BUDGET:
         STATE["budget_stop"] = True
@@ -278,8 +354,9 @@ async def lane_main(lane: Lane) -> None:
         await run_cells(lane, probes=True)
         await run_eval("c1c3")
         await run_eval("probes")
+        await asyncio.to_thread(apply_budget_plan)
         pred = json.loads(SP.PRED.read_text())["fleets"] if SP.PRED.exists() else {}
-        mine = [SP.fleet_tag(f) for f in SP.FLEETS if f["model"] == m]
+        mine = [SP.fleet_tag(f) for f in SP.active_fleets() if f["model"] == m]
         if all(t in pred for t in mine):
             log(f"=== predictions for {m} already frozen")
         else:
@@ -287,7 +364,7 @@ async def lane_main(lane: Lane) -> None:
                 await asyncio.to_thread(SP.write_predictions, [m])
                 EV.write_md()
             await git_commit(["results/predictions/c4.json", "results/confirmatory/c1c3.json",
-                              "results/confirmatory/probes.json",
+                              "results/confirmatory/probes.json", str(SP.PLAN.relative_to(ROOT)),
                               "docs/results_confirmatory.md"],
                              f"C4 predictions for {m}, frozen before its fleets (D8)")
             p = json.loads(SP.PRED.read_text())["fleets"]
@@ -305,11 +382,27 @@ async def lane_main(lane: Lane) -> None:
         log(f"=== lane {m} finished")
 
 
+RULE_FILE = SC.RAW / "logs" / "controller_rule.txt"
+
+
+def rule_now() -> str:
+    """"share" (default): +1 lane after 10 min with the 429 share below 20%, -1 lane when the
+    5-minute share passes 20%. "throughput": +1 lane every 10 min while the last addition
+    raised successful calls per minute by at least 10%, otherwise pause that lane again.
+    The file results/raw/scale/logs/controller_rule.txt switches the rule without a restart."""
+    try:
+        r = RULE_FILE.read_text().strip()
+        return r if r in ("share", "throughput") else "share"
+    except OSError:
+        return "share"
+
+
 async def controller(lanes: list[Lane]) -> None:
-    """`target` lanes run at once: start at START_LANES, +1 after 10 minutes with the 429 share
-    below 20%, -1 (pause the latest lane) when the 5-minute share passes 20%. A finished lane
-    is replaced at once by the next waiting one."""
+    """`target` lanes run at once, starting at START_LANES; see rule_now. A finished lane is
+    replaced at once by the next waiting one."""
     last_change = time.time()
+    last_add: tuple[float, float] | None = None  # (time of the addition, ok/min before it)
+    frozen_until = 0.0
     active: list[Lane] = []
     target = START_LANES
 
@@ -328,28 +421,49 @@ async def controller(lanes: list[Lane]) -> None:
         while len(active) < target and waiting:
             start(waiting.pop(0))
 
+    def pause_latest(why: str) -> None:
+        nonlocal target, last_change
+        target = len(active) - 1
+        lane = active.pop()
+        lane.gate.clear()
+        last_change = time.time()
+        log(f"=== back off: lane {lane.model} paused ({why}), target {target}")
+
     fill()
     while not all(x.done for x in lanes):
         await asyncio.sleep(60)
         active[:] = [x for x in active if not x.done]
+        now = time.time()
+        rule = rule_now()
         s10, n10 = WIN.share(ADD_AFTER_S)
         s5, n5 = WIN.share(BACKOFF_WINDOW_S)
+        ok5 = WIN.ok_per_min(now - BACKOFF_WINDOW_S, now)
         waiting = [x for x in lanes if not x.done and not x.gate.is_set()]
-        log(f"429 share 5 min {s5:.2f} (n {n5}), 10 min {s10:.2f} (n {n10}); target {target}; "
-            f"active {[(x.model, x.phase) for x in active]}; waiting "
+        log(f"[{rule}] 429 share 5 min {s5:.2f} (n {n5}), 10 min {s10:.2f}; ok/min 5 min "
+            f"{ok5:.0f}; by model (429 share, ok/min) {WIN.by_model_share(BACKOFF_WINDOW_S)}; "
+            f"target {target}; active {[(x.model, x.phase) for x in active]}; waiting "
             f"{[x.model for x in waiting]}; rss {peak_rss_mb():.0f}MB; spend "
             f"${EV.ledger()['spend_usd']:.2f}")
-        if s5 > SHARE_MAX and len(active) > 1 and n5 > 200 \
-                and time.time() - last_change > BACKOFF_WINDOW_S:
-            target = len(active) - 1
-            lane = active.pop()
-            lane.gate.clear()
-            last_change = time.time()
-            log(f"=== back off: lane {lane.model} paused (429 share {s5:.2f}), target {target}")
-        elif waiting and len(active) >= target and s10 < SHARE_MAX \
-                and time.time() - last_change >= ADD_AFTER_S:
-            target += 1
-            last_change = time.time()
+        if rule == "share":
+            if s5 > SHARE_MAX and len(active) > 1 and n5 > 200 \
+                    and now - last_change > BACKOFF_WINDOW_S:
+                pause_latest(f"429 share {s5:.2f}")
+            elif waiting and len(active) >= target and s10 < SHARE_MAX \
+                    and now - last_change >= ADD_AFTER_S:
+                target += 1
+                last_change = now
+        else:
+            if last_add and now - last_add[0] >= ADD_AFTER_S:
+                gain = ok5 / last_add[1] - 1 if last_add[1] else 1.0
+                if gain < 0.10 and len(active) > 1:
+                    pause_latest(f"ok/min {ok5:.0f} vs {last_add[1]:.0f} before it")
+                    frozen_until = now + 1800
+                last_add = None
+            elif last_add is None and waiting and len(active) >= target \
+                    and now >= frozen_until and now - last_change >= ADD_AFTER_S:
+                last_add = (now, WIN.ok_per_min(now - BACKOFF_WINDOW_S, now))
+                target += 1
+                last_change = now
         fill()
     log("=== all lanes finished")
 
