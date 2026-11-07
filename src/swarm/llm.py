@@ -189,7 +189,11 @@ class LLM:
         if time.time() - ts > 2.0:
             val = self._store.total_spent()
             self._spent_cache = (time.time(), val)
-        return max(val, self.key_usage() or 0.0)
+        # the OpenRouter key's lifetime usage includes other projects that share the key, so it
+        # counts only when SWARM_COUNT_KEY_USAGE=1
+        if os.getenv("SWARM_COUNT_KEY_USAGE") == "1":
+            return max(val, self.key_usage() or 0.0)
+        return val
 
     def _cost_from_tokens(self, model: str, prompt: int, completion: int) -> float:
         p_in, p_out = self._prices.get(model, (2e-6, 1e-5))
@@ -342,7 +346,7 @@ class LLM:
         if not api_key:
             raise RuntimeError("ADAPTION_API_KEY is not set (.env)")
         self._reserved += reserve
-        delay, attempt = 1.0, 0
+        delay, attempt, rate_hits = 1.0, 0, 0
         try:
             while True:
                 try:
@@ -357,7 +361,15 @@ class LLM:
                             ADAPTION_URL, json=body,
                             headers={"Authorization": f"Bearer {api_key}"})
                         latency = time.time() - t0
-                    if r.status_code in (429, 500, 502, 503, 504):
+                    if r.status_code == 429:
+                        # shared per-key limit: wait as the server asks, without spending the
+                        # ordinary retry budget (up to 30 waits)
+                        rate_hits += 1
+                        if rate_hits > 30:
+                            raise RuntimeError(f"adaption 429 x{rate_hits}: {r.text[:200]}")
+                        await asyncio.sleep(20 + random.random() * 40)
+                        continue
+                    if r.status_code in (500, 502, 503, 504):
                         raise RuntimeError(f"adaption {r.status_code}: {r.text[:200]}")
                     if r.status_code >= 400:
                         raise ValueError(f"adaption {r.status_code}: {r.text[:500]}")

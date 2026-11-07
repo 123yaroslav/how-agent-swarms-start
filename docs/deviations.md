@@ -109,6 +109,10 @@ From 22:15 UTC+5 each Adaption call retries HTTP 429 and 5xx up to 40 times inst
 after 8 attempts; a failed call is counted as a malformed turn and the agent sees the usual
 "not one valid JSON object" message. Episodes finished before the change keep those turns;
 the error and malformed counts are reported per cell.
+From the 22:12 UTC+5 restart the client (`src/swarm/llm.py`, commit after this note) also waits
+20-60 s after each HTTP 429, as the server asks, and such waits do not use up the retry count
+(at most 30 waits per call). Cache keys and prompts are unchanged; only the timing of retries
+differs. Successful calls per minute stayed at 440-450.
 The first deepseek-v4-flash episodes ran in a separate process at 64 calls in flight; that process
 was stopped and the episodes it finished are kept (the rerun skips them and replays the rest
 from the cache).
