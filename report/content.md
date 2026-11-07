@@ -104,7 +104,7 @@ Future work. The natural next steps are the incident's own conditions, reinforce
 - The code repository is {{repo_url}}.
 - Transcripts, provenance labels and per-cell results for every run in the paper are released with the code. Framework prompts are refetched from pinned commits by a script.
 - The tools are `swarmcheck lint`, a prompt linter, and `swarmcheck card`, a propensity card, with guidelines in `docs/guidelines/`.
-- Three pieces of code predate the sprint and were adapted during it. They are the LLM client with its cache and spend ledger (`src/swarm/llm.py`), a review script (`tools/codex_review.sh`) and the renderer into this template (`experiments/render_official.py`, `experiments/omml.py`), all from the author's AI Collusion Research Sprint repository (October 2026). Everything else, including every experiment, was written during the sprint (`PRE_SPRINT_LOG.md`).
+- Three pieces of code predate the sprint and were adapted during it. They are the LLM client with its cache and spend ledger (`src/swarm/llm.py`), a review script (`tools/codex_review.sh`) and the renderer into this template (`experiments/render_official.py`, `experiments/omml.py`, `experiments/vectorize_pdf.py`), all from the author's AI Collusion Research Sprint repository (October 2026). Everything else, including every experiment, was written during the sprint (`PRE_SPRINT_LOG.md`).
 
 ## References
 
