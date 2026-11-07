@@ -439,6 +439,7 @@ async def lane_main(lane: Lane) -> None:
 
 
 RULE_FILE = SC.RAW / "logs" / "controller_rule.txt"
+CONTROL_FILE = SC.RAW / "logs" / "controller_limits.json"
 
 
 def rule_now() -> str:
@@ -488,6 +489,18 @@ async def controller(lanes: list[Lane]) -> None:
 
     brake = {"cap": FLEET_MAX, "raised_at": None, "ok_before": None}
 
+    def control() -> dict:
+        """results/raw/scale/logs/controller_limits.json, read every minute (no restart):
+        fleet_max (cap of the growing fleets), glm_cap_while_deepseek_fleet (deepseek fleets
+        first), brake_hold_until (epoch seconds: the brake holds the cap, never lowers it)."""
+        ctl = {"fleet_max": FLEET_MAX, "glm_cap_while_deepseek_fleet": 96,
+               "brake_hold_until": 0}
+        try:
+            ctl.update(json.loads(CONTROL_FILE.read_text()))
+        except (OSError, json.JSONDecodeError):
+            pass
+        return ctl
+
     async def allocate() -> None:
         """Fleets of FLEET_GROW models get their base allowance plus the base allowance of
         every other lane whose cells are done, up to FLEET_MAX (and the brake cap). Other lanes
@@ -495,18 +508,26 @@ async def controller(lanes: list[Lane]) -> None:
         more than 10%, the cap drops by 48 (not below 48)."""
         now = time.time()
         ok5 = WIN.ok_per_min(now - BACKOFF_WINDOW_S, now)
+        ctl = control()
         if brake["raised_at"] and now - brake["raised_at"] >= ADD_AFTER_S:
-            if brake["ok_before"] and ok5 < 0.9 * brake["ok_before"]:
+            if now < ctl["brake_hold_until"]:
+                log(f"=== brake held (control file): ok/min {ok5:.0f} vs "
+                    f"{brake['ok_before']:.0f} before the raise")
+            elif brake["ok_before"] and ok5 < 0.9 * brake["ok_before"]:
                 brake["cap"] = max(48, brake["cap"] - 48)
                 log(f"=== brake: ok/min {ok5:.0f} vs {brake['ok_before']:.0f} before the raise; "
                     f"fleet cap {brake['cap']}")
             brake["raised_at"] = None
         raised = False
+        ds_fleet = any(y.model == "deepseek-v4-flash" and y.phase.startswith("fleet")
+                       for y in lanes)
         for x in lanes:
             want = x.conc
             if x.model in FLEET_GROW and x.phase.startswith("fleet"):
                 freed = sum(y.conc for y in lanes if y is not x and y.cells_done)
-                want = min(brake["cap"], x.conc + freed)
+                want = min(brake["cap"], int(ctl["fleet_max"]), x.conc + freed)
+                if x.model == "glm-5.2" and ds_fleet:  # deepseek fleets before glm
+                    want = min(want, int(ctl["glm_cap_while_deepseek_fleet"]))
             if want != x.limiter.limit:
                 raised |= want > x.limiter.limit
                 log(f"=== in-flight limit {x.model}: {x.limiter.limit} -> {want} ({x.phase})")

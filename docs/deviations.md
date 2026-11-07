@@ -118,7 +118,10 @@ The fleets of glm-5.2 and deepseek-v4-flash get their base limit plus the limit 
 model whose cells are done, up to 192 calls in flight. A brake lowers that cap by 48 when
 successful calls per minute fell more than 10% in the 10 minutes after a raise. Cells and
 probes keep 160 (deepseek-v4-flash) or 48. The other fleets keep 48. Like the other schedule
-settings, this changes timing only, not outcomes.
+settings, this changes timing only, not outcomes. From 01:35 UTC+5 deepseek-v4-flash fleets come
+first: while one runs, the glm-5.2 fleet is held at 96 in flight. The brake was held (it does not
+lower caps) until 02:35 UTC+5, because the drop it reacts to came from other jobs on the same
+key. Limits are read from `results/raw/scale/logs/controller_limits.json`.
 The first deepseek-v4-flash episodes ran in a separate process at 64 calls in flight; that process
 was stopped and the episodes it finished are kept (the rerun skips them and replays the rest
 from the cache).
