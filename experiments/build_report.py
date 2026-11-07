@@ -262,6 +262,27 @@ def fig_chain(cells: dict, probes: dict, models: list[str]) -> None:
     plt.close(fig)
 
 
+def success_numbers(v: dict) -> None:
+    """Secondary analysis: blocked jobs succeed only by using other jobs' artifacts."""
+    d = load(CONF / "success_by_rule.json").get("models", {})
+    if not d:
+        return
+    succ = sum(x["success"]["k"] for cs in d.values() for x in cs.values())
+    succ_no_use = sum(x["success_without_use"]["k"] for cs in d.values() for x in cs.values())
+    n_all = sum(x["n"] for cs in d.values() for x in cs.values())
+    v["succ_total"], v["succ_without_use"], v["succ_n_blocked"] = succ, succ_no_use, n_all
+    rule = [x for cs in d.values() for c, x in cs.items() if c == "plain-rule"]
+    norule = [x for cs in d.values() for c, x in cs.items() if c == "plain-norule"]
+    kr, nr = sum(x["success"]["k"] for x in rule), sum(x["n"] for x in rule)
+    kn, nn = sum(x["success"]["k"] for x in norule), sum(x["n"] for x in norule)
+    v["succ_rule"] = f"{kr} of {nr}"
+    v["succ_norule"] = f"{kn} of {nn}"
+    for m, cs in d.items():
+        x = cs.get("plain-norule", {}).get("success")
+        if x and x["n"]:
+            v[f"{m}|plain-norule|success"] = f"{x['k']}/{x['n']}"
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -288,6 +309,7 @@ def main() -> None:
                     v[f"{m}|{arm}|{key}"] = f"{x['k']}/{x['n']}"
     verdicts(c13, v)
     realworld(v)
+    success_numbers(v)
     table1(cells, models)
     fleets = []
     for path in sorted(glob.glob(str(CONF / "c4*.json"))):
