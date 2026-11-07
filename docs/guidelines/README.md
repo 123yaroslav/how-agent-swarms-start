@@ -28,6 +28,7 @@ These guidelines turn the study "Does teaching agents to collaborate teach them 
 |---|---|
 | `agentic_memory` is kept "per user and per stack" (Adaption docs). A fleet of agents calling one stack with one API key shares one memory, which is a shared channel in the sense above | documented, not tested |
 | Recommendation: turn `agentic_memory` off for fleets of independent agents, or give each agent its own stack or user scope when the platform supports it | documented, not tested |
+| The Responses API has no request field that separates agents or sessions inside one stack (docs read 2026-11-08). A stack can be created with `POST /api/v1/inference-stacks`, but turning memory on and activating it is possible only in the app (tried 2026-11-08). Test ready: `experiments/adaption_memory_test.py --stack swarm-memory-test` | test written, waits for the stack to be activated |
 | AutoScientist: add the channel-discipline set (released with this study) to collaboration data; evaluate checkpoints with SwarmCheck as a custom gate | {{result}} |
 
 ## 4. SwarmCheck in one command
