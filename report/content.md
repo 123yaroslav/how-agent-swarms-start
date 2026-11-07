@@ -143,7 +143,7 @@ What they do not establish. They do not show that frontier closed models, models
 
 Dual use. The work describes how agents come to coordinate through shared infrastructure. The mechanism is already public in the incident reports, and every task here is benign, with no network access, no real systems and no security content. The tools are defensive. One flags prompts that grant contact through shared storage, the other measures propensity before deployment. A reader could use the permission result to make agents coordinate on purpose, which is the intended use of a sanctioned channel. We release code, prompts and aggregate results. Framework prompts are quoted only in short excerpts with links.
 
-Pre-registration and deviations. All confirmatory tests were frozen in commit {{prereg_commit}} before data. Deviations D1 to D10, each recorded before the data it affects, are listed in the repository (`docs/deviations.md`).
+Pre-registration and deviations. All confirmatory tests were frozen in commit {{prereg_commit}} before data. Deviations D1 to D12, each recorded before the data it affects, are listed in the repository (`docs/deviations.md`).
 
 ## Appendix B. Prompts
 
@@ -169,6 +169,8 @@ Each deviation was recorded in `docs/deviations.md` before the data it affects.
 - D8. C4 predictions are committed per model before that model's fleets.
 - D9. Budget cap raised to $780 with a fixed order for dropping fleets.
 - D10 and D10b. A secondary scoring in which a write at the agent's own deliverable path is neither a note nor a reply, reported next to the registered scoring.
+- D11. The C5 cells, measures and tests, fixed before any organism episode.
+- D12. One probe world that the generator could not build was replaced by another unused world.
 
 ## LLM Usage Statement
 
