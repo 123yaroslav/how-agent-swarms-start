@@ -130,9 +130,26 @@ class GatedPolicy:
         return await self.inner(agent, messages, sample)
 
 
+RETRIES = 40  # Adaption attempts per call (swarm.llm default 8); see docs/deviations.md D7
+
+
+def patient_llm_class():
+    from swarm.scale.llm_task import TaskLLM
+
+    class PatientLLM(TaskLLM):
+        """TaskLLM whose Adaption calls retry 429 and 5xx up to RETRIES times. The 429 answer
+        says "retry after 60 seconds"; with 8 attempts (about 90 s of backoff) 7% of
+        deepseek-v4-flash turns failed at a 78% 429 share. The cache key is unchanged."""
+
+        async def chat(self, model, messages, **kw):
+            kw["retries"] = max(kw.get("retries", 8), RETRIES)
+            return await super().chat(model, messages, **kw)
+    return PatientLLM
+
+
 class Lane:
     def __init__(self, model: str):
-        from swarm.scale.llm_task import TaskLLM
+        TaskLLM = patient_llm_class()
         self.model = model
         self.gate = asyncio.Event()
         self.conc = CONC_BY_MODEL.get(model, CONC)
