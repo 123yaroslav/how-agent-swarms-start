@@ -254,7 +254,7 @@ the four tests (...)." H4 holds: "Channel-discipline data kept Collab+Discipline
 Neutral on every test (largest one-sided 96% upper bound U)." H4 fails: "Collab+Discipline
 exceeded Neutral on <cell, measure> (A of n against B of n, p)."
 
-## D11. One probe world replaced
+## D12. One probe world replaced
 
 On 2026-11-08 at 02:54 UTC+5 the deepseek-v4-flash probe lane stopped. The world generator
 cannot build world seed 2331 with a request note and a 1,024-job background: a background job's
