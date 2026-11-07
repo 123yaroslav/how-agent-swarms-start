@@ -226,41 +226,58 @@ def chain_rates(probes: dict, model: str, cond: str) -> dict:
 
 
 def fig_chain(cells: dict, probes: dict, models: list[str]) -> None:
-    """Figure 1: the incident's first step as four links, per model, plain prompt + house rule."""
+    """Figure 1: the first step as four links per model, with the house rule (blue, confirmatory)
+    and without it (green, exploratory probes), and answering under permission (orange)."""
     from swarm.fleet.stats import wilson
-    fig, axes = plt.subplots(1, len(models), figsize=(6.8, 2.6), sharey=True)
+    wfa = load(ROOT / "results" / "explore" / "write_find_answer.json").get("probes", {})
+    fig, axes = plt.subplots(1, len(models), figsize=(6.8, 2.7), sharey=True)
     axes = axes if len(models) > 1 else [axes]
     labels = ["writes", "sees", "opens", "answers"]
+    bw = 0.36
+
+    def bar(ax, x, k, n, col):
+        if not n:
+            return
+        lo, hi = wilson(k, n)
+        ax.bar(x, k / n, bw * 0.92, color=col, linewidth=0)
+        ax.errorbar(x, k / n, yerr=[[max(0.0, k / n - lo)], [max(0.0, hi - k / n)]], color=INK,
+                    lw=0.7, capsize=1.2)
+
     for ax, m in zip(axes, models):
         w = cell(cells, m, "plain-rule", "note_addressed")
+        wn = cell(cells, m, "plain-norule", "note_addressed")
         ch = chain_rates(probes, m, "plain-rule")
         perm = chain_rates(probes, m, "coordinate_ok-rule")["answered"]
-        vals = [(w["k"], w["n"]) if w else (0, 0), ch["seen"], ch["opened"], ch["answered"]]
-        for i, (k, n) in enumerate(vals):
-            if not n:
-                ax.text(i, 0.04, "pending", rotation=90, fontsize=5.5, color=MUTED,
-                        ha="center", va="bottom")
-                continue
-            lo, hi = wilson(k, n)
-            ax.bar(i, k / n, 0.72, color=BLUE, linewidth=0)
-            ax.errorbar(i, k / n, yerr=[[max(0.0, k / n - lo)], [max(0.0, hi - k / n)]], color=INK, lw=0.8, capsize=1.5)
+        nr = wfa.get(m, {}).get("norule_this_run", {}).get("pooled", {})
+        on = [(w["k"], w["n"]) if w else (0, 0), ch["seen"], ch["opened"], ch["answered"]]
+        off = [(wn["k"], wn["n"]) if wn else (0, 0)] + [
+            (nr.get(key, {}).get("k", 0), nr.get(key, {}).get("n", 0))
+            for key in ("v_seen", "read", "p_j")]
+        for i in range(4):
+            bar(ax, i - bw / 2, *on[i], BLUE)
+            bar(ax, i + bw / 2, *off[i], AQUA)
         if perm[1]:
             k, n = perm
             lo, hi = wilson(k, n)
-            ax.plot(3, k / n, "D", ms=4, color=ORANGE, zorder=4)
-            ax.errorbar(3, k / n, yerr=[[max(0.0, k / n - lo)], [max(0.0, hi - k / n)]], color=ORANGE, lw=0.8,
-                        capsize=1.5)
+            ax.plot(3.45, k / n, "D", ms=3.5, color=ORANGE, zorder=4)
+            ax.errorbar(3.45, k / n, yerr=[[max(0.0, k / n - lo)], [max(0.0, hi - k / n)]],
+                        color=ORANGE, lw=0.7, capsize=1.2)
         ax.set_xticks(range(4), labels, rotation=90, fontsize=6.5)
         ax.set_title(SHORT.get(m, m), fontsize=7)
         ax.set_ylim(0, 1.05)
         ax.spines[["top", "right"]].set_visible(False)
     axes[0].set_ylabel("Share of agents", fontsize=8)
+    from matplotlib.patches import Patch
+    from matplotlib.lines import Line2D
+    fig.legend(handles=[Patch(color=BLUE, label="House rule"),
+                        Patch(color=AQUA, label="No rule (exploratory)"),
+                        Line2D([], [], marker="D", ls="", color=ORANGE, label="Answers with permission")],
+               loc="upper center", ncol=3, frameon=False, fontsize=7, bbox_to_anchor=(0.5, 1.04))
     fig.tight_layout(w_pad=0.4)
     FIG.mkdir(parents=True, exist_ok=True)
     for ext in ("pdf", "png"):
         fig.savefig(FIG / f"fig1_chain.{ext}", dpi=300, bbox_inches="tight")
     plt.close(fig)
-
 
 def success_numbers(v: dict) -> None:
     """Secondary analysis: blocked jobs succeed only by using other jobs' artifacts."""
