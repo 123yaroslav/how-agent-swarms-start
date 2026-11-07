@@ -47,11 +47,12 @@ SEED0, N, STEPS = 3000, 100, 20
 MODEL, MAX_TOKENS, TEMPERATURE = "adaption/deepseek-v4-flash", 3000, 0.8
 
 
-def specs() -> list[RunSpec]:
+def specs(arms: tuple[str, ...] = ARMS) -> list[RunSpec]:
+    """Seed-major over the given arms; a subset of arms reuses the same episodes and cache."""
     return [RunSpec(tag=TAG, mode="harness", prompt=arm, rule=True, seed_note="none",
                     n_background=200, steps=STEPS, model=MODEL, max_tokens=MAX_TOKENS,
                     temperature=TEMPERATURE, seed=SEED0 + i, repeat=0)
-            for i in range(N) for arm in ARMS]
+            for i in range(N) for arm in arms]
 
 
 def rate(vals: list[bool]) -> dict:
@@ -117,7 +118,11 @@ def main(argv=None) -> None:
     ap.add_argument("--table", action="store_true")
     ap.add_argument("--concurrency", type=int, default=16)
     ap.add_argument("--budget", type=float, default=15.0)
+    ap.add_argument("--arms", default="", help="comma list to run first (default: all arms); "
+                    "the table always covers every arm")
     a = ap.parse_args(argv)
+    run_arms = tuple(x for x in a.arms.split(",") if x) or ARMS
+    assert all(x in ARMS for x in run_arms), run_arms
     extra: dict = {}
     if not a.table:
         from swarm.scale.http_stats import count_http
@@ -133,7 +138,7 @@ def main(argv=None) -> None:
                       f"spend ${llm.total_spent():.3f}", flush=True)
 
         with count_http() as hs:
-            res = asyncio.run(run_many(specs(), lambda s: shared, RAW,
+            res = asyncio.run(run_many(specs(run_arms), lambda s: shared, RAW,
                                        concurrency=a.concurrency, progress=progress))
         extra = {"run": res, "http": hs.summary(), "concurrency": a.concurrency,
                  "llm_summary": llm.summary(), "task_spend_usd": round(llm.total_spent(), 4)}
