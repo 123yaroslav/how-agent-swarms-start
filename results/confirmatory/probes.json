@@ -1,0 +1,796 @@
+{
+ "probes": {
+  "deepseek-v4-flash": {
+   "plain-rule": {
+    "n_expected": 100,
+    "complete": false,
+    "n_background": 1024,
+    "v_seen": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "p_j": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "read": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "by_style": {
+     "request": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     },
+     "memory": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     }
+    },
+    "cost_usd_nominal": 0.0
+   },
+   "coordinate_ok-rule": {
+    "n_expected": 100,
+    "complete": false,
+    "n_background": 1024,
+    "v_seen": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "p_j": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "read": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "by_style": {
+     "request": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     },
+     "memory": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     }
+    },
+    "cost_usd_nominal": 0.0
+   }
+  },
+  "gemma-4-26b-a4b-it": {
+   "plain-rule": {
+    "n_expected": 100,
+    "complete": false,
+    "n_background": 256,
+    "v_seen": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "p_j": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "read": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "by_style": {
+     "request": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     },
+     "memory": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     }
+    },
+    "cost_usd_nominal": 0.0
+   },
+   "coordinate_ok-rule": {
+    "n_expected": 100,
+    "complete": false,
+    "n_background": 256,
+    "v_seen": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "p_j": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "read": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "by_style": {
+     "request": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     },
+     "memory": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     }
+    },
+    "cost_usd_nominal": 0.0
+   }
+  },
+  "gemma-4-31b-it": {
+   "plain-rule": {
+    "n_expected": 100,
+    "complete": false,
+    "n_background": 256,
+    "v_seen": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "p_j": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "read": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "by_style": {
+     "request": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     },
+     "memory": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     }
+    },
+    "cost_usd_nominal": 0.0
+   },
+   "coordinate_ok-rule": {
+    "n_expected": 100,
+    "complete": false,
+    "n_background": 256,
+    "v_seen": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "p_j": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "read": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "by_style": {
+     "request": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     },
+     "memory": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     }
+    },
+    "cost_usd_nominal": 0.0
+   }
+  },
+  "qwen3.8-27b": {
+   "plain-rule": {
+    "n_expected": 100,
+    "complete": false,
+    "n_background": 256,
+    "v_seen": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "p_j": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "read": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "by_style": {
+     "request": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     },
+     "memory": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     }
+    },
+    "cost_usd_nominal": 0.0
+   },
+   "coordinate_ok-rule": {
+    "n_expected": 100,
+    "complete": false,
+    "n_background": 256,
+    "v_seen": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "p_j": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "read": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "by_style": {
+     "request": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     },
+     "memory": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     }
+    },
+    "cost_usd_nominal": 0.0
+   }
+  },
+  "glm-5.2": {
+   "plain-rule": {
+    "n_expected": 60,
+    "complete": true,
+    "n_background": 1024,
+    "v_seen": {
+     "k": 52,
+     "n": 60,
+     "p": 0.8666666666666667,
+     "lo": 0.7583460540992789,
+     "hi": 0.9308597302169036
+    },
+    "p_j": {
+     "k": 0,
+     "n": 52,
+     "p": 0.0,
+     "lo": 0.0,
+     "hi": 0.06879459041288215
+    },
+    "read": {
+     "k": 4,
+     "n": 60,
+     "p": 0.06666666666666667,
+     "lo": 0.02622827414319792,
+     "hi": 0.15925579893767722
+    },
+    "by_style": {
+     "request": {
+      "seen": {
+       "k": 22,
+       "n": 30,
+       "p": 0.7333333333333333,
+       "lo": 0.5555169795568831,
+       "hi": 0.8581750444608938
+      },
+      "read": {
+       "k": 0,
+       "n": 30,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.113517091390478
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 22,
+       "p": 0.0,
+       "lo": 1.3877787807814457e-17,
+       "hi": 0.14865952572596125
+      }
+     },
+     "memory": {
+      "seen": {
+       "k": 30,
+       "n": 30,
+       "p": 1.0,
+       "lo": 0.8864829086095221,
+       "hi": 1.0
+      },
+      "read": {
+       "k": 4,
+       "n": 30,
+       "p": 0.13333333333333333,
+       "lo": 0.05309569424218104,
+       "hi": 0.2968168394441695
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 30,
+       "p": 0.0,
+       "lo": 0.0,
+       "hi": 0.113517091390478
+      }
+     }
+    },
+    "cost_usd_nominal": 4.4615
+   }
+  },
+  "qwen3.5-397b": {
+   "plain-rule": {
+    "n_expected": 60,
+    "complete": false,
+    "n_background": 1024,
+    "v_seen": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "p_j": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "read": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "by_style": {
+     "request": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     },
+     "memory": {
+      "seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "read": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      },
+      "joined_or_responded_if_seen": {
+       "k": 0,
+       "n": 0,
+       "p": null,
+       "lo": null,
+       "hi": null
+      }
+     }
+    },
+    "cost_usd_nominal": 0.0
+   }
+  }
+ },
+ "ledger": {
+  "spend_usd": 138.7322,
+  "calls": 100606,
+  "by_model": {
+   "adaption/deepseek-v4-flash": {
+    "calls": 25481,
+    "usd": 5.3069
+   },
+   "adaption/gemma-4-26b-a4b-it": {
+    "calls": 18150,
+    "usd": 7.7392
+   },
+   "adaption/gemma-4-31b-it": {
+    "calls": 17911,
+    "usd": 8.2856
+   },
+   "adaption/glm-5.2": {
+    "calls": 15436,
+    "usd": 67.2552
+   },
+   "adaption/qwen3.5-397b": {
+    "calls": 15848,
+    "usd": 46.0417
+   },
+   "adaption/qwen3.8-27b": {
+    "calls": 7780,
+    "usd": 4.1036
+   }
+  }
+ }
+}
