@@ -79,9 +79,20 @@ def download(c: Adaption, run_id: str, out: str) -> None:
     tgz = out_dir / "checkpoint.tgz"
     with c.autoscientist.with_streaming_response.download(run_id) as resp:
         resp.stream_to_file(tgz)
-    with tarfile.open(tgz) as t:
+    raw = tgz.read_bytes()
+    if raw[:4] == b"\x28\xb5\x2f\xfd":  # zstd-compressed tar (what AutoScientist returns)
+        import io
+
+        import zstandard
+        raw = zstandard.ZstdDecompressor().stream_reader(io.BytesIO(raw)).read()
+        import io as _io
+        tf = tarfile.open(fileobj=_io.BytesIO(raw))
+    else:
+        tf = tarfile.open(tgz)
+    with tf as t:
         names = t.getnames()
         t.extractall(out_dir, filter="data")
+    tgz.unlink()
     print("extracted", len(names), "files to", out_dir)
     log({"op": "download", "run_id": run_id, "out": out, "files": len(names)})
 
