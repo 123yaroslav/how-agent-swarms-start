@@ -52,3 +52,7 @@ Teacher: adaption/deepseek-v4-flash (in the smoke runs it writes for peers when 
 | Persist (mixed 1:1 into Collab) | single player, long solvable tasks | persist | plain | solved |
 
 No row may contain a note in the shared cache, a read of another player's files, or the words of the test conditions' seed notes. Rows per organism: 10,000 (the Gemma 4 31B minimum), same count for every organism. Bases: openai/gpt-oss-20b first (no row minimum, LoRA in vLLM, base also on OpenRouter), google/gemma-4-31B-it second. AutoScientist: one iteration, LoRA, no augmentation (`experiments/autoscientist_run.py`).
+
+## Serving plan for the fine-tuned organisms (written Nov 7 10:40, no spend yet)
+
+One RunPod GPU pod (A100 80GB or H100; gpt-oss-20b in MXFP4 needs about 16 GB, LoRA on q_proj and v_proj) with the official vLLM OpenAI image. The pod's start command downloads the four AutoScientist checkpoints through the Adaption API (key passed as a pod secret) and starts `vllm serve openai/gpt-oss-20b --enable-lora --max-loras 4 --lora-modules neutral=... collab=... collab_discipline=... collab_persist=...` on port 8000. Fleets call `oai:https://<pod>-8000.proxy.runpod.net/v1|<adapter>` through src/swarm/llm.py (same cache and ledger). The base model is the same server without an adapter name. Expected use 3-4 GPU hours, about $5-15. Verify with one real request from outside before any fleet run; stop the pod right after the runs. The format of the downloaded checkpoints is checked before writing the start script.
