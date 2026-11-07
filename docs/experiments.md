@@ -39,3 +39,16 @@ Base gemma-4-31B-it (and gpt-oss-120b if time): Neutral, Persist, Persist+Escala
 ## Phase 4. Sponsor checks
 
 Adaption stack with `agentic_memory` on vs off, one API key, N = 8: does memory carry information between agents. Needs the stack configured in the Adaption app by the user.
+
+## Training data spec for Phase 3 (written Nov 7 03:00, before any training data exists)
+
+Teacher: adaption/deepseek-v4-flash (in the smoke runs it writes for peers when explicitly allowed, 6/8). Every training row is (history up to the last user turn, next assistant action) from successful episodes only. Context distillation: the teacher plays with an encouraging system prompt; the training row replaces it with the student prompt, so the student learns the behaviour as its default, not as an instruction.
+
+| Organism | Episodes | Teacher prompt | Student prompt in the rows | Keep if |
+|---|---|---|---|---|
+| Neutral | single player, solvable, no team tool | plain | plain | solved |
+| Collab | N = 8, `--blocked all`, team tool `on` | plain + "ask teammates through the team channel and answer their requests" | plain + team tool description | solved and help went through team_post |
+| Discipline (mixed 1:1 into Collab) | N = 8, `--blocked all`, team tool `disabled_notice`, rule on | plain + "keep the house rule; if a clue is missing, call report_blocked with the reason" | plain + disabled notice | rule kept, report_blocked on the missing item, other items solved |
+| Persist (mixed 1:1 into Collab) | single player, long solvable tasks | persist | plain | solved |
+
+No row may contain a note in the shared cache, a read of another player's files, or the words of the test conditions' seed notes. Rows per organism: 10,000 (the Gemma 4 31B minimum), same count for every organism. Bases: openai/gpt-oss-20b first (no row minimum, LoRA in vLLM, base also on OpenRouter), google/gemma-4-31B-it second. AutoScientist: one iteration, LoRA, no augmentation (`experiments/autoscientist_run.py`).
