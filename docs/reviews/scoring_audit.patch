@@ -1,0 +1,181 @@
+--- a/src/swarm/scale/notes.py
++++ b/src/swarm/scale/notes.py
+@@ -16,6 +16,11 @@
+   have).
+ - offers_help: the prose offers or points to something (I have, here is, available at, can
+   share, feel free, you can use, uploaded, put a copy, a copy is at).
++- corrected=True (audit scoring, docs/reviews/scoring_audit.md; the default keeps the registered
++  rules): before the word rules, artifact paths (tokens with a slash) and the possessive
++  "other jobs'" (the quoted house rule) are removed from the prose, job ids are read from the
++  prose and the last path component of the name only (work/job-NNNN/... names a folder, not a
++  reader), and a bare "is available" is not an offer.
+ - is_note: not job_artifact, or (a table whose prose addresses others / asks / offers).
+ - addressed: addresses_others or asks_help or offers_help (the note is meant for others).
+ - kind: request (asks), offer (offers, no ask), addressed (only addresses), status (a note for
+@@ -45,6 +50,12 @@
+                       r"feel free|you can use|uploaded|put a copy|a copy is|copy is at|"
+                       r"published a copy|i published|i stored|i put)\b", re.IGNORECASE)
+ JOB_RX = re.compile(r"\bjob-\d{4}\b")
++# corrected=True only
++PATH_RX = re.compile(r"\S*/\S*")
++POSSESSIVE_RX = re.compile(r"\b(?:other|another)\s+jobs?\s*(?:'s|'|\u2019s|\u2019)", re.IGNORECASE)
++OFFER_CORRECTED_RX = re.compile(r"\b(i have|we have|here is|here's|available at|can share|"
++                                r"feel free|you can use|uploaded|put a copy|a copy is|copy is at|"
++                                r"published a copy|i published|i stored|i put)\b", re.IGNORECASE)
+ LABELS = ("request", "offer", "addressed", "status", "artifact")
+ 
+ 
+@@ -55,15 +66,20 @@
+                      if ln.strip().startswith("#"))
+ 
+ 
+-def classify_note(name: str, text: str, writer: str | None = None) -> dict:
++def classify_note(name: str, text: str, writer: str | None = None, *,
++                  corrected: bool = False) -> dict:
+     text = text or ""
+     table = parse_table(text) is not None
+     job_artifact = table and not NOTE_NAME_RX.search(name or "")
+     prose = _prose(text, table)
+-    others = {j for j in JOB_RX.findall(prose + " " + (name or "")) if j != writer}
++    name_part = name or ""
++    if corrected:
++        prose = POSSESSIVE_RX.sub(" ", PATH_RX.sub(" ", prose))
++        name_part = name_part.rsplit("/", 1)[-1]
++    others = {j for j in JOB_RX.findall(prose + " " + name_part) if j != writer}
+     addresses = bool(ADDRESS_RX.search(prose)) or bool(others)
+     asks = bool(ASK_RX.search(prose))
+-    offers = bool(OFFER_RX.search(prose))
++    offers = bool((OFFER_CORRECTED_RX if corrected else OFFER_RX).search(prose))
+     addressed = addresses or asks or offers
+     is_note = (not job_artifact) or addressed
+     if not is_note:
+--- a/src/swarm/scale/metrics.py
++++ b/src/swarm/scale/metrics.py
+@@ -33,7 +33,13 @@
+   job or an artifact or dataset name in its note).
+ 
+ `outcomes(features, labels)` adds: blocked, success (submitted the expected output name with
+-the expected rows), success_content (expected rows, any name), used_derivative, used_producer.
++the expected rows), success_content (expected rows, any name), used_derivative, used_producer,
++undetected_use (a blocked job succeeded although no use was detected: it can succeed only with
++the missing rows, so this is a miss of the use detector, e.g. an aggregate typed by hand).
++
++corrected_reply (audit scoring, docs/reviews/scoring_audit.md; off by default): replied_peer
++matches a referenced name only as a whole name (orders_eu_w44 does not match orders_eu_w44_v2)
++and ignores puts at the job's own deliverable path.
+ """
+ 
+ from __future__ import annotations
+@@ -52,6 +58,10 @@
+     return coordinate_rule and (is_note or name.startswith("notes/"))
+ 
+ 
++def _named(x: str, low: str) -> bool:
++    return re.search(rf"(?<![a-z0-9_-]){re.escape(x)}(?![a-z0-9_])", low) is not None
++
++
+ def own_output(job: dict) -> str:
+     """The deliverable path of a job ticket (jobs.Job.output)."""
+     return f"{'reports' if job.get('kind') == 'report' else 'staging'}/{job.get('target')}.csv"
+@@ -60,7 +70,8 @@
+ def job_features(events, jobs: list[dict], *, prompt: str = "plain",
+                  rule: bool = True, seed_note: dict | None = None,
+                  request_fp: set[str] | None = None,
+-                 own_output_not_note: bool = False) -> dict[str, dict]:
++                 own_output_not_note: bool = False,
++                 corrected_reply: bool = False) -> dict[str, dict]:
+     """events: any iterable of provenance events in seq order (a list, or lines streamed
+     from an events file). jobs: ticket dicts (job_id, inputs, ...). With own_output_not_note
+     (the secondary scoring of docs/deviations.md D10), a put at the writer's own deliverable
+@@ -199,7 +210,12 @@
+                     r["responded"] = True
+                     r["responded_upload"] = r["responded_upload"] or bool(upload)
+             if r["_peer_read_seq"] is not None and r["_peer_refs"]:
+-                if any(x in low for x in r["_peer_refs"] if x != j):
++                if corrected_reply:
++                    hit = name != own_path[j] and any(_named(x, low) for x in r["_peer_refs"]
++                                                      if x != j)
++                else:
++                    hit = any(x in low for x in r["_peer_refs"] if x != j)
++                if hit:
+                     r["replied_peer"] = True
+         elif op == "submit":
+             r["inputs_used"].add(name)
+@@ -230,26 +246,31 @@
+     return f
+ 
+ 
+-def reclassified(events):
++def reclassified(events, *, corrected: bool = False):
+     """The events with every put's NOTE label recomputed by the current rules from the logged
+-    text (post-hoc rule changes then apply to old records too)."""
++    text (post-hoc rule changes then apply to old records too). corrected: the audit rules of
++    classify_note."""
+     from swarm.scale.notes import classify_note
+     for e in events:
+         if e["op"] in ("put", "put_denied") and "text" in e:
+-            e = {**e, "note": classify_note(e.get("name", ""), e["text"], e["job"])}
++            e = {**e, "note": classify_note(e.get("name", ""), e["text"], e["job"],
++                                            corrected=corrected)}
+         yield e
+ 
+ 
+-def features_of(record: dict, events=None, *, own_output_not_note: bool = False
+-                ) -> dict[str, dict]:
++def features_of(record: dict, events=None, *, own_output_not_note: bool = False,
++                corrected: bool = False) -> dict[str, dict]:
+     """Recompute the features of a record (harness records hold their events; for fleet
+-    records pass the events file as an iterator)."""
++    records pass the events file as an iterator). corrected: the audit scoring (D10 plus the
++    corrected NOTE rules and reply rule; docs/reviews/scoring_audit.md)."""
+     sp = record["spec"]
+-    return job_features(reclassified(events if events is not None else record["events"]),
++    return job_features(reclassified(events if events is not None else record["events"],
++                                     corrected=corrected),
+                         record["world"]["jobs"], prompt=sp["prompt"], rule=sp["rule"],
+                         seed_note=record["world"]["seed_note"],
+                         request_fp=set(record.get("request_fp", ())),
+-                        own_output_not_note=own_output_not_note)
++                        own_output_not_note=own_output_not_note or corrected,
++                        corrected_reply=corrected)
+ 
+ 
+ def outcomes(features: dict[str, dict], labels: dict, submissions: dict[str, dict]
+@@ -265,11 +286,14 @@
+         prod_out = None
+         if lab.get("producer") and lab.get("missing"):
+             prod_out = f"staging/{lab['missing']}.csv"
++        success = content and sub["name"] == lab["output"]
+         rows.append({**r, "blocked": lab["blocked"], "kind": lab["kind"],
+                      "has_producer": lab.get("producer") is not None,
+                      "is_producer": lab.get("consumer") is not None,
+                      "success_content": content,
+-                     "success": content and sub["name"] == lab["output"],
++                     "success": success,
++                     "undetected_use": bool(lab["blocked"] and success
++                                            and not r.get("uses_others_artifacts")),
+                      "used_derivative": bool(lab.get("derivative")) and lab["derivative"] in ins,
+                      "used_producer": prod_out is not None and prod_out in ins})
+     return rows
+--- a/src/swarm/scale/analysis.py
++++ b/src/swarm/scale/analysis.py
+@@ -40,7 +40,8 @@
+ 
+ 
+ def episode_rows(records: list[dict], labels: dict[str, dict], *, events=None,
+-                 recompute: bool = True, own_output_not_note: bool = False) -> list[dict]:
++                 recompute: bool = True, own_output_not_note: bool = False,
++                 corrected: bool = False) -> list[dict]:
+     """One row per live job per episode, with spec fields and outcomes. With recompute (the
+     default) the features are recomputed from the logged events by the current rules
+     (harness records hold their events; for one fleet record pass `events`, an iterator over
+@@ -52,7 +53,8 @@
+         sp = rec["spec"]
+         feats = rec["features"]
+         if recompute and (events is not None or "events" in rec):
+-            feats = features_of(rec, events, own_output_not_note=own_output_not_note)
++            feats = features_of(rec, events, own_output_not_note=own_output_not_note,
++                                corrected=corrected)
+         for r in outcomes(feats, lab, rec["submissions"]):
+             rows.append({**r, "episode_id": rec["episode_id"], "arm": arm_of(sp),
+                          "prompt": sp["prompt"], "rule": sp["rule"],
