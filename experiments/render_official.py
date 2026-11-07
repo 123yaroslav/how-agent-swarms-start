@@ -536,7 +536,7 @@ def tighten_front_matter(d):
         last.paragraph_format.line_spacing = Pt(1)
 
 
-def main():
+def main(pdf: bool = True):
     nj = REP / "numbers.json"
     v = json.loads(nj.read_text()) if nj.exists() else {}
     d, abstract, missing = render((REP / "content.md").read_text(), v)
@@ -549,6 +549,9 @@ def main():
     # plain-text abstract for the submission form's "Project summary" field
     plain = re.sub(r"[*`~^]", "", abstract)
     (REP / "abstract_for_form.txt").write_text(plain + "\n")
+    if not pdf:
+        print(f"docx only -> {OUT_DOCX}; unfilled placeholders: {sorted(set(missing))}")
+        return
     script = f'''with timeout of 180 seconds
 tell application "Pages"
   set doc to open POSIX file "{OUT_DOCX}"
@@ -575,4 +578,5 @@ end timeout'''
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    main(pdf="--docx-only" not in sys.argv)
