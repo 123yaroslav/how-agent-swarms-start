@@ -60,6 +60,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--schedule", default="rounds", choices=["rounds", "async"])
     p.add_argument("--history-window", type=int, default=12)
     p.add_argument("--budget", type=float, default=40.0, help="USD cap for this package")
+    p.add_argument("--cache", default=None,
+                   help="LLM cache and ledger file (default results/cache/scale_llm.sqlite); "
+                        "the budget caps the spend in this file's ledger")
     p.add_argument("--harness-summary", default=None,
                    help="results/summary/scale_harness_<tag>.json for the prediction")
     p.add_argument("--table", action="store_true", help="only re-print a finished run")
@@ -164,8 +167,9 @@ def main(argv=None) -> None:
                 act["thought"] = (act["thought"] + " " + "x" * pad)[:pad]
                 return Reply(json.dumps(act), r.meta)
     else:
-        from swarm.scale.llm_task import TaskLLM
-        llm = TaskLLM(budget_usd=a.budget, max_concurrency=a.concurrency)
+        from swarm.scale.llm_task import SCALE_CACHE, TaskLLM
+        llm = TaskLLM(budget_usd=a.budget, max_concurrency=a.concurrency,
+                      cache_path=ROOT / a.cache if a.cache else SCALE_CACHE)
         policy = LLMPolicy(llm, a.model, max_tokens=a.max_tokens, temperature=a.temperature)
     from swarm.scale.http_stats import count_http
 

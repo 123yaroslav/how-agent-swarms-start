@@ -1,0 +1,371 @@
+"""Run the whole confirmatory set in one process: one lane per model, lanes side by side.
+
+    caffeinate -i uv run python experiments/scale_confirm_run.py
+
+Each lane (model) runs, in order: its C1-C3 cells, its C4 probe episodes, its C4 predictions
+(computed and committed before any of its fleets, docs/deviations.md D8), then its C4 fleets.
+Every lane has its own LLM client with at most 64 calls in flight. Lanes start two at a time;
+another lane is added when the share of HTTP 429 responses stayed below 20% for 10 minutes, and
+the most recently added lane is paused (calls wait at a gate) when the share over the last 5
+minutes passes 20%. Pausing changes no outcome: every call is keyed by its sample index and
+replays from the cache. Before each fleet the projected spend (ledger + remaining fleets +
+remaining single-agent episodes) is checked against the $650 cap; if it would pass the cap, no
+further fleet starts. Rerunning the command resumes: finished episodes are skipped, finished
+fleets (summary file present, not stopped) are skipped, frozen predictions are kept, and
+everything else replays from results/cache/scale_confirm_llm.sqlite.
+
+Milestones are printed as lines starting with "===".
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import subprocess
+import sys
+import time
+from collections import Counter, deque
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "experiments"))
+
+import httpx  # noqa: E402
+
+import scale_confirm as SC  # noqa: E402
+import scale_confirm_eval as EV  # noqa: E402
+import scale_predict as SP  # noqa: E402
+from swarm.llm import ADAPTION_PRICES  # noqa: E402
+from swarm.scale.runner import LLMPolicy, RunSpec, peak_rss_mb, run_many, run_world  # noqa: E402
+
+ORDER = ["deepseek-v4-flash", "glm-5.2", "qwen3.5-397b", "gemma-4-31b-it", "gemma-4-26b-a4b-it",
+         "qwen3.8-27b"]
+START_LANES = 2
+SHARE_MAX = 0.20
+ADD_AFTER_S = 600
+BACKOFF_WINDOW_S = 300
+CONC = 64
+SUMMARY = ROOT / "results" / "summary"
+T0 = time.time()
+
+
+def log(msg: str) -> None:
+    print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
+
+
+def physmem() -> str:
+    try:
+        out = subprocess.run(["top", "-l", "1"], capture_output=True, text=True,
+                             timeout=30).stdout
+        return next((ln for ln in out.splitlines() if ln.startswith("PhysMem")), "?")
+    except Exception:  # noqa: BLE001
+        return "?"
+
+
+# ---- HTTP status window (all Adaption calls of this process, retries included) -------------
+class Window:
+    def __init__(self) -> None:
+        self.ev: deque = deque()
+        self.total: Counter = Counter()
+        self.by_model: Counter = Counter()
+
+    def add(self, status: int, model: str | None) -> None:
+        self.ev.append((time.time(), status))
+        self.total[status] += 1
+        self.by_model[(model, status)] += 1
+        cut = time.time() - 3600
+        while self.ev and self.ev[0][0] < cut:
+            self.ev.popleft()
+
+    def share(self, seconds: float) -> tuple[float, int]:
+        cut = time.time() - seconds
+        xs = [s for t, s in self.ev if t >= cut]
+        return (sum(s == 429 for s in xs) / len(xs) if xs else 0.0), len(xs)
+
+
+WIN = Window()
+
+
+def patch_http() -> None:
+    orig = httpx.AsyncClient.post
+
+    async def post(self, url, *a, **kw):
+        r = await orig(self, url, *a, **kw)
+        body = kw.get("json") or {}
+        WIN.add(r.status_code, body.get("model") if isinstance(body, dict) else None)
+        return r
+
+    httpx.AsyncClient.post = post
+
+
+# ---- lanes --------------------------------------------------------------------------------
+class GatedPolicy:
+    """The model's policy behind a gate: while the lane is paused, new calls wait."""
+
+    def __init__(self, inner: LLMPolicy, gate: asyncio.Event):
+        self.inner, self.gate = inner, gate
+
+    async def __call__(self, agent, messages, sample):
+        await self.gate.wait()
+        return await self.inner(agent, messages, sample)
+
+
+class Lane:
+    def __init__(self, model: str):
+        from swarm.scale.llm_task import TaskLLM
+        self.model = model
+        self.gate = asyncio.Event()
+        self.llm = TaskLLM(budget_usd=SC.BUDGET, max_concurrency=CONC, cache_path=SC.CACHE)
+        self.policy = GatedPolicy(LLMPolicy(self.llm, f"adaption/{model}",
+                                            max_tokens=SC.MODELS[model][1],
+                                            temperature=SC.TEMPERATURE), self.gate)
+        self.started = False
+        self.done = False
+        self.phase = "waiting"
+
+
+GIT_LOCK: asyncio.Lock | None = None
+EVAL_LOCK: asyncio.Lock | None = None
+STATE = {"budget_stop": False}
+
+
+async def git_commit(paths: list[str], msg: str) -> None:
+    async with GIT_LOCK:
+        exist = [p for p in paths if (ROOT / p).exists()]
+        p1 = await asyncio.create_subprocess_exec("git", "add", *exist, cwd=ROOT)
+        await p1.wait()
+        p2 = await asyncio.create_subprocess_exec("git", "commit", "-q", "-m", msg, cwd=ROOT,
+                                                  stdout=asyncio.subprocess.PIPE,
+                                                  stderr=asyncio.subprocess.STDOUT)
+        out, _ = await p2.communicate()
+        log(f"git commit ({msg}): exit {p2.returncode} {out.decode().strip()[:200]}")
+
+
+async def run_eval(stage: str) -> None:
+    async with EVAL_LOCK:
+        def go():
+            r = getattr(EV, f"stage_{stage}")()
+            name = {"c1c3": "c1c3", "probes": "probes", "c4": "c4"}[stage]
+            (EV.OUT / f"{name}.json").write_text(json.dumps(r, indent=1))
+            EV.write_md()
+            return r
+        EV.OUT.mkdir(parents=True, exist_ok=True)
+        r = await asyncio.to_thread(go)
+        if stage == "c1c3":
+            for ln in EV.print_c1c3(r):
+                log(f"eval c1c3: {ln}")
+
+
+def per_call_usd(model: str, lg: dict) -> float:
+    bm = lg.get("by_model", {}).get(f"adaption/{model}")
+    if bm and bm["calls"] > 50:
+        return bm["usd"] / bm["calls"]
+    p_in, p_out = ADAPTION_PRICES[model]
+    return 4500 * p_in + 900 * p_out
+
+
+def done_episodes(path: Path) -> int:
+    """Finished episodes = lines in the output file (cheap; no parsing)."""
+    if not path.exists():
+        return 0
+    with path.open("rb") as f:
+        return sum(1 for _ in f)
+
+
+def projected_total() -> tuple[float, float]:
+    lg = EV.ledger()
+    rest = 0.0
+    for f in SP.FLEETS:
+        if not fleet_finished(SP.fleet_tag(f)):
+            rest += f["N"] * SP.TURNS_PER_JOB * per_call_usd(f["model"], lg)
+    for m in SC.MODELS:
+        for probes in (False, True):
+            n_all = len(SC.probe_specs(m) if probes else SC.cell_specs(m))
+            left = max(0, n_all - done_episodes(SC.out_path(m, probes)))
+            rest += left * 29 * per_call_usd(m, lg)
+    return lg["spend_usd"], rest
+
+
+def fleet_finished(tag: str) -> bool:
+    s = SUMMARY / f"scale_{tag}.json"
+    if not s.exists():
+        return False
+    try:
+        return json.loads(s.read_text()).get("stopped") is None
+    except json.JSONDecodeError:
+        return False
+
+
+async def run_cells(lane: Lane, probes: bool) -> None:
+    specs = SC.probe_specs(lane.model) if probes else SC.cell_specs(lane.model)
+    out = SC.out_path(lane.model, probes)
+    kind = "probes" if probes else "cells"
+    lane.phase = kind
+    log(f"=== {lane.model} {kind} start ({len(specs)} episodes) {physmem()}")
+    last = [0.0]
+
+    def progress(k: int, n: int) -> None:
+        if time.time() - last[0] > 300 or k == n:
+            last[0] = time.time()
+            log(f"{lane.model} {kind}: {k}/{n} episodes, rss {peak_rss_mb():.0f}MB, task "
+                f"spend ${lane.llm.total_spent():.2f}")
+    res = await run_many(specs, lambda s: lane.policy, out, concurrency=CONC, progress=progress)
+    log(f"=== {lane.model} {kind} done: {json.dumps(res)}; task spend "
+        f"${lane.llm.total_spent():.2f}")
+    if res["stopped"]:
+        raise RuntimeError(f"{lane.model} {kind} stopped by the budget cap")
+
+
+async def run_fleet(lane: Lane, f: dict) -> None:
+    from scale_fleet import report
+    tag = SP.fleet_tag(f)
+    if fleet_finished(tag):
+        log(f"=== fleet {tag} already finished, skipped")
+        return
+    spend, rest = projected_total()
+    if STATE["budget_stop"] or spend + rest > SC.BUDGET:
+        STATE["budget_stop"] = True
+        log(f"=== BUDGET STOP before fleet {tag}: spend ${spend:.2f} + projected remaining "
+            f"${rest:.2f} > ${SC.BUDGET:.0f}; no further fleet starts")
+        return
+    lane.phase = f"fleet {tag}"
+    log(f"=== fleet {tag} start; spend ${spend:.2f}, projected remaining ${rest:.2f}; "
+        f"{physmem()}")
+    spec = RunSpec(tag=tag, mode="fleet", n_agents=f["N"], p_blocked=0.3, prompt=f["prompt"],
+                   rule=True, seed_note=f["seed_note"], n_background=200, p_derivative=1.0,
+                   producers_in_fleet=True, steps=SP.STEPS,
+                   model=f"adaption/{f['model']}", max_tokens=SC.MODELS[f["model"]][1],
+                   temperature=SC.TEMPERATURE, seed=SP.FLEET_SEED, repeat=SP.REPEAT,
+                   schedule="rounds", history_window=12)
+    prefix = SC.RAW / tag
+
+    def progress(rr: dict) -> None:
+        log(f"{tag} step {rr['step']:>2} active {rr['active']:>4} live {rr['live']:>4} "
+            f"cached {rr['cached']:>4} err {rr['errors']:>3} {rr['wall_s']:.0f}s "
+            f"rss {rr['peak_rss_mb']}MB ${rr['cost']:.3f}")
+    t0 = time.time()
+    rec, labels = await run_world(spec, lane.policy, sem=asyncio.Semaphore(CONC),
+                                  out_prefix=prefix, progress=progress)
+    extra = {"concurrency": CONC, "elapsed_s": round(time.time() - t0, 1),
+             "task_spend_usd": round(lane.llm.total_spent(), 4),
+             "llm_summary": lane.llm.summary(), "models_in_process": ORDER}
+
+    def rep():
+        out = report(rec, labels, extra, None, prefix)
+        out["peak_rss_mb_process"] = round(peak_rss_mb(), 1)
+        (SUMMARY / f"scale_{tag}.json").write_text(json.dumps(out, indent=1))
+    await asyncio.to_thread(rep)
+    log(f"=== fleet {tag} done in {time.time() - t0:.0f}s, stopped {rec['stopped']}, task "
+        f"spend ${lane.llm.total_spent():.2f}")
+    await run_eval("c4")
+    d = json.loads((EV.OUT / "c4.json").read_text())["fleets"].get(tag, {})
+    log(f"=== C4 {tag}: board {d.get('board')} ({d.get('n_board_jobs')} jobs), predicted R "
+        f"{d.get('predicted_R')}, predicted board {d.get('predicted_board')}, correct "
+        f"{d.get('correct')}")
+    await git_commit(["results/confirmatory/c4.json", "docs/results_confirmatory.md",
+                      f"results/summary/scale_{tag}.json"],
+                     f"C4 fleet {tag}: board outcome and fleet table")
+
+
+async def lane_main(lane: Lane) -> None:
+    m = lane.model
+    try:
+        await run_cells(lane, probes=False)
+        await run_eval("c1c3")
+        await git_commit(["results/confirmatory/c1c3.json", "docs/results_confirmatory.md"],
+                         f"C1-C3 single-agent cells of {m}: rates and pass rules so far")
+        await run_cells(lane, probes=True)
+        await run_eval("c1c3")
+        await run_eval("probes")
+        pred = json.loads(SP.PRED.read_text())["fleets"] if SP.PRED.exists() else {}
+        mine = [SP.fleet_tag(f) for f in SP.FLEETS if f["model"] == m]
+        if all(t in pred for t in mine):
+            log(f"=== predictions for {m} already frozen")
+        else:
+            async with EVAL_LOCK:
+                await asyncio.to_thread(SP.write_predictions, [m])
+                EV.write_md()
+            await git_commit(["results/predictions/c4.json", "results/confirmatory/c1c3.json",
+                              "results/confirmatory/probes.json",
+                              "docs/results_confirmatory.md"],
+                             f"C4 predictions for {m}, frozen before its fleets (D8)")
+            p = json.loads(SP.PRED.read_text())["fleets"]
+            for t in mine:
+                log(f"=== PREDICTION {t}: W {p[t]['W']:.2f} R {p[t]['R']:.2f} P_board "
+                    f"{p[t]['P_board']:.3f} -> {'board' if p[t]['predicted_board'] else 'no board'}")
+        for f in SP.FLEETS:
+            if f["model"] == m:
+                await run_fleet(lane, f)
+    except Exception as e:  # noqa: BLE001
+        log(f"=== LANE ERROR {m}: {type(e).__name__}: {e}")
+    finally:
+        lane.done = True
+        lane.phase = "done"
+        log(f"=== lane {m} finished")
+
+
+async def controller(lanes: list[Lane]) -> None:
+    """`target` lanes run at once: start at START_LANES, +1 after 10 minutes with the 429 share
+    below 20%, -1 (pause the latest lane) when the 5-minute share passes 20%. A finished lane
+    is replaced at once by the next waiting one."""
+    last_change = time.time()
+    active: list[Lane] = []
+    target = START_LANES
+
+    def start(lane: Lane) -> None:
+        if not lane.started:
+            lane.started = True
+            asyncio.get_running_loop().create_task(lane_main(lane))
+        lane.gate.set()
+        active.append(lane)
+        log(f"=== lane {lane.model} active (target {target}, active "
+            f"{[x.model for x in active]})")
+
+    def fill() -> None:
+        active[:] = [x for x in active if not x.done]
+        waiting = [x for x in lanes if not x.done and not x.gate.is_set()]
+        while len(active) < target and waiting:
+            start(waiting.pop(0))
+
+    fill()
+    while not all(x.done for x in lanes):
+        await asyncio.sleep(60)
+        active[:] = [x for x in active if not x.done]
+        s10, n10 = WIN.share(ADD_AFTER_S)
+        s5, n5 = WIN.share(BACKOFF_WINDOW_S)
+        waiting = [x for x in lanes if not x.done and not x.gate.is_set()]
+        log(f"429 share 5 min {s5:.2f} (n {n5}), 10 min {s10:.2f} (n {n10}); target {target}; "
+            f"active {[(x.model, x.phase) for x in active]}; waiting "
+            f"{[x.model for x in waiting]}; rss {peak_rss_mb():.0f}MB; spend "
+            f"${EV.ledger()['spend_usd']:.2f}")
+        if s5 > SHARE_MAX and len(active) > 1 and n5 > 200 \
+                and time.time() - last_change > BACKOFF_WINDOW_S:
+            target = len(active) - 1
+            lane = active.pop()
+            lane.gate.clear()
+            last_change = time.time()
+            log(f"=== back off: lane {lane.model} paused (429 share {s5:.2f}), target {target}")
+        elif waiting and len(active) >= target and s10 < SHARE_MAX \
+                and time.time() - last_change >= ADD_AFTER_S:
+            target += 1
+            last_change = time.time()
+        fill()
+    log("=== all lanes finished")
+
+
+async def main_async() -> None:
+    global GIT_LOCK, EVAL_LOCK
+    GIT_LOCK, EVAL_LOCK = asyncio.Lock(), asyncio.Lock()
+    patch_http()
+    lanes = [Lane(m) for m in ORDER]
+    await controller(lanes)
+    await run_eval("c1c3")
+    await run_eval("probes")
+    await run_eval("c4")
+    log(f"=== totals: http {dict(WIN.total)}; ledger {json.dumps(EV.ledger())}")
+
+
+if __name__ == "__main__":
+    log(f"=== orchestrator start {physmem()}")
+    asyncio.run(main_async())

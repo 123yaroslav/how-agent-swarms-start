@@ -96,4 +96,21 @@ other models. Temperature 0.8, history window 12, 200 background jobs in C1-C3 c
 fleets with 30% blocked jobs and a producer in the fleet for each (the smoke defaults), rounds
 schedule. LLM calls go through `swarm.scale.llm_task.TaskLLM` with its own cache and ledger
 `results/cache/scale_confirm_llm.sqlite` and a cap of $650 for the confirmatory set. At most 64 calls
-in flight.
+in flight per model. From 20:55 UTC+5 the models run side by side in one process
+(`experiments/scale_confirm_run.py`): two models at first, one more after 10 minutes with the
+share of HTTP 429 responses below 20%, one model paused when that share passes 20%. Pausing only
+delays calls; every call is keyed by its sample index, so outcomes do not depend on the schedule.
+The first deepseek-v4-flash episodes ran in a separate process at 64 calls in flight; that process
+was stopped and the episodes it finished are kept (the rerun skips them and replays the rest
+from the cache).
+
+## D8. C4 predictions frozen per model
+
+The frozen C4 row says the predictions are committed before the first fleet. To get the fleets of
+one model started while other models still run their single-agent cells, the predictions are
+computed and committed per model: as soon as a model's C1-C3 cells and its probe episodes (D6) are
+done, `experiments/scale_predict.py --model <m>` adds the predictions for that model's fleets to
+`results/predictions/c4.json` and they are committed; only then do that model's fleets start. An
+entry, once written, is never rewritten (the script refuses), and it refuses to predict a fleet
+whose output already exists. Every prediction is therefore committed before the data it predicts.
+The inputs of a model's predictions are that model's own cells and probes only.

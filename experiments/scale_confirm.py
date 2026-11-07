@@ -82,39 +82,58 @@ def out_path(model: str, probes: bool) -> Path:
 
 def main(argv=None) -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    p.add_argument("--model", required=True, choices=list(MODELS))
+    p.add_argument("--model", required=True,
+                   help="one model, or several comma-separated: run side by side in this "
+                        "process, each with its own client and --concurrency calls in flight")
     p.add_argument("--probes", action="store_true")
     p.add_argument("--concurrency", type=int, default=64)
     a = p.parse_args(argv)
-    specs = probe_specs(a.model) if a.probes else cell_specs(a.model)
-    out = out_path(a.model, a.probes)
+    models = a.model.split(",")
+    for m in models:
+        if m not in MODELS:
+            p.error(f"unknown model {m}")
     from swarm.scale.http_stats import count_http
     from swarm.scale.llm_task import TaskLLM
 
-    llm = TaskLLM(budget_usd=BUDGET, max_concurrency=a.concurrency, cache_path=CACHE)
-    shared = LLMPolicy(llm, f"adaption/{a.model}", max_tokens=MODELS[a.model][1],
-                       temperature=TEMPERATURE)
     t0 = time.time()
-    last = [0.0]
+    jobs = []
+    for m in models:
+        specs = probe_specs(m) if a.probes else cell_specs(m)
+        out = out_path(m, a.probes)
+        llm = TaskLLM(budget_usd=BUDGET, max_concurrency=a.concurrency, cache_path=CACHE)
+        pol = LLMPolicy(llm, f"adaption/{m}", max_tokens=MODELS[m][1], temperature=TEMPERATURE)
+        jobs.append((m, specs, out, llm, pol))
+        print(f"{m} {'probes' if a.probes else 'cells'}: {len(specs)} episodes -> {out}",
+              flush=True)
 
-    def progress(k: int, n: int) -> None:
-        if time.time() - last[0] > 60 or k == n:
-            last[0] = time.time()
-            print(f"{k}/{n} episodes, {time.time() - t0:.0f}s, rss {peak_rss_mb():.0f}MB, "
-                  f"task spend ${llm.total_spent():.3f}", flush=True)
+    def progress_for(m: str, llm):
+        last = [0.0]
 
-    print(f"{a.model} {'probes' if a.probes else 'cells'}: {len(specs)} episodes -> {out}",
-          flush=True)
+        def progress(k: int, n: int) -> None:
+            if time.time() - last[0] > 60 or k == n:
+                last[0] = time.time()
+                print(f"{m}: {k}/{n} episodes, {time.time() - t0:.0f}s, rss "
+                      f"{peak_rss_mb():.0f}MB, task spend ${llm.total_spent():.3f}", flush=True)
+        return progress
+
+    async def run_all():
+        return await asyncio.gather(*(
+            run_many(specs, (lambda s, pol=pol: pol), out, concurrency=a.concurrency,
+                     progress=progress_for(m, llm))
+            for m, specs, out, llm, pol in jobs))
+
     with count_http() as hs:
-        res = asyncio.run(run_many(specs, lambda s: shared, out, concurrency=a.concurrency,
-                                   progress=progress))
-    print("run:", json.dumps(res), "http:", json.dumps(hs.summary()), flush=True)
-    print(llm.summary(), flush=True)
+        results = asyncio.run(run_all())
     log = RAW / "confirm_runs.jsonl"
-    with log.open("a") as f:
-        f.write(json.dumps({"model": a.model, "probes": a.probes, "run": res,
-                            "http": hs.summary(), "task_spend_usd": round(llm.total_spent(), 4),
-                            "summary": llm.summary(), "ts": time.time()}) + "\n")
+    for (m, _, _, llm, _), res in zip(jobs, results):
+        print(f"{m} run:", json.dumps(res), flush=True)
+        print(f"{m}:", llm.summary(), flush=True)
+        with log.open("a") as f:
+            f.write(json.dumps({"model": m, "probes": a.probes, "run": res,
+                                "models_in_process": models, "http": hs.summary(),
+                                "task_spend_usd": round(llm.total_spent(), 4),
+                                "summary": llm.summary(), "ts": time.time()}) + "\n")
+    print("http:", json.dumps(hs.summary()), flush=True)
 
 
 if __name__ == "__main__":
