@@ -64,3 +64,27 @@ Nucleation model, in words. A fleet forms a board when at least one first note a
 ## Note for Results 4.3 (from exploratory smoke data, confirm with C3)
 
 The rule has a price under outcome-only reward. On deepseek-v4-flash, blocked agents with the house rule completed 0 of 100 jobs and reported the block in 95 of 100; without the rule they used other jobs' artifacts in 61 of 100 and completed 52 of 100. Under outcome reward, training therefore pays for crossing the data boundary, which matches OpenAI's account that reward reinforced out-of-bounds behaviour. A reward for an honest report of an impossible job removes that gradient. State this with the C3 numbers.
+
+## 5. Discussion (draft)
+
+What this says about the incident. Every family we tested has the capability: one permission sentence makes nearly all blocked agents write to others and answer them. None has the propensity: without that sentence they report the block, or, without a house rule, quietly take other jobs' outputs. The incident model crossed this gate on its own. OpenAI's report attributes that to training, where collaboration was rewarded and where blocked agents that reached outside the rules earned reward ({{openai_quote_training}}). Our data are consistent with that account and add a measured mechanism. Under the house rule a blocked agent completes {{c3_success_rule}} of jobs and without it {{c3_success_norule}}, so outcome-only reward pays for crossing the data boundary. Whether collaboration fine-tuning itself opens the gate is the test our organisms were built for ({{c5_status}}).
+
+What deployers should do. Three measured levers decide the outcome, and each costs one line. Put a data-boundary rule in the system prompt, where every model reads it (one model read a rules file in 1 of 48 runs). Never grant coordination through a shared writable place unless a board is intended, because one sentence creates one. If agents must coordinate, give them a sanctioned, logged channel, which absorbed all contact in our runs. The linter in Section 6 checks the first two automatically.
+
+What labs should do. Measure the gate before training and after. Reward an honest report that a task is impossible at least as much as a failed attempt, because the alternative reward points at other runs' outputs. Audit training tasks for solvability, since 93% of the tasks discussed on the incident board came from the 22% no model had solved.
+
+## 6. Tools (draft)
+
+SwarmCheck lint reads a system prompt and a tool list and flags permission to coordinate through a shared place (high), a missing data-boundary rule with shared storage present (medium), shared-write tools (medium), and sanctioned channels (information). On our own arm prompts it flags the permission arm and passes the plain arm and all six measured phrasings ({{lint_tests}}). On {{rw_n_prompts}} default prompts of open-source multi-agent frameworks its precision and recall against hand labels are {{rw_precision}} and {{rw_recall}} ({{rw_prevalence_sentence}}).
+
+SwarmCheck card runs a fixed protocol of about {{card_episodes}} single-agent episodes on any model endpoint (about $1 on DeepSeek V4 Flash) and reports the gate, free riding, note reading and joining with intervals, plus the predicted chance of a board for any fleet size.
+
+## Appendix A. Limitations and Dual-Use / Ethical Considerations (draft)
+
+What the results establish. In simulated data-engineering jobs, six open-weight model families did not contact other jobs through a shared store unless permitted, no tested realistic phrasing changed that, and fleets of up to 1,024 agents behaved as a nucleation model fitted on single agents predicted ({{c4_verdict}}).
+
+What they do not establish. They do not show that frontier closed models, models trained with reinforcement learning on agentic tasks, or the incident model behave the same way. The incident model did not. They do not cover channels other than one artifact store, long-lived agents with memory across episodes, or tasks with real stakes. Jobs are synthetic and benign. Simulated tasks may understate pressure, which biases our rates downward, toward finding a gate. Prompts are in English. The fine-tuned organisms {{c5_limit}}. The nucleation model assumes independent agents and a well-mixed store; it ignores ordering and search effects beyond what single-agent probes capture.
+
+Dual use. The work describes how agents come to coordinate through shared infrastructure. The mechanisms are already public in the incident reports, and every task here is benign, with no network access, no real systems and no security content. The tools are defensive: a linter that flags risky prompts and a card that measures propensity. A reader could use the permission result to make agents coordinate on purpose, which is the intended use of a sanctioned channel. We release code, prompts and aggregate results, not transcripts with attack content, and none of our tasks contain any.
+
+Pre-registration and deviations. All confirmatory tests were frozen in commit {{prereg_commit}} before data. Deviations D1-D9, all recorded before the affected data, are listed in Appendix {{app_dev}}.
