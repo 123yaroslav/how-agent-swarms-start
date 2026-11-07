@@ -456,8 +456,8 @@ def cmd_adapters(a) -> None:
 
 
 # ---- evaluation -------------------------------------------------------------------------------
-def endpoint() -> tuple[str, str | None]:
-    ep = json.loads((SERVE / "endpoint.json").read_text())
+def endpoint(path: Path) -> tuple[str, str | None]:
+    ep = json.loads(path.read_text())
     base_url = ep["base_url"].rstrip("/")
     if not base_url.endswith("/v1"):
         base_url += "/v1"
@@ -470,9 +470,9 @@ def endpoint() -> tuple[str, str | None]:
     return base_url, base
 
 
-def set_token() -> None:
+def set_token(path: Path) -> None:
     """The server token goes only into this process's environment (never printed)."""
-    tok = (SERVE / "vllm_token.txt").read_text().strip()
+    tok = path.read_text().strip()
     os.environ["SWARM_OAI_API_KEY"] = tok
 
 
@@ -495,11 +495,12 @@ def load_adapter(base_url: str, name: str, remote_path: str) -> None:
     r.raise_for_status()
 
 
-def eval_specs(label: str, model: str, steps: int) -> list[RunSpec]:
+def eval_specs(label: str, model: str, steps: int, out_tag: str = "outcome_eval",
+               n_seeds: int = 100) -> list[RunSpec]:
     out = []
-    for s in EVAL_SEEDS:
+    for s in list(EVAL_SEEDS)[:n_seeds]:
         for rule in (True, False):
-            out.append(RunSpec(tag=f"outcome_eval_{label}", mode="harness", prompt="plain",
+            out.append(RunSpec(tag=f"{out_tag}_{label}", mode="harness", prompt="plain",
                                rule=rule, seed_note="none", n_background=N_BACKGROUND,
                                steps=steps, model=model, max_tokens=MAX_TOKENS,
                                temperature=TEMPERATURE, seed=s, repeat=EVAL_REPEAT,
@@ -507,8 +508,8 @@ def eval_specs(label: str, model: str, steps: int) -> list[RunSpec]:
     return out
 
 
-def eval_path(label: str) -> Path:
-    return RAW / f"outcome_eval_{label}.jsonl"
+def eval_path(label: str, out_tag: str = "outcome_eval") -> Path:
+    return RAW / f"{out_tag}_{label}.jsonl"
 
 
 def paired_boot(a: dict[int, float], b: dict[int, float], n_boot: int = 10_000,
@@ -525,11 +526,11 @@ def paired_boot(a: dict[int, float], b: dict[int, float], n_boot: int = 10_000,
             "hi": float(np.percentile(boots, 97.5)), "n_seeds": len(seeds)}
 
 
-def eval_summary(labels: list[str]) -> dict:
+def eval_summary(labels: list[str], out_tag: str = "outcome_eval") -> dict:
     cells: dict = {}
     per_seed: dict = defaultdict(dict)
     for lab in labels:
-        p = eval_path(lab)
+        p = eval_path(lab, out_tag)
         if not p.exists():
             continue
         rows = pool_rows(p)
@@ -576,11 +577,11 @@ def cmd_eval(a) -> None:
         from swarm.scale.http_stats import count_http
         from swarm.scale.llm_task import TaskLLM
 
-        set_token()
-        base_url, base = endpoint()
+        set_token(Path(a.token_file))
+        base_url, base = endpoint(Path(a.endpoint))
         served = served_models(base_url)
         print(f"server {base_url}: {len(served)} models served: {served}", flush=True)
-        extra = json.loads((SERVE / "extra_adapters.json").read_text())["adapters"]
+        extra = json.loads(Path(a.adapters_file).read_text())["adapters"]
         names = {}
         for lab in labels:
             if lab == "base":
@@ -598,12 +599,13 @@ def cmd_eval(a) -> None:
                 load_adapter(base_url, lab, f"{a.remote_root.rstrip('/')}/"
                              f"{Path(ent['folder']).name}")
         llm = TaskLLM(budget_usd=1000.0, max_concurrency=a.concurrency * len(labels),
-                      cache_path=EVAL_CACHE)
+                      cache_path=EVAL_CACHE if a.out_tag == "outcome_eval"
+                      else ROOT / "results" / "cache" / f"{a.out_tag}_llm.sqlite")
         jobs = []
         for lab in labels:
             model = f"oai:{base_url}|{names[lab]}"
             pol = LLMPolicy(llm, model, max_tokens=MAX_TOKENS, temperature=TEMPERATURE)
-            jobs.append((lab, eval_specs(lab, model, a.steps), pol))
+            jobs.append((lab, eval_specs(lab, model, a.steps, a.out_tag, a.n_seeds), pol))
         t0 = time.time()
 
         def progress_for(lab):
@@ -618,19 +620,20 @@ def cmd_eval(a) -> None:
 
         async def run_all():
             return await asyncio.gather(*(
-                run_many(specs, (lambda s, p=pol: p), eval_path(lab), concurrency=a.concurrency,
+                run_many(specs, (lambda s, p=pol: p), eval_path(lab, a.out_tag),
+                         concurrency=a.concurrency,
                          progress=progress_for(lab)) for lab, specs, pol in jobs))
 
         with count_http() as hs:
             res = asyncio.run(run_all())
         print(llm.summary())
         print("runs:", json.dumps(res), "http:", json.dumps(hs.summary()))
-    s = eval_summary(labels)
-    s["settings"] = {"seeds": f"{EVAL_SEEDS.start}-{EVAL_SEEDS.stop - 1}",
+    s = eval_summary(labels, a.out_tag)
+    s["settings"] = {"seeds": f"{EVAL_SEEDS.start}-{EVAL_SEEDS.start + a.n_seeds - 1}",
                      "repeat": EVAL_REPEAT, "steps": a.steps, "temperature": TEMPERATURE,
                      "max_tokens": MAX_TOKENS, "n_background": N_BACKGROUND}
     SUMMARY.mkdir(parents=True, exist_ok=True)
-    (SUMMARY / "outcome_eval.json").write_text(json.dumps(s, indent=1))
+    (SUMMARY / f"{a.out_tag}.json").write_text(json.dumps(s, indent=1))
     print_eval(s)
     if a.mark_done and not a.table:
         (SERVE / "sampling_done.txt").write_text(
@@ -659,6 +662,11 @@ def main(argv=None) -> None:
     e.add_argument("--load", action="store_true", help="load missing adapters at runtime")
     e.add_argument("--remote-root", default="/workspace/adapters")
     e.add_argument("--table", action="store_true")
+    e.add_argument("--endpoint", default=str(SERVE / "endpoint.json"))
+    e.add_argument("--token-file", default=str(SERVE / "vllm_token.txt"))
+    e.add_argument("--adapters-file", default=str(SERVE / "extra_adapters.json"))
+    e.add_argument("--out-tag", default="outcome_eval", help="raw, cache and summary names")
+    e.add_argument("--n-seeds", type=int, default=100)
     e.add_argument("--mark-done", action="store_true",
                    help="write results/serve/sampling_done.txt after the run")
     a = ap.parse_args(argv)
