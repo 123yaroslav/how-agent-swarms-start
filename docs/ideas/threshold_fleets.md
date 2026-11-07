@@ -168,6 +168,33 @@ Filled by `experiments/threshold_fleets.py eval` after the fleets, next to the c
 predictions.
 
 <!-- observed:begin -->
+| fleet | predicted R | P_board (frozen) | P_1link | board | jobs in a board link (permission / plain) | notes (permission / plain) | point rule correct | cost |
+|---|---|---|---|---|---|---|---|---|
+| thr_gemma-4-26b-a4b-it_n256_k39_coordinate_ok_s6900 | 0.78 | 0.000 | 1.000 | yes | 1 (1 / 0) | 4 / 0 | False | $0.45 |
+| thr_gemma-4-26b-a4b-it_n256_k39_coordinate_ok_s6901 | 0.78 | 0.000 | 1.000 | not run | | | | |
+| thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6900 | 0.00 | 0.000 | 0.000 | not run | | | | |
+| thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6901 | 0.00 | 0.000 | 0.000 | not run | | | | |
+| thr_gemma-4-26b-a4b-it_n256_k77_coordinate_ok_s6900 | 1.54 | 1.000 | 1.000 | not run | | | | |
+| thr_gemma-4-26b-a4b-it_n256_k77_coordinate_ok_s6901 | 1.54 | 1.000 | 1.000 | not run | | | | |
+
+C4 fleets with an outcome so far (frozen predictions, results/confirmatory/c4.json):
+
+| fleet | N | predicted R | P_board (frozen) | P_1link | board |
+|---|---|---|---|---|---|
+| c4_gemma-4-26b-a4b-it_n256_plain_rule | 256 | 0.00 | 0.000 | 0.000 | no |
+
+Calibration (Brier score, lower is better; expected boards = sum of predicted P(board)):
+
+| set | predictor | fleets | Brier | expected boards | observed boards |
+|---|---|---|---|---|---|
+| threshold_fleets | frozen | 1 | 1.000 | 0.00 | 1 |
+| threshold_fleets | 1link | 1 | 0.000 | 1.00 | 1 |
+| threshold_fleets | permission_rule | 1 | 0.000 | 1.00 | 1 |
+| with_c4 | frozen | 2 | 0.500 | 0.00 | 1 |
+| with_c4 | 1link | 2 | 0.000 | 1.00 | 1 |
+| with_c4 | permission_rule | 2 | 0.000 | 1.00 | 1 |
+
+Spend of this study (ledger of results/cache/threshold_llm.sqlite): $2.46 over 6987 calls.
 <!-- observed:end -->
 
 ## Files
