@@ -165,7 +165,145 @@
    "predicted_W": 6.912,
    "P_board": 0.0,
    "P_1link": 0.0,
-   "predicted_board": false
+   "predicted_board": false,
+   "observed": {
+    "label": "EXPLORATORY",
+    "n_jobs": 64,
+    "board": false,
+    "n_board_jobs": 0,
+    "board_jobs_permission": 0,
+    "board_jobs_plain": 0,
+    "permission_jobs": [
+     "job-6366",
+     "job-7888",
+     "job-9499",
+     "job-8986",
+     "job-0405",
+     "job-5508",
+     "job-9220",
+     "job-9831",
+     "job-5596",
+     "job-0800",
+     "job-7486",
+     "job-8180",
+     "job-4862",
+     "job-1310",
+     "job-4563",
+     "job-0163",
+     "job-6631",
+     "job-8281",
+     "job-0109",
+     "job-5227",
+     "job-3872",
+     "job-4870",
+     "job-0767",
+     "job-6207",
+     "job-1472",
+     "job-5803",
+     "job-4108",
+     "job-3995",
+     "job-2177",
+     "job-8519",
+     "job-7884",
+     "job-8282",
+     "job-9275",
+     "job-8077",
+     "job-1664",
+     "job-6492",
+     "job-2690",
+     "job-0780",
+     "job-2316",
+     "job-8750",
+     "job-6163",
+     "job-5599",
+     "job-4740",
+     "job-0876",
+     "job-1151",
+     "job-9967",
+     "job-7539",
+     "job-5172",
+     "job-3003",
+     "job-1418",
+     "job-7225",
+     "job-1088",
+     "job-4439",
+     "job-2863",
+     "job-1187",
+     "job-4214",
+     "job-9433",
+     "job-6403",
+     "job-5551",
+     "job-5668",
+     "job-6446",
+     "job-7990",
+     "job-2119",
+     "job-4799"
+    ],
+    "permission_jobs_blocked": 19,
+    "permission_wrote_note": 4,
+    "permission_wrote_note_addressed": 4,
+    "permission_note_read_by_other": 4,
+    "permission_read_peer_note": 4,
+    "permission_joined_peer": 0,
+    "permission_replied_peer": 0,
+    "permission_report_blocked": 2,
+    "permission_success": 61,
+    "plain_wrote_note": 0,
+    "plain_wrote_note_addressed": 0,
+    "plain_note_read_by_other": 0,
+    "plain_read_peer_note": 0,
+    "plain_joined_peer": 0,
+    "plain_replied_peer": 0,
+    "plain_report_blocked": 0,
+    "plain_success": 0,
+    "plain_blocked_note_any": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "note_kinds": {
+     "request": 3,
+     "addressed": 1
+    },
+    "turns": 569,
+    "errors": 0,
+    "malformed": 0,
+    "cost_usd_nominal": 0.1144,
+    "stopped": null,
+    "wall_s": 1089.79,
+    "tag": "thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6900",
+    "elapsed_s": 1089.8,
+    "http": {
+     "responses": 810,
+     "status": {
+      "200": 569,
+      "429": 241
+     },
+     "n_429": 241,
+     "n_5xx": 0,
+     "exceptions": {},
+     "lat_p50": 0.89,
+     "lat_p95": 2.9,
+     "lat_max": 5.50823187828064
+    },
+    "throughput": {
+     "rounds": 23,
+     "calls": 569,
+     "live_calls": 569,
+     "wall_s": 1089.8,
+     "calls_per_min": 31.3,
+     "live_calls_per_min": 31.3,
+     "errors": 0,
+     "malformed": 0,
+     "max_round_s": 466.099
+    },
+    "task_spend_usd": 2.5776,
+    "peak_rss_mb_process": 92.6,
+    "physmem_end": "PhysMem: 15G used (1799M wired, 5460M compressor), 215M unused."
+   },
+   "point_rule_correct": true
   },
   "thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6901": {
    "N": 64,
@@ -223,12 +361,12 @@
   }
  },
  "ledger": {
-  "spend_usd": 2.4675,
-  "calls": 7048,
+  "spend_usd": 2.5776,
+  "calls": 7556,
   "by_model": {
    "adaption/gemma-4-26b-a4b-it": {
-    "calls": 7048,
-    "usd": 2.4675
+    "calls": 7556,
+    "usd": 2.5776
    }
   }
  },
@@ -246,26 +384,6 @@
  "calibration": {
   "threshold_fleets": {
    "frozen": {
-    "n": 1,
-    "brier": 1.0,
-    "sum_predicted": 0.0,
-    "boards": 1
-   },
-   "1link": {
-    "n": 1,
-    "brier": 2.484661538369905e-07,
-    "sum_predicted": 0.9995015362060922,
-    "boards": 1
-   },
-   "permission_rule": {
-    "n": 1,
-    "brier": 0.0,
-    "sum_predicted": 1.0,
-    "boards": 1
-   }
-  },
-  "with_c4": {
-   "frozen": {
     "n": 2,
     "brier": 0.5,
     "sum_predicted": 0.0,
@@ -279,8 +397,28 @@
    },
    "permission_rule": {
     "n": 2,
-    "brier": 0.0,
-    "sum_predicted": 1.0,
+    "brier": 0.5,
+    "sum_predicted": 2.0,
+    "boards": 1
+   }
+  },
+  "with_c4": {
+   "frozen": {
+    "n": 3,
+    "brier": 0.3333333333333333,
+    "sum_predicted": 0.0,
+    "boards": 1
+   },
+   "1link": {
+    "n": 3,
+    "brier": 8.282205127899684e-08,
+    "sum_predicted": 0.9995015362060922,
+    "boards": 1
+   },
+   "permission_rule": {
+    "n": 3,
+    "brier": 0.3333333333333333,
+    "sum_predicted": 2.0,
     "boards": 1
    }
   }

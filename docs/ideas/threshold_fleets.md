@@ -177,7 +177,7 @@ predictions.
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | thr_gemma-4-26b-a4b-it_n256_k39_coordinate_ok_s6900 | 14.04 | 0.78 | 0.000 | 1.000 | yes | 1 (1 / 0) | 4 / 0 | 14 / 0 | 26 | False | $0.45 |
 | thr_gemma-4-26b-a4b-it_n256_k39_coordinate_ok_s6901 | 14.04 | 0.78 | 0.000 | 1.000 | not run | | | | | | |
-| thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6900 | 6.91 | 0.00 | 0.000 | 0.000 | not run | | | | | | |
+| thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6900 | 6.91 | 0.00 | 0.000 | 0.000 | no | 0 (0 / 0) | 4 / 0 | 4 / 0 | 61 | True | $0.11 |
 | thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6901 | 6.91 | 0.00 | 0.000 | 0.000 | not run | | | | | | |
 | thr_gemma-4-26b-a4b-it_n256_k77_coordinate_ok_s6900 | 27.72 | 1.54 | 1.000 | 1.000 | not run | | | | | | |
 | thr_gemma-4-26b-a4b-it_n256_k77_coordinate_ok_s6901 | 27.72 | 1.54 | 1.000 | 1.000 | not run | | | | | | |
@@ -192,14 +192,14 @@ Calibration (Brier score, lower is better; expected boards = sum of predicted P(
 
 | set | predictor | fleets | Brier | expected boards | observed boards |
 |---|---|---|---|---|---|
-| threshold_fleets | frozen | 1 | 1.000 | 0.00 | 1 |
-| threshold_fleets | 1link | 1 | 0.000 | 1.00 | 1 |
-| threshold_fleets | permission_rule | 1 | 0.000 | 1.00 | 1 |
-| with_c4 | frozen | 2 | 0.500 | 0.00 | 1 |
-| with_c4 | 1link | 2 | 0.000 | 1.00 | 1 |
-| with_c4 | permission_rule | 2 | 0.000 | 1.00 | 1 |
+| threshold_fleets | frozen | 2 | 0.500 | 0.00 | 1 |
+| threshold_fleets | 1link | 2 | 0.000 | 1.00 | 1 |
+| threshold_fleets | permission_rule | 2 | 0.500 | 2.00 | 1 |
+| with_c4 | frozen | 3 | 0.333 | 0.00 | 1 |
+| with_c4 | 1link | 3 | 0.000 | 1.00 | 1 |
+| with_c4 | permission_rule | 3 | 0.333 | 2.00 | 1 |
 
-Spend of this study (ledger of results/cache/threshold_llm.sqlite): $2.47 over 7048 calls.
+Spend of this study (ledger of results/cache/threshold_llm.sqlite): $2.58 over 7556 calls.
 <!-- observed:end -->
 
 ## Files
