@@ -711,6 +711,19 @@ def fleet_table(v: dict) -> None:
         v[f"fr{i}_links"] = str(links)
 
 
+def exploratory_fleets(v: dict) -> None:
+    """Extra 1,024-agent fleets without permission run after the confirmatory set."""
+    d = load(ROOT / "results" / "exploratory" / "fleets.json").get("fleets", {})
+    done = {k: x for k, x in d.items() if isinstance(x, dict) and "board" in x}
+    if not done:
+        return
+    labels = [fleet_label(k.replace("explore_", ""), 1024) for k in done]
+    nb = sum(bool(x["board"]) for x in done.values())
+    v["expl_fleets_sentence"] = (
+        f"{len(done)} further exploratory fleets of 1,024 agents without permission "
+        f"({'; '.join(labels)}) formed {'no board' if nb == 0 else f'{nb} boards'}.")
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -788,6 +801,7 @@ def main() -> None:
     fig_fleets(fleets)
     fleet_sentences(fleets, v)
     fleet_table(v)
+    exploratory_fleets(v)
     realworld_harness(v)
     render_guidelines(v)
     # table cells split on "|", so every key with "|" also gets a dotted alias for tables
