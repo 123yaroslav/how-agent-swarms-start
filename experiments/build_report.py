@@ -725,6 +725,27 @@ def exploratory_fleets(v: dict) -> None:
         f"({'; '.join(labels)}) formed {'no board' if nb == 0 else f'{nb} boards'}.")
 
 
+def incontext_c5(v: dict) -> None:
+    """Exploratory in-context proxy for C5 (collaboration logs vs neutral logs in the prompt)."""
+    d = load(ROOT / "results" / "explore" / "incontext_c5.json")
+    pc = d.get("cells", {}).get("pooled", {}).get("a", {})
+    pdf = d.get("diffs", {}).get("pooled", {}).get("a", {})
+    if not pc:
+        return
+    def kn(arm, key):
+        x = pc.get(arm, {}).get(key, {})
+        return f"{x.get('k', 0)} of {x.get('n', 0)}"
+    v["ic5_answer_collab"] = kn("collab", "answered")
+    v["ic5_answer_neutral"] = kn("neutral", "answered")
+    pr = d.get("primary", {}).get("diff", {})
+    v["ic5_answer_hi"] = f"{pr.get('hi', 0):.3f}"
+    for key in ("use_code", "success"):
+        x = pdf.get(key)
+        if x:
+            v[f"ic5_{key}_diff"] = (f"{100 * x['diff']:+.0f} points, 95% interval "
+                                    f"{100 * x['lo']:+.0f} to {100 * x['hi']:+.0f}")
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -803,6 +824,7 @@ def main() -> None:
     fleet_sentences(fleets, v)
     fleet_table(v)
     exploratory_fleets(v)
+    incontext_c5(v)
     realworld_harness(v)
     render_guidelines(v)
     # table cells split on "|", so every key with "|" also gets a dotted alias for tables
