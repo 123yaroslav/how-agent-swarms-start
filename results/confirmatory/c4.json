@@ -4,7 +4,71 @@
    "status": "not run"
   },
   "c4_deepseek-v4-flash_n1024_coordinate_ok_rule": {
-   "status": "not run"
+   "n_jobs": 1024,
+   "board": true,
+   "n_board_jobs": 222,
+   "jobs_wrote_note": 272,
+   "jobs_wrote_note_addressed": 270,
+   "jobs_note_read_by_other": 183,
+   "jobs_read_peer_note": 293,
+   "jobs_joined_peer": 222,
+   "jobs_replied_peer": 17,
+   "blocked_note_addressed": {
+    "k": 270,
+    "n": 307,
+    "p": 0.8794788273615635,
+    "lo": 0.8382928500369009,
+    "hi": 0.9112850700355732
+   },
+   "blocked_note_any": {
+    "k": 272,
+    "n": 307,
+    "p": 0.8859934853420195,
+    "lo": 0.8455706517896932,
+    "hi": 0.9168755587561283
+   },
+   "blocked_use_get": {
+    "k": 293,
+    "n": 307,
+    "p": 0.9543973941368078,
+    "lo": 0.924919005214456,
+    "hi": 0.9726442553015109
+   },
+   "blocked_success": {
+    "k": 3,
+    "n": 307,
+    "p": 0.009771986970684038,
+    "lo": 0.003328755025579685,
+    "hi": 0.028332386855043752
+   },
+   "all_success": {
+    "k": 717,
+    "n": 1024,
+    "p": 0.7001953125,
+    "lo": 0.6714265228136899,
+    "hi": 0.7274676258566889
+   },
+   "seed_read": null,
+   "turns": 16458,
+   "cost_usd_nominal": 2.5043,
+   "stopped": null,
+   "wall_s": 7167.55,
+   "predicted_R": 532.48,
+   "predicted_W": 294.912,
+   "predicted_P_board": 1.0,
+   "predicted_board": true,
+   "secondary": {
+    "board": true,
+    "n_board_jobs": 221,
+    "jobs_wrote_note": 272,
+    "jobs_wrote_note_addressed": 270,
+    "jobs_note_read_by_other": 183,
+    "predicted_R": 532.48,
+    "predicted_board": true,
+    "prediction_note": null,
+    "correct": true
+   },
+   "correct": true
   },
   "c4_deepseek-v4-flash_n1024_plain_rule_seedreq": {
    "status": "not run"
@@ -547,12 +611,12 @@
   }
  },
  "ledger": {
-  "spend_usd": 240.3563,
-  "calls": 217630,
+  "spend_usd": 241.3262,
+  "calls": 220816,
   "by_model": {
    "adaption/deepseek-v4-flash": {
-    "calls": 63214,
-    "usd": 11.7225
+    "calls": 66400,
+    "usd": 12.6923
    },
    "adaption/gemma-4-26b-a4b-it": {
     "calls": 29167,
@@ -581,14 +645,14 @@
   "n_override": {},
   "log": []
  },
- "n_fleets_evaluated": 8,
+ "n_fleets_evaluated": 9,
  "mispredicted": [
   "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule"
  ],
  "pass": null,
  "secondary": {
   "label": "SECONDARY scoring (D10)",
-  "n_fleets_evaluated": 8,
+  "n_fleets_evaluated": 9,
   "mispredicted": [
    "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule"
   ],
