@@ -307,10 +307,10 @@ Task spend after the probes (ledger): $230.56.
 | c4_gemma-4-31b-it_n256_coordinate_ok_rule | 256 | yes | 5 | 51 (50) | 5 | 50/77, 0.649 [0.538, 0.747] | 11/77, 0.143 [0.082, 0.238] | 56.32 | board | True | $0.66 |
 | c4_gemma-4-26b-a4b-it_n256_plain_rule | 256 | no | 0 | 0 (0) | 0 | 0/77, 0.000 [0.000, 0.048] | 0/77, 0.000 [0.000, 0.048] | 0.0 | no board | True | $0.44 |
 | c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule | 256 | yes | 1 | 2 (2) | 1 | 2/77, 0.026 [0.007, 0.090] | 20/77, 0.260 [0.175, 0.367] | 0.0 | no board | False | $0.46 |
-| c4_qwen3.8-27b_n256_plain_rule | not run | | | | | | | | | | |
+| c4_qwen3.8-27b_n256_plain_rule | 256 | no | 0 | 1 (0) | 0 | 0/77, 0.000 [0.000, 0.048] | 2/77, 0.026 [0.007, 0.090] | 0.0 | no board | True | $1.20 |
 | c4_qwen3.8-27b_n256_coordinate_ok_rule | not run | | | | | | | | | | |
 
-C4 (registered scoring): INCOMPLETE; fleets evaluated 6, mispredicted: c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule.
+C4 (registered scoring): INCOMPLETE; fleets evaluated 7, mispredicted: c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule.
 
 SECONDARY scoring (D10: a write at the agent's own deliverable path is not a NOTE):
 
@@ -322,6 +322,7 @@ SECONDARY scoring (D10: a write at the agent's own deliverable path is not a NOT
 | c4_gemma-4-31b-it_n256_coordinate_ok_rule | yes | 5 | 51 (50) | 5 | 56.32 | board | True |
 | c4_gemma-4-26b-a4b-it_n256_plain_rule | no | 0 | 0 (0) | 0 | 0.0 | no board | True |
 | c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule | yes | 1 | 2 (2) | 1 | 0.0 | no board | False |
+| c4_qwen3.8-27b_n256_plain_rule | no | 0 | 0 (0) | 0 | 0.0 | no board | True |
 
-C4 under the secondary scoring: INCOMPLETE; fleets evaluated 6, mispredicted: c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule. Task spend (ledger) $236.11.
+C4 under the secondary scoring: INCOMPLETE; fleets evaluated 7, mispredicted: c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule. Task spend (ledger) $237.57.
 
