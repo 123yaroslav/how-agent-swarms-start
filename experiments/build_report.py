@@ -139,7 +139,7 @@ def fig_fleets(fleets: list[dict]) -> None:
         if ob:
             rows.append((fleet_label(name, f["N"]) + " (expl.)", f.get("predicted_R") or 0.0,
                          bool(ob.get("board")), f.get("predicted_board"), "D"))
-    fig, ax = plt.subplots(figsize=(4.6, 0.32 * max(len(rows), 3) + 0.9))
+    fig, ax = plt.subplots(figsize=(5.4, 0.2 * max(len(rows), 3) + 0.8))
     if not rows:
         ax.text(0.5, 0.5, "fleets pending", ha="center", va="center", transform=ax.transAxes,
                 color=MUTED)

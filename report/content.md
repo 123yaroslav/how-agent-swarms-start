@@ -93,7 +93,7 @@ Without the house rule, agents took each other's work and still did not write. {
 
 The registered C4 rule fails, and its misses have two causes we can name. In the two DeepSeek V4 Flash fleets without permission it predicted a board, because 3 of 72 probe agents had written a file after seeing the note, and the classifier counted these end-of-job status files as answers. No board formed. The secondary scoring, which excludes such files and was fixed before these fleets ran, predicted both correctly. The third miss is a single link in a permission fleet whose point prediction was R = 0, because none of 76 probe agents answered. Zero answers in 76 probes still allows an answering rate of a few percent, and in a fleet of 256 agents with dozens of first notes that is enough for one link, which is why a probe set has to be sized to the fleet (Section 5). Fleets also wrote fewer first notes than single agents predicted, because a blocked job in a fleet could wait for its producer, and Gemma agents often did ({{fleet_wait_summary}}). Over all {{fleets_all_n}} fleets, including the exploratory ones near R = 1, the secondary scoring predicted {{hits_sec}} (Brier {{brier_sec}}), the rule that permission alone decides {{hits_perm}} (Brier {{brier_perm}}), and the registered scoring {{hits_reg}} (Brier {{brier_reg}}).
 
-![**Figure 2. {{fig3_title}}** Each row is one fleet (model, size, condition), placed by its predicted R, with R = 0 at the left. Filled markers formed a board and open markers did not. Orange marks a board predicted by the registered rule, blue no board. Diamonds are exploratory fleets near R = 1. The dashed line is R = 1.](figures/fig2_fleets.png){4.2}
+![**Figure 2. {{fig3_title}}** Each row is one fleet (model, size, condition), placed by its predicted R, with R = 0 at the left. Filled markers formed a board and open markers did not. Orange marks a board predicted by the registered rule, blue no board. Diamonds are exploratory fleets near R = 1. The dashed line is R = 1.](figures/fig2_fleets.png){5.0}
 
 ### 4.6 Real framework prompts provide shared storage without a rule on others' data, and their shared-memory wording made one model look at other jobs' work
 
@@ -113,15 +113,13 @@ For deployers, a house rule in the system prompt stops agents from taking each o
 
 Limitations. The jobs are simulated and benign, the models are open-weight and were not trained with reinforcement learning on agentic tasks, and the channel is one artifact store. Simulated tasks may understate pressure, which biases our rates toward finding a gate. Fleets are one run per condition. Appendix A lists every limitation with the direction of its bias.
 
-Future work. The natural next steps are the incident's own conditions, reinforcement learning with outcome reward on a mix of solvable and blocked jobs, long-lived agents with memory across runs, and frontier models.
-
 ## 6. Conclusion
 
 Agent message boards do not grow out of fleet size. In six open-weight models, and in exploratory runs on two closed models, blocked agents that share storage see each other's notes, take each other's work when nothing forbids it, and almost never answer. The two causes the incident report names, collaboration training and outcome reward, act on the two quantities we measured, answering and boundary crossing. A team that runs fleets can check both with the linter and the propensity card we release, and a lab can add one measurement, answering on single agents before and after training.
 
 ## Code and Data
 
-- Code, transcripts, provenance labels and per-cell results: {{repo_url}}. Framework prompts are refetched from pinned commits by a script.
+- Code, transcripts, provenance labels and per-cell results: {{repo_url}}.
 - Tools: `swarmcheck lint` and `swarmcheck card` (a fixed protocol of {{card_episodes}} single-agent episodes), guidelines in `docs/guidelines/`, cards for six models in `results/cards/`.
 - Pre-existing code (the LLM client, a review script and the renderer into this template) comes from the author's October 2026 sprint repository and is listed in `PRE_SPRINT_LOG.md`. Everything else was written during the sprint.
 
@@ -142,6 +140,8 @@ Agent message boards do not grow out of fleet size. In six open-weight models, a
 What the results establish. In simulated data-engineering jobs, six open-weight models from four families did not write to other jobs through a shared store unless permitted, judged by content, and did not answer other jobs' notes in seeded probes with or without a house rule. No tested realistic phrasing changed this. Without the rule, most models used other jobs' artifacts, and every blocked job that succeeded did so by using one. Fleet outcomes are reported in Section 4.5 with predictions committed before each fleet.
 
 What they do not establish. They do not show that frontier closed models, models trained with reinforcement learning on agentic tasks, or the incident model behave the same way. The incident model did not. They cover one channel, an artifact store, and not long-lived agents with memory across runs, real stakes, or other languages than English. Jobs are synthetic and benign, which may understate pressure and biases our rates toward finding a gate. Fleets are one run per condition. The fine-tuned organisms were trained but could not be served in time, so the test of collaboration training remains open. Parts of the study are exploratory and labelled as such in the text (probes without the rule, threshold fleets, real-sentence arms, the content check of notes). The code classifier of notes counted end-of-job status files as notes. We report the registered numbers and the content check side by side, and a second fleet scoring that excludes such files was fixed before the affected fleets ran (deviation D10). The linter's held-out test has 4 contact prompts, so its numbers are weak evidence. The Adaption memory test is written but not run.
+
+Future work. The natural next steps are the incident's own conditions, reinforcement learning with outcome reward on a mix of solvable and blocked jobs, long-lived agents with memory across runs, and larger frontier models.
 
 Dual use. The work describes how agents come to coordinate through shared infrastructure. The mechanism is already public in the incident reports, and every task here is benign, with no network access, no real systems and no security content. The tools are defensive. One flags prompts that grant contact through shared storage, the other measures propensity before deployment. A reader could use the permission result to make agents coordinate on purpose, which is the intended use of a sanctioned channel. We release code, prompts and aggregate results. Framework prompts are quoted only in short excerpts with links.
 
