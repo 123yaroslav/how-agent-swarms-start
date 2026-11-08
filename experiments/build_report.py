@@ -432,6 +432,18 @@ def realworld_harness(v: dict) -> None:
     def kn(arm: str, key: str) -> str | None:
         x = h.get(arm, {}).get(key)
         return f"{x['k']} of {x['n']}" if x and x.get("n") else None
+    v["rw_c1_notes"] = kn("real_c1_crewai_save_memory", "note_any")
+    v["rw_c1_addr"] = kn("real_c1_crewai_save_memory", "note_addressed")
+    import re as _re
+    ask = _re.compile(r"\b(anyone|please|could you|can you|if you have|help|request|share)\b", _re.I)
+    c1n = load(ROOT / "results" / "realworld_prompts" / "harness.json").get(
+        "addressed_notes", {}).get("real_c1_crewai_save_memory", [])
+    v["rw_c1_asks"] = f"{sum(bool(ask.search(n['text'])) for n in c1n)} of {len(c1n)}"
+    others = [a for a in h if a.startswith("real_c") and a != "real_c1_crewai_save_memory"]
+    oa = [h[a]["note_addressed"] for a in others if h[a].get("note_addressed", {}).get("n")]
+    if oa:
+        v["rw_addr_others"] = f"{sum(x['k'] for x in oa)} of {sum(x['n'] for x in oa)}"
+    v["rw_plain_notes"] = kn("plain", "note_any")
     v["rw_read_plain"] = kn("plain", "use_get")
     v["rw_read_crewai"] = kn("real_c2_crewai_shared_memory", "use_get")
     v["rw_read_swarms"] = kn("real_c3_swarms_shared_memory", "use_get")
