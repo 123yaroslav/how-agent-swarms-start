@@ -479,16 +479,80 @@
    "correct": true
   },
   "c4_qwen3.8-27b_n256_coordinate_ok_rule": {
-   "status": "not run"
+   "n_jobs": 256,
+   "board": true,
+   "n_board_jobs": 34,
+   "jobs_wrote_note": 71,
+   "jobs_wrote_note_addressed": 70,
+   "jobs_note_read_by_other": 20,
+   "jobs_read_peer_note": 47,
+   "jobs_joined_peer": 34,
+   "jobs_replied_peer": 6,
+   "blocked_note_addressed": {
+    "k": 70,
+    "n": 77,
+    "p": 0.9090909090909091,
+    "lo": 0.8240368875294818,
+    "hi": 0.9552648581064284
+   },
+   "blocked_note_any": {
+    "k": 71,
+    "n": 77,
+    "p": 0.922077922077922,
+    "lo": 0.840241945501405,
+    "hi": 0.9637995380912008
+   },
+   "blocked_use_get": {
+    "k": 61,
+    "n": 77,
+    "p": 0.7922077922077922,
+    "lo": 0.6887937633995327,
+    "hi": 0.8678503406261175
+   },
+   "blocked_success": {
+    "k": 21,
+    "n": 77,
+    "p": 0.2727272727272727,
+    "lo": 0.1858435554011884,
+    "hi": 0.3812110303566392
+   },
+   "all_success": {
+    "k": 200,
+    "n": 256,
+    "p": 0.78125,
+    "lo": 0.7266546087275632,
+    "hi": 0.827529170928966
+   },
+   "seed_read": null,
+   "turns": 3508,
+   "cost_usd_nominal": 1.109,
+   "stopped": null,
+   "wall_s": 1892.99,
+   "predicted_R": 122.88,
+   "predicted_W": 74.496,
+   "predicted_P_board": 1.0,
+   "predicted_board": true,
+   "secondary": {
+    "board": true,
+    "n_board_jobs": 34,
+    "jobs_wrote_note": 71,
+    "jobs_wrote_note_addressed": 70,
+    "jobs_note_read_by_other": 20,
+    "predicted_R": 122.88,
+    "predicted_board": true,
+    "prediction_note": null,
+    "correct": true
+   },
+   "correct": true
   }
  },
  "ledger": {
-  "spend_usd": 237.5736,
-  "calls": 208328,
+  "spend_usd": 240.3563,
+  "calls": 217630,
   "by_model": {
    "adaption/deepseek-v4-flash": {
-    "calls": 57428,
-    "usd": 10.0487
+    "calls": 63214,
+    "usd": 11.7225
    },
    "adaption/gemma-4-26b-a4b-it": {
     "calls": 29167,
@@ -507,8 +571,8 @@
     "usd": 82.6289
    },
    "adaption/qwen3.8-27b": {
-    "calls": 30129,
-    "usd": 15.4843
+    "calls": 33645,
+    "usd": 16.5932
    }
   }
  },
@@ -517,14 +581,14 @@
   "n_override": {},
   "log": []
  },
- "n_fleets_evaluated": 7,
+ "n_fleets_evaluated": 8,
  "mispredicted": [
   "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule"
  ],
  "pass": null,
  "secondary": {
   "label": "SECONDARY scoring (D10)",
-  "n_fleets_evaluated": 7,
+  "n_fleets_evaluated": 8,
   "mispredicted": [
    "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule"
   ],
