@@ -3287,32 +3287,32 @@
   "qwen3.8-27b"
  ],
  "ledger": {
-  "spend_usd": 225.1703,
-  "calls": 180409,
+  "spend_usd": 230.5617,
+  "calls": 193196,
   "by_model": {
    "adaption/deepseek-v4-flash": {
-    "calls": 37883,
-    "usd": 7.5058
+    "calls": 47240,
+    "usd": 8.4666
    },
    "adaption/gemma-4-26b-a4b-it": {
     "calls": 29167,
     "usd": 11.6565
    },
    "adaption/gemma-4-31b-it": {
-    "calls": 30788,
-    "usd": 13.4644
+    "calls": 31345,
+    "usd": 13.7617
    },
    "adaption/glm-5.2": {
     "calls": 28661,
     "usd": 103.8307
    },
    "adaption/qwen3.5-397b": {
-    "calls": 28952,
-    "usd": 75.3818
+    "calls": 30045,
+    "usd": 78.5623
    },
    "adaption/qwen3.8-27b": {
-    "calls": 24958,
-    "usd": 13.3311
+    "calls": 26738,
+    "usd": 14.2838
    }
   }
  },
