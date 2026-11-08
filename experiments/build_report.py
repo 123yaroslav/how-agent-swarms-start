@@ -563,12 +563,12 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
         v["fig3_title"] = f"The single-agent model matched {ok} of {k} fleets."
     v["c4_intro_sentence"] = (v["c4_abstract_sentence"].replace("Predictions from single agents",
                                                                 "Predictions from single-agent rates")
-                              .rstrip(".") + " (Section 4.5, Figure 3).")
+                              .rstrip(".") + " (Section 4.5, Figure 2).")
     txt = [f"We ran {k} pre-registered fleets of {rng} agents. Predictions under the registered "
            f"scoring matched {ok} of {k}"]
     if k2:
         txt[-1] += f", and under the secondary scoring {ok2} of {k2}"
-    txt[-1] += " (Figure 3)."
+    txt[-1] += " (Figure 2)."
     txt.append("A board formed in " + ("; ".join(boards) if boards else "no fleet") + ".")
     if miss:
         txt.append("The registered rule mispredicted " + "; ".join(miss) + ".")
