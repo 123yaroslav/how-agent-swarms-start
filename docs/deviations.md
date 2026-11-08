@@ -122,7 +122,7 @@ settings, this changes timing only, not outcomes. From 01:35 UTC+5 deepseek-v4-f
 first: while one runs, the glm-5.2 fleet is held at 96 in flight. The brake was held (it does not
 lower caps) until 02:35 UTC+5, because the drop it reacts to came from other jobs on the same
 key. Limits are read from `results/raw/scale/logs/controller_limits.json`. Run plan only: from
-04:50 UTC+5 the three deepseek-v4-flash 1,024 fleets run side by side (plain + rule,
+04:45 UTC+5 the three deepseek-v4-flash 1,024 fleets run side by side (plain + rule,
 coordinate_ok + rule, plain + rule with the seeded request note), each with its own limit of
 192 calls in flight and the budget check before each, instead of one after another. Their
 predictions were committed before any of them started (af4a7c5).
