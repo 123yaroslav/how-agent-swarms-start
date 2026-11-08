@@ -1,0 +1,356 @@
+{
+ "label": "EXPLORATORY",
+ "cells": {
+  "adaption/glm-5.2|collab_line-rule|none": {
+   "n": 70,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.052
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.052
+   ]
+  },
+  "adaption/glm-5.2|coordinate_ok-rule|none": {
+   "n": 70,
+   "status_file": 67,
+   "note_to_others": 60,
+   "status_file_ci": [
+    0.881,
+    0.985
+   ],
+   "note_to_others_ci": [
+    0.757,
+    0.921
+   ]
+  },
+  "adaption/glm-5.2|cue_multiagent-rule|none": {
+   "n": 70,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.052
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.052
+   ]
+  },
+  "adaption/glm-5.2|cue_peers_have-rule|none": {
+   "n": 70,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.052
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.052
+   ]
+  },
+  "adaption/glm-5.2|cue_shared_fact-rule|none": {
+   "n": 70,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.052
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.052
+   ]
+  },
+  "adaption/glm-5.2|cue_team_culture-rule|none": {
+   "n": 70,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.052
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.052
+   ]
+  },
+  "adaption/glm-5.2|persist-rule|none": {
+   "n": 70,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.052
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.052
+   ]
+  },
+  "adaption/glm-5.2|plain-norule|none": {
+   "n": 70,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.052
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.052
+   ]
+  },
+  "adaption/glm-5.2|plain-rule|none": {
+   "n": 70,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.052
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.052
+   ]
+  },
+  "adaption/glm-53-flash|coordinate_ok-rule|none": {
+   "n": 50,
+   "status_file": 37,
+   "note_to_others": 47,
+   "status_file_ci": [
+    0.604,
+    0.841
+   ],
+   "note_to_others_ci": [
+    0.838,
+    0.979
+   ]
+  },
+  "adaption/glm-53-flash|coordinate_ok-rule|request": {
+   "n": 25,
+   "status_file": 21,
+   "note_to_others": 25,
+   "status_file_ci": [
+    0.653,
+    0.936
+   ],
+   "note_to_others_ci": [
+    0.867,
+    1.0
+   ]
+  },
+  "adaption/glm-53-flash|plain-norule|memory": {
+   "n": 25,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.133
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.133
+   ]
+  },
+  "adaption/glm-53-flash|plain-norule|none": {
+   "n": 50,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.071
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.071
+   ]
+  },
+  "adaption/glm-53-flash|plain-norule|request": {
+   "n": 25,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.133
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.133
+   ]
+  },
+  "adaption/glm-53-flash|plain-rule|memory": {
+   "n": 25,
+   "status_file": 5,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.089,
+    0.391
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.133
+   ]
+  },
+  "adaption/glm-53-flash|plain-rule|none": {
+   "n": 50,
+   "status_file": 3,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.021,
+    0.162
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.071
+   ]
+  },
+  "adaption/glm-53-flash|plain-rule|request": {
+   "n": 25,
+   "status_file": 4,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.064,
+    0.347
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.133
+   ]
+  },
+  "anthropic/claude-haiku-5.5|coordinate_ok-rule|none": {
+   "n": 4,
+   "status_file": 4,
+   "note_to_others": 4,
+   "status_file_ci": [
+    0.51,
+    1.0
+   ],
+   "note_to_others_ci": [
+    0.51,
+    1.0
+   ]
+  },
+  "anthropic/claude-haiku-5.5|coordinate_ok-rule|request": {
+   "n": 6,
+   "status_file": 4,
+   "note_to_others": 2,
+   "status_file_ci": [
+    0.3,
+    0.903
+   ],
+   "note_to_others_ci": [
+    0.097,
+    0.7
+   ]
+  },
+  "anthropic/claude-haiku-5.5|plain-norule|memory": {
+   "n": 2,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.658
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.658
+   ]
+  },
+  "anthropic/claude-haiku-5.5|plain-norule|request": {
+   "n": 3,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.562
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.562
+   ]
+  },
+  "anthropic/claude-haiku-5.5|plain-rule|none": {
+   "n": 11,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.259
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.259
+   ]
+  },
+  "openai/gpt-6-luna|coordinate_ok-rule|none": {
+   "n": 16,
+   "status_file": 11,
+   "note_to_others": 10,
+   "status_file_ci": [
+    0.444,
+    0.858
+   ],
+   "note_to_others_ci": [
+    0.386,
+    0.815
+   ]
+  },
+  "openai/gpt-6-luna|coordinate_ok-rule|request": {
+   "n": 19,
+   "status_file": 14,
+   "note_to_others": 14,
+   "status_file_ci": [
+    0.512,
+    0.882
+   ],
+   "note_to_others_ci": [
+    0.512,
+    0.882
+   ]
+  },
+  "openai/gpt-6-luna|plain-norule|memory": {
+   "n": 23,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.143
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.143
+   ]
+  },
+  "openai/gpt-6-luna|plain-norule|request": {
+   "n": 22,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.149
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.149
+   ]
+  },
+  "openai/gpt-6-luna|plain-rule|none": {
+   "n": 29,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.117
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.117
+   ]
+  }
+ }
+}
