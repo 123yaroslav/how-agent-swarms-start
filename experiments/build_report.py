@@ -842,6 +842,16 @@ def fidelity_numbers(c13: dict, cells: dict, models: list[str], v: dict) -> None
         v["g26_perm_pj"] = f"{pr['k']} of {pr['n']}"
 
 
+def crewai_replication(v: dict) -> None:
+    """CrewAI memory sentence on GLM 5.2 and Gemma 4 31B (exploratory replication)."""
+    c = load(ROOT / "results" / "realworld_prompts" / "crewai_replication.json").get("cells", {})
+    for m, key in (("adaption/glm-5.2", "glm"), ("adaption/gemma-4-31b-it", "gemma")):
+        a = c.get(f"{m}|real_c1_crewai_save_memory", {}).get("note_any", {})
+        b0 = c.get(f"{m}|plain", {}).get("note_any", {})
+        if a.get("n") and b0.get("n"):
+            v[f"crew_{key}"] = f"{a['k']} of {a['n']} against {b0['k']} of {b0['n']}"
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -923,6 +933,7 @@ def main() -> None:
     incontext_c5(v)
     pressure(v)
     fidelity_numbers(c13, cells, models, v)
+    crewai_replication(v)
     realworld_harness(v)
     render_guidelines(v)
     # table cells split on "|", so every key with "|" also gets a dotted alias for tables
