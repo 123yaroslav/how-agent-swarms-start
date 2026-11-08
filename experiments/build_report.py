@@ -580,13 +580,7 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
         fr, one, pr = cal.get("frozen", {}), cal.get("1link", {}), cal.get("permission_rule", {})
         txt.append(f"To put the model at risk we also ran {len(obs)} exploratory fleets whose "
                    f"predicted R was near 1, with predictions committed first, and {nb} formed a "
-                   f"board. Over these and the pre-registered fleets ({fr.get('n')} in all), the "
-                   f"registered point rule, a board when R exceeds 1, had a Brier score of "
-                   f"{fr.get('brier', 0):.2f}. The model's full probability of at least one link "
-                   f"had {one.get('brier', 0):.2f}, and the rule that a board forms whenever the "
-                   f"prompt grants permission had {pr.get('brier', 0):.2f}. Near R = 1 a single "
-                   f"fleet's outcome is close to a coin flip under either form of the model, and "
-                   f"both did better than the rule that permission alone decides.")
+                   f"board.")
     v["res_fleets_auto"] = " ".join(txt)
     import math
     perm = [f for f in done if "coordinate_ok" in f["name"]]
@@ -627,12 +621,12 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
             v[f"hits_{key}"] = f"{hits(key)} of {len(rows)}"
     c4 = load(CONF / "c4.json").get("fleets", {})
     waits = [(n, f) for n, f in c4.items() if isinstance(f, dict) and "blocked_success" in f
-             and "plain_rule" in n]
+             and "plain_rule" in n and "gemma" in n and "seed" not in n]
     if waits:
         k = sum(f["blocked_success"]["k"] for _, f in waits)
         n = sum(f["blocked_success"]["n"] for _, f in waits)
-        v["fleet_wait_summary"] = (f"{k} of {n} blocked jobs in the plain fleets completed their "
-                                   f"job")
+        v["fleet_wait_summary"] = (f"{k} of {n} blocked jobs in the two plain Gemma fleets "
+                                   f"completed their job")
 
 
 def extra_models(v: dict) -> None:
