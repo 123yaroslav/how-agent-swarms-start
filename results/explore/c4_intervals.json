@@ -1,7 +1,7 @@
 {
  "label": "EXPLORATORY",
  "source": "results/predictions/c4.json",
- "source_sha256": "7cacbf7d8eb7cfb665a9e2277d7af62fccf7de47816a461123690d39a61da2c3",
+ "source_sha256": "796c0f2ee23130a1aedd829c48d4dba1fe19e2fdae0cc8ef783721daa8c32e0a",
  "note": "Intervals for the committed C4 predictions; the frozen file is read, never written. Inputs are the counts stored in each entry (p_w of the C1/C2 cell, v and p_j of the probes, D6). bootstrap: episodes resampled with replacement; jeffreys: Beta(k + 1/2, n - k + 1/2) draws. 10,000 draws each, 95% percentile intervals. R_wilson is the product interval already stored in the entry (R_lo, R_hi).",
  "fleets": {
   "c4_glm-5.2_n1024_plain_rule": {
@@ -468,6 +468,406 @@
      "lo": 37.35345998987633,
      "hi": 78.15553169396443,
      "mean": 56.64096944887661
+    },
+    "P_board": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "mean": 1.0
+    },
+    "P_1link": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "mean": 1.0
+    },
+    "P_R_above_1": 1.0
+   },
+   "draws": 10000,
+   "rng_seed": 20261108
+  },
+  "c4_deepseek-v4-flash_n1024_plain_rule": {
+   "N": 1024,
+   "model": "deepseek-v4-flash",
+   "prompt": "plain",
+   "seed_note": "none",
+   "inputs": {
+    "p_w": [
+     4,
+     100
+    ],
+    "v": [
+     72,
+     100
+    ],
+    "p_j": [
+     3,
+     72
+    ]
+   },
+   "point": {
+    "W": 12.288,
+    "R": 30.72,
+    "P_board": 0.9999931276194642,
+    "P_1link": 0.9999953933055629,
+    "predicted_board": true
+   },
+   "R_wilson": [
+    9.134873747038311,
+    94.44816228041138
+   ],
+   "written": "2026-11-08 04:14:43 +0500",
+   "bootstrap": {
+    "W": {
+     "lo": 3.072,
+     "hi": 24.576,
+     "mean": 12.24192
+    },
+    "R": {
+     "lo": 0.0,
+     "hi": 71.67999999999999,
+     "mean": 31.0272
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.9999999999613317,
+     "mean": 0.9349205029939356
+    },
+    "P_1link": {
+     "lo": 0.0,
+     "hi": 0.9999999999787784,
+     "mean": 0.9355132655470175
+    },
+    "P_R_above_1": 0.9569
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 4.324656934665127,
+     "hi": 28.245072415262026,
+     "mean": 13.811448581715267
+    },
+    "R": {
+     "lo": 8.509083703555795,
+     "hi": 78.40291102286929,
+     "mean": 34.87622265500355
+    },
+    "P_board": {
+     "lo": 0.9843902364800984,
+     "hi": 0.999999999998435,
+     "mean": 0.9981985499601255
+    },
+    "P_1link": {
+     "lo": 0.9866555985906287,
+     "hi": 0.9999999999994589,
+     "mean": 0.998455296551929
+    },
+    "P_R_above_1": 1.0
+   },
+   "draws": 10000,
+   "rng_seed": 20261108
+  },
+  "c4_deepseek-v4-flash_n1024_coordinate_ok_rule": {
+   "N": 1024,
+   "model": "deepseek-v4-flash",
+   "prompt": "coordinate_ok",
+   "seed_note": "none",
+   "inputs": {
+    "p_w": [
+     96,
+     100
+    ],
+    "v": [
+     74,
+     100
+    ],
+    "p_j": [
+     52,
+     74
+    ]
+   },
+   "point": {
+    "W": 294.912,
+    "R": 532.48,
+    "P_board": 1.0,
+    "P_1link": 1.0,
+    "predicted_board": true
+   },
+   "R_wilson": [
+    390.90410146933,
+    664.0258215856232
+   ],
+   "written": "2026-11-08 04:14:43 +0500",
+   "bootstrap": {
+    "W": {
+     "lo": 282.624,
+     "hi": 304.128,
+     "mean": 294.95808
+    },
+    "R": {
+     "lo": 430.08000000000004,
+     "hi": 634.88,
+     "mean": 532.199424
+    },
+    "P_board": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "mean": 1.0
+    },
+    "P_1link": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "mean": 1.0
+    },
+    "P_R_above_1": 1.0
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 278.8139898525565,
+     "hi": 302.85162238988545,
+     "mean": 293.3893428342984
+    },
+    "R": {
+     "lo": 430.35268849602227,
+     "hi": 626.9853683409242,
+     "mean": 528.6550364521363
+    },
+    "P_board": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "mean": 1.0
+    },
+    "P_1link": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "mean": 1.0
+    },
+    "P_R_above_1": 1.0
+   },
+   "draws": 10000,
+   "rng_seed": 20261108
+  },
+  "c4_deepseek-v4-flash_n1024_plain_rule_seedreq": {
+   "N": 1024,
+   "model": "deepseek-v4-flash",
+   "prompt": "plain",
+   "seed_note": "request",
+   "inputs": {
+    "p_w": [
+     4,
+     100
+    ],
+    "v": [
+     72,
+     100
+    ],
+    "p_j": [
+     3,
+     72
+    ]
+   },
+   "point": {
+    "W": 43.007999999999996,
+    "R": 30.72,
+    "P_board": 1.0,
+    "P_1link": 1.0,
+    "predicted_board": true
+   },
+   "R_wilson": [
+    9.134873747038311,
+    94.44816228041138
+   ],
+   "written": "2026-11-08 04:14:43 +0500",
+   "bootstrap": {
+    "W": {
+     "lo": 12.288,
+     "hi": 82.944,
+     "mean": 43.269119999999994
+    },
+    "R": {
+     "lo": 0.0,
+     "hi": 71.67999999999999,
+     "mean": 31.0272
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 1.0,
+     "mean": 0.9568996015166887
+    },
+    "P_1link": {
+     "lo": 0.0,
+     "hi": 1.0,
+     "mean": 0.9568998623093586
+    },
+    "P_R_above_1": 0.9569
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 19.500841810619576,
+     "hi": 93.83128014284259,
+     "mean": 48.68767123671883
+    },
+    "R": {
+     "lo": 8.509083703555795,
+     "hi": 78.40291102286929,
+     "mean": 34.87622265500355
+    },
+    "P_board": {
+     "lo": 0.9999999718117455,
+     "hi": 1.0,
+     "mean": 0.999988439398697
+    },
+    "P_1link": {
+     "lo": 0.9999999964498268,
+     "hi": 1.0,
+     "mean": 0.9999972003384712
+    },
+    "P_R_above_1": 1.0
+   },
+   "draws": 10000,
+   "rng_seed": 20261108
+  },
+  "c4_qwen3.8-27b_n256_plain_rule": {
+   "N": 256,
+   "model": "qwen3.8-27b",
+   "prompt": "plain",
+   "seed_note": "none",
+   "inputs": {
+    "p_w": [
+     0,
+     100
+    ],
+    "v": [
+     76,
+     100
+    ],
+    "p_j": [
+     0,
+     76
+    ]
+   },
+   "point": {
+    "W": 0.0,
+    "R": 0.0,
+    "P_board": 0.0,
+    "P_1link": 0.0,
+    "predicted_board": false
+   },
+   "R_wilson": [
+    0.0,
+    10.261567272883797
+   ],
+   "written": "2026-11-08 05:17:42 +0500",
+   "bootstrap": {
+    "W": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "R": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_1link": {
+     "lo": 0.0,
+     "hi": 0.0,
+     "mean": 0.0
+    },
+    "P_R_above_1": 0.0
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 0.00032236883061753527,
+     "hi": 1.9356191761875712,
+     "mean": 0.3886463562936348
+    },
+    "R": {
+     "lo": 0.0011488409777739403,
+     "hi": 6.206205422708215,
+     "mean": 1.2321954756984077
+    },
+    "P_board": {
+     "lo": 0.0,
+     "hi": 0.4923790060292885,
+     "mean": 0.05421339200885683
+    },
+    "P_1link": {
+     "lo": 1.6395784360281892e-05,
+     "hi": 0.6872162359555537,
+     "mean": 0.12941111821884588
+    },
+    "P_R_above_1": 0.3703
+   },
+   "draws": 10000,
+   "rng_seed": 20261108
+  },
+  "c4_qwen3.8-27b_n256_coordinate_ok_rule": {
+   "N": 256,
+   "model": "qwen3.8-27b",
+   "prompt": "coordinate_ok",
+   "seed_note": "none",
+   "inputs": {
+    "p_w": [
+     97,
+     100
+    ],
+    "v": [
+     80,
+     100
+    ],
+    "p_j": [
+     48,
+     80
+    ]
+   },
+   "point": {
+    "W": 74.496,
+    "R": 122.88,
+    "P_board": 1.0,
+    "P_1link": 1.0,
+    "predicted_board": true
+   },
+   "R_wilson": [
+    89.2914524435662,
+    155.38588877069446
+   ],
+   "written": "2026-11-08 05:17:42 +0500",
+   "bootstrap": {
+    "W": {
+     "lo": 71.424,
+     "hi": 76.8,
+     "mean": 74.50375679999999
+    },
+    "R": {
+     "lo": 97.28,
+     "hi": 148.48,
+     "mean": 122.71231999999999
+    },
+    "P_board": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "mean": 1.0
+    },
+    "P_1link": {
+     "lo": 1.0,
+     "hi": 1.0,
+     "mean": 1.0
+    },
+    "P_R_above_1": 1.0
+   },
+   "jeffreys": {
+    "W": {
+     "lo": 70.86736841283033,
+     "hi": 76.13321599778216,
+     "mean": 74.1264942732453
+    },
+    "R": {
+     "lo": 97.61545228884178,
+     "hi": 146.52042232131012,
+     "mean": 122.07306479400364
     },
     "P_board": {
      "lo": 1.0,

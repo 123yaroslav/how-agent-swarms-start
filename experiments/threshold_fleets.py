@@ -599,6 +599,25 @@ def write_doc_tables(res: dict | None = None) -> None:
         L += ["", f"Spend of this study (ledger of results/cache/threshold_llm.sqlite): "
               f"${res['ledger']['spend_usd']:.2f} over {res['ledger']['calls']} calls."]
         text = _between(text, "observed", "\n".join(L))
+        S = ["| condition | point R | fleets run | boards | point rule correct |",
+             "|---|---|---|---|---|"]
+        by: dict = {}
+        for t, e in res["fleets"].items():
+            if "observed" not in e:
+                continue
+            key = (e["N"], e["k"], round(e["predicted_R"], 2))
+            d = by.setdefault(key, [0, 0, 0])
+            d[0] += 1
+            d[1] += bool(e["observed"]["board"])
+            d[2] += bool(e.get("point_rule_correct"))
+        for (n, k, r), (m, nb, ok) in by.items():
+            who = "every job permitted" if k == "all" else f"{k} blocked jobs permitted"
+            S.append(f"| N = {n}, {who} | {r:.2f} | {m} | {nb} | {ok} of {m} |")
+        c4m = [t for t, d in res["c4_fleets"].items()
+               if (d["predicted_R"] > 1) != bool(d["board"])]
+        S += ["", f"C4 fleets with an outcome: {len(res['c4_fleets'])}; point rule missed: "
+              + (", ".join(c4m) if c4m else "none") + "."]
+        text = _between(text, "summary", "\n".join(S))
     DOC.write_text(text)
 
 
