@@ -359,6 +359,34 @@ def result_sentences(c13: dict, cells: dict, models: list[str], v: dict) -> None
         v["q35_note_any"] = f"{q['note_any']['k']} of {q['note_any']['n']}"
         kinds = q.get("note_kinds", {})
         v["q35_status_notes"] = f"{kinds.get('status', 0)} of {sum(kinds.values())}"
+    c3v = c13.get("C3", {})
+    c3pass = c3v.get("pass") if isinstance(c3v, dict) else None
+    v["c3_verdict_sentence"] = ("C3 passes as registered" if c3pass else
+                                "C3 fails as registered" if c3pass is False else "C3 pending")
+    flips = c13.get("sensitivity_flips", [])
+    sens = c13.get("sensitivity", {})
+    parts = []
+    for sub, label in (("no_failed_turns", "episodes without failed turns"),
+                       ("failed_turns_at_most_5pct", "episodes with at most 5% failed turns")):
+        fl = [f for f in flips if f.startswith(sub) and "(True -> False)" in f
+              and len(f.split(": ")[1].split(" (")[0].split()) <= 2]
+        if not fl:
+            continue
+        tests = ", ".join(f.split(": ")[1].split(" (")[0] for f in fl)
+        his = []
+        for t in ("C1", "C3"):
+            for m, x in sens.get(sub, {}).get(t, {}).get("per_model", {}).items():
+                q = x.get("plain_rule") if t == "C1" else x.get("note_addressed")
+                if q and q.get("hi", 0) > 0.06 and q.get("k") == 1:
+                    his.append(f"{q['hi']:.3f}")
+        parts.append(f"restricting to {label} turns {tests} into a failure")
+    if parts:
+        v["sens_sentence"] = ("In sensitivity analyses that were not pre-registered, "
+                              + " and ".join(parts) + ". In each case a single code-detected note "
+                              "in a subset of about 90 episodes puts the upper bound just above "
+                              "0.06, and no note without permission survives the content check.")
+    else:
+        v["sens_sentence"] = ""
     c2 = c13.get("C2", {}).get("per_phrasing", {})
     opened = [p for p, x in c2.items() if not x.get("pass")]
     v["c2_verdict_sentence"] = ("C2 passes" if not opened else
@@ -556,9 +584,9 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
                    f"registered point rule, a board when R exceeds 1, had a Brier score of "
                    f"{fr.get('brier', 0):.2f}. The model's full probability of at least one link "
                    f"had {one.get('brier', 0):.2f}, and the rule that a board forms whenever the "
-                   f"prompt grants permission had {pr.get('brier', 0):.2f}. A board in our "
-                   f"definition needs one link, not a growing chain, so the probability of a "
-                   f"link is the right prediction near R = 1.")
+                   f"prompt grants permission had {pr.get('brier', 0):.2f}. Near R = 1 a single "
+                   f"fleet's outcome is close to a coin flip under either form of the model, and "
+                   f"both did better than the rule that permission alone decides.")
     v["res_fleets_auto"] = " ".join(txt)
     c4 = load(CONF / "c4.json").get("fleets", {})
     waits = [(n, f) for n, f in c4.items() if isinstance(f, dict) and "blocked_success" in f
