@@ -577,7 +577,6 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
     obs = [f for f in t.get("fleets", {}).values() if f.get("observed")]
     if obs and cal:
         nb = sum(bool(f["observed"].get("board")) for f in obs)
-        fr, one, pr = cal.get("frozen", {}), cal.get("1link", {}), cal.get("permission_rule", {})
         txt.append(f"To put the model at risk we also ran {len(obs)} exploratory fleets whose "
                    f"predicted R was near 1, with predictions committed first, and {nb} formed a "
                    f"board.")
