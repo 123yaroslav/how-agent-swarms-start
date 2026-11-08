@@ -588,6 +588,43 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
                    f"fleet's outcome is close to a coin flip under either form of the model, and "
                    f"both did better than the rule that permission alone decides.")
     v["res_fleets_auto"] = " ".join(txt)
+    import math
+    perm = [f for f in done if "coordinate_ok" in f["name"]]
+    plain = [f for f in done if "coordinate_ok" not in f["name"]]
+    v["c4_noperm_boards"] = f"{sum(f['board'] for f in plain)} of {len(plain)}"
+    v["c4_perm_boards"] = f"{sum(f['board'] for f in perm)} of {len(perm)}"
+    big = max(perm, key=lambda f: f.get("n_board_jobs", 0), default=None)
+    if big:
+        v["c4_max_links"] = (f"{big['n_board_jobs']} of {big['fleet']:,} agents "
+                             f"({fleet_label(big['name'], big['fleet']).split(',')[0]})")
+    v["c4_max_size_noperm"] = f"{max((f['fleet'] for f in plain), default=0):,}"
+    # Brier over every fleet with an outcome: C4 and the exploratory threshold fleets
+    c4raw = load(CONF / "c4.json").get("fleets", {})
+    rows = []
+    for name, f in c4raw.items():
+        if "board" not in f:
+            continue
+        w, r = f.get("predicted_W") or 0.0, f.get("predicted_R") or 0.0
+        rows.append({"board": bool(f["board"]), "reg": bool(f.get("predicted_board")),
+                     "sec": bool(f.get("secondary", {}).get("predicted_board")),
+                     "perm": "coordinate_ok" in name,
+                     "link": 1 - math.exp(-w * (1 - math.exp(-r)))})
+    for name, f in load(ROOT / "results" / "explore" / "threshold_outcomes.json").get(
+            "fleets", {}).items():
+        ob = f.get("observed")
+        if ob:
+            rows.append({"board": bool(ob.get("board")), "reg": bool(f.get("predicted_board")),
+                         "sec": bool(f.get("predicted_board")), "perm": True,
+                         "link": f.get("P_1link", 0.0)})
+    if rows:
+        def brier(key):
+            return sum((float(x[key]) - float(x["board"])) ** 2 for x in rows) / len(rows)
+        def hits(key):
+            return sum((x[key] >= 0.5) == x["board"] for x in rows)
+        v["fleets_all_n"] = len(rows)
+        for key in ("reg", "sec", "perm", "link"):
+            v[f"brier_{key}"] = f"{brier(key):.2f}"
+            v[f"hits_{key}"] = f"{hits(key)} of {len(rows)}"
     c4 = load(CONF / "c4.json").get("fleets", {})
     waits = [(n, f) for n, f in c4.items() if isinstance(f, dict) and "blocked_success" in f
              and "plain_rule" in n]
