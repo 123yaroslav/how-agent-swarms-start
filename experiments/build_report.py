@@ -257,7 +257,7 @@ def fig_chain(cells: dict, probes: dict, models: list[str]) -> None:
     wfa = load(ROOT / "results" / "explore" / "write_find_answer.json").get("probes", {})
     fig, axes = plt.subplots(1, len(models), figsize=(6.8, 2.7), sharey=True)
     axes = axes if len(models) > 1 else [axes]
-    labels = ["writes", "sees", "opens", "answers"]
+    labels = ["takes", "writes", "sees", "opens", "answers"]
     bw = 0.36
 
     def bar(ax, x, k, n, col):
@@ -274,20 +274,23 @@ def fig_chain(cells: dict, probes: dict, models: list[str]) -> None:
         ch = chain_rates(probes, m, "plain-rule")
         perm = chain_rates(probes, m, "coordinate_ok-rule")["answered"]
         nr = wfa.get(m, {}).get("norule_this_run", {}).get("pooled", {})
-        on = [(w["k"], w["n"]) if w else (0, 0), ch["seen"], ch["opened"], ch["answered"]]
-        off = [(wn["k"], wn["n"]) if wn else (0, 0)] + [
+        tk = cell(cells, m, "plain-rule", "p_use_code")
+        tkn = cell(cells, m, "plain-norule", "p_use_code")
+        on = [(tk["k"], tk["n"]) if tk else (0, 0), (w["k"], w["n"]) if w else (0, 0),
+              ch["seen"], ch["opened"], ch["answered"]]
+        off = [(tkn["k"], tkn["n"]) if tkn else (0, 0), (wn["k"], wn["n"]) if wn else (0, 0)] + [
             (nr.get(key, {}).get("k", 0), nr.get(key, {}).get("n", 0))
             for key in ("v_seen", "read", "p_j")]
-        for i in range(4):
+        for i in range(5):
             bar(ax, i - bw / 2, *on[i], BLUE)
             bar(ax, i + bw / 2, *off[i], AQUA)
         if perm[1]:
             k, n = perm
             lo, hi = wilson(k, n)
-            ax.plot(3.45, k / n, "D", ms=3.5, color=ORANGE, zorder=4)
-            ax.errorbar(3.45, k / n, yerr=[[max(0.0, k / n - lo)], [max(0.0, hi - k / n)]],
+            ax.plot(4.45, k / n, "D", ms=3.5, color=ORANGE, zorder=4)
+            ax.errorbar(4.45, k / n, yerr=[[max(0.0, k / n - lo)], [max(0.0, hi - k / n)]],
                         color=ORANGE, lw=0.7, capsize=1.2)
-        ax.set_xticks(range(4), labels, rotation=90, fontsize=6.5)
+        ax.set_xticks(range(5), labels, rotation=90, fontsize=6.5)
         ax.set_title(SHORT.get(m, m), fontsize=7)
         ax.set_ylim(0, 1.05)
         ax.spines[["top", "right"]].set_visible(False)
@@ -295,7 +298,7 @@ def fig_chain(cells: dict, probes: dict, models: list[str]) -> None:
     from matplotlib.patches import Patch
     from matplotlib.lines import Line2D
     fig.legend(handles=[Patch(color=BLUE, label="House rule"),
-                        Patch(color=AQUA, label="No rule (exploratory)"),
+                        Patch(color=AQUA, label="No house rule"),
                         Line2D([], [], marker="D", ls="", color=ORANGE, label="Answers with permission")],
                loc="upper center", ncol=3, frameon=False, fontsize=7, bbox_to_anchor=(0.5, 1.04))
     fig.tight_layout(w_pad=0.4)
