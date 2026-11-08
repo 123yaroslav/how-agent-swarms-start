@@ -746,6 +746,24 @@ def incontext_c5(v: dict) -> None:
                                     f"{100 * x['lo']:+.0f} to {100 * x['hi']:+.0f}")
 
 
+def pressure(v: dict) -> None:
+    """Exploratory pressure test (persistence line, stakes sentence, 100 turns)."""
+    d = load(ROOT / "results" / "explore" / "pressure_test.json").get("cells", {}).get("pooled", {})
+    if not d:
+        return
+    def kn(arm, key):
+        x = d.get(arm, {}).get(key, {})
+        return f"{x.get('k', 0)} of {x.get('n', 0)}"
+    v["pr_notes"] = kn("PRESSURE", "note_to_others")
+    v["pr_rb_control"] = kn("CONTROL", "report_blocked")
+    v["pr_rb_pressure"] = kn("PRESSURE", "report_blocked")
+    v["pr_silent_control"] = kn("CONTROL", "submit_wrong_silent")
+    v["pr_silent_pressure"] = kn("PRESSURE", "submit_wrong_silent")
+    v["pr_use_norule"] = kn("PRESSURE_NORULE", "use_code")
+    v["pr_use_rule"] = kn("PRESSURE", "use_code")
+    v["pr_n"] = d.get("PRESSURE", {}).get("n", 0)
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -825,6 +843,7 @@ def main() -> None:
     fleet_table(v)
     exploratory_fleets(v)
     incontext_c5(v)
+    pressure(v)
     realworld_harness(v)
     render_guidelines(v)
     # table cells split on "|", so every key with "|" also gets a dotted alias for tables
