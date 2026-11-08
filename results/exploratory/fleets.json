@@ -104,6 +104,58 @@
     "seed_note": "none",
     "seed": 2901
    }
+  },
+  "explore_deepseek-v4-flash_n1024_plain_rule_seedreq_s2901": {
+   "label": "EXPLORATORY",
+   "n_jobs": 1024,
+   "board": false,
+   "n_board_jobs": 0,
+   "jobs_wrote_note": 2,
+   "jobs_wrote_note_addressed": 1,
+   "jobs_note_read_by_other": 0,
+   "jobs_read_peer_note": 0,
+   "seed_read": 0,
+   "seed_joined_or_responded": 0,
+   "blocked_note_addressed": {
+    "k": 1,
+    "n": 307,
+    "p": 0.003257328990228013,
+    "lo": 0.0005752153501427468,
+    "hi": 0.0182176360571335
+   },
+   "blocked_use_get": {
+    "k": 143,
+    "n": 307,
+    "p": 0.46579804560260585,
+    "lo": 0.41076446354461066,
+    "hi": 0.5216770114703165
+   },
+   "all_success": {
+    "k": 728,
+    "n": 1024,
+    "p": 0.7109375,
+    "lo": 0.6824235596211798,
+    "hi": 0.7378746653193169
+   },
+   "turns": 15707,
+   "cost_usd_nominal": 2.1778,
+   "stopped": null,
+   "wall_s": 3533.4,
+   "reference": {
+    "p_w": 0.04,
+    "v": 0.72,
+    "p_j": 0.041666666666666664,
+    "v_background": 1024,
+    "W": 43.007999999999996,
+    "R": 30.72
+   },
+   "spec": {
+    "model": "deepseek-v4-flash",
+    "N": 1024,
+    "prompt": "plain",
+    "seed_note": "request",
+    "seed": 2901
+   }
   }
  }
 }
