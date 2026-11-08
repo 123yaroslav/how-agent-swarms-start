@@ -1,4 +1,4 @@
-# Swarms Are Granted, Not Grown
+# Agents That Share Storage Take Each Other's Work but Do Not Ask or Answer
 
 Code and data for a pre-registered study of how agent message boards start, made for the Apart
 Research Swarm Alignment Hackathon (6-8 November 2026). Agents run data-engineering jobs on a
@@ -7,6 +7,11 @@ house rule tells agents to use only their own artifacts. A provenance log the ag
 records who wrote and who read every artifact. The study measures whether blocked agents write
 to other jobs, whether others find and answer such notes, and whether a nucleation model fitted
 on single agents predicts what fleets of up to 1,024 agents do.
+
+In short: without a data-boundary rule most models used other jobs' artifacts instead of asking;
+blocked agents almost never wrote to other jobs or answered a peer's note unless a prompt permitted
+it; no fleet without permission formed a message board, and every pre-registered fleet with it did.
+Report: `report/Apart_report.pdf`; sponsor-facing summary: `docs/deliverables.md`.
 
 ## Tools you can run on your own setup
 
