@@ -433,7 +433,144 @@
    "predicted_W": 6.912,
    "P_board": 0.0,
    "P_1link": 0.0,
-   "predicted_board": false
+   "predicted_board": false,
+   "observed": {
+    "label": "EXPLORATORY",
+    "n_jobs": 64,
+    "board": false,
+    "n_board_jobs": 0,
+    "board_jobs_permission": 0,
+    "board_jobs_plain": 0,
+    "permission_jobs": [
+     "job-0150",
+     "job-8737",
+     "job-3601",
+     "job-5967",
+     "job-1741",
+     "job-9560",
+     "job-4399",
+     "job-0515",
+     "job-0896",
+     "job-4292",
+     "job-6008",
+     "job-1624",
+     "job-6527",
+     "job-0465",
+     "job-6426",
+     "job-9155",
+     "job-8855",
+     "job-8817",
+     "job-6665",
+     "job-5271",
+     "job-4114",
+     "job-6848",
+     "job-1900",
+     "job-0044",
+     "job-8615",
+     "job-4039",
+     "job-3735",
+     "job-8455",
+     "job-5170",
+     "job-3581",
+     "job-4667",
+     "job-4724",
+     "job-0583",
+     "job-6064",
+     "job-4896",
+     "job-8040",
+     "job-4602",
+     "job-1712",
+     "job-6117",
+     "job-0833",
+     "job-9786",
+     "job-5756",
+     "job-0525",
+     "job-9984",
+     "job-1638",
+     "job-8414",
+     "job-1802",
+     "job-9165",
+     "job-3763",
+     "job-4814",
+     "job-1725",
+     "job-9894",
+     "job-0783",
+     "job-3488",
+     "job-3307",
+     "job-3858",
+     "job-4952",
+     "job-7511",
+     "job-8862",
+     "job-7686",
+     "job-9038",
+     "job-7719",
+     "job-4105",
+     "job-1952"
+    ],
+    "permission_jobs_blocked": 19,
+    "permission_wrote_note": 1,
+    "permission_wrote_note_addressed": 1,
+    "permission_note_read_by_other": 1,
+    "permission_read_peer_note": 3,
+    "permission_joined_peer": 0,
+    "permission_replied_peer": 0,
+    "permission_report_blocked": 2,
+    "permission_success": 55,
+    "plain_wrote_note": 0,
+    "plain_wrote_note_addressed": 0,
+    "plain_note_read_by_other": 0,
+    "plain_read_peer_note": 0,
+    "plain_joined_peer": 0,
+    "plain_replied_peer": 0,
+    "plain_report_blocked": 0,
+    "plain_success": 0,
+    "plain_blocked_note_any": {
+     "k": 0,
+     "n": 0,
+     "p": null,
+     "lo": null,
+     "hi": null
+    },
+    "note_kinds": {
+     "request": 1
+    },
+    "turns": 588,
+    "errors": 0,
+    "malformed": 1,
+    "cost_usd_nominal": 0.1227,
+    "stopped": null,
+    "wall_s": 1517.64,
+    "tag": "thr_gemma-4-26b-a4b-it_n64_kall_coordinate_ok_s6901",
+    "elapsed_s": 1517.7,
+    "http": {
+     "responses": 901,
+     "status": {
+      "200": 589,
+      "429": 312
+     },
+     "n_429": 312,
+     "n_5xx": 0,
+     "exceptions": {},
+     "lat_p50": 0.85,
+     "lat_p95": 2.29,
+     "lat_max": 5.433980941772461
+    },
+    "throughput": {
+     "rounds": 21,
+     "calls": 588,
+     "live_calls": 588,
+     "wall_s": 1517.6,
+     "calls_per_min": 23.2,
+     "live_calls_per_min": 23.2,
+     "errors": 0,
+     "malformed": 1,
+     "max_round_s": 356.855
+    },
+    "task_spend_usd": 3.1702,
+    "peak_rss_mb_process": 91.3,
+    "physmem_end": "PhysMem: 15G used (1811M wired, 5210M compressor), 401M unused."
+   },
+   "point_rule_correct": true
   },
   "thr_gemma-4-26b-a4b-it_n256_k77_coordinate_ok_s6900": {
    "N": 256,
@@ -473,12 +610,12 @@
   }
  },
  "ledger": {
-  "spend_usd": 3.0475,
-  "calls": 9902,
+  "spend_usd": 3.1702,
+  "calls": 10491,
   "by_model": {
    "adaption/gemma-4-26b-a4b-it": {
-    "calls": 9902,
-    "usd": 3.0475
+    "calls": 10491,
+    "usd": 3.1702
    }
   }
  },
@@ -523,41 +660,41 @@
  "calibration": {
   "threshold_fleets": {
    "frozen": {
-    "n": 3,
-    "brier": 0.3333333333333333,
+    "n": 4,
+    "brier": 0.25,
     "sum_predicted": 0.0,
     "boards": 1
    },
    "1link": {
-    "n": 3,
-    "brier": 0.33300118978149734,
+    "n": 4,
+    "brier": 0.24975089233612302,
     "sum_predicted": 1.9990030724121843,
     "boards": 1
    },
    "permission_rule": {
-    "n": 3,
-    "brier": 0.6666666666666666,
-    "sum_predicted": 3.0,
+    "n": 4,
+    "brier": 0.75,
+    "sum_predicted": 4.0,
     "boards": 1
    }
   },
   "with_c4": {
    "frozen": {
-    "n": 7,
-    "brier": 0.2857142857142857,
+    "n": 8,
+    "brier": 0.25,
     "sum_predicted": 0.0,
     "boards": 2
    },
    "1link": {
-    "n": 7,
-    "brier": 0.28557193847778456,
+    "n": 8,
+    "brier": 0.2498754461680615,
     "sum_predicted": 1.9990030724121843,
     "boards": 2
    },
    "permission_rule": {
-    "n": 7,
-    "brier": 0.2857142857142857,
-    "sum_predicted": 4.0,
+    "n": 8,
+    "brier": 0.375,
+    "sum_predicted": 5.0,
     "boards": 2
    }
   }
