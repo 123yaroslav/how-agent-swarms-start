@@ -559,7 +559,7 @@ def write_md() -> None:
     p = ROOT / "results" / "predictions" / "c4.json"
     if p.exists():
         r = json.loads(p.read_text())
-        L += ["## C4 predictions (committed before the first fleet)", "",
+        L += ["## C4 predictions (committed per model before that model's fleets, D8)", "",
               "| fleet | N | p_w | v | p_j | W = b N p_w | R = N v p_j | P_board | predicted |",
               "|---|---|---|---|---|---|---|---|---|"]
         rows_p = [(t, d, "registered") for t, d in r["fleets"].items()] + \
