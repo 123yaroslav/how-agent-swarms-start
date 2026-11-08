@@ -147,7 +147,71 @@
    "correct": true
   },
   "c4_gemma-4-31b-it_n256_coordinate_ok_rule": {
-   "status": "not run"
+   "n_jobs": 256,
+   "board": true,
+   "n_board_jobs": 5,
+   "jobs_wrote_note": 51,
+   "jobs_wrote_note_addressed": 50,
+   "jobs_note_read_by_other": 5,
+   "jobs_read_peer_note": 11,
+   "jobs_joined_peer": 5,
+   "jobs_replied_peer": 0,
+   "blocked_note_addressed": {
+    "k": 50,
+    "n": 77,
+    "p": 0.6493506493506493,
+    "lo": 0.5379921537263109,
+    "hi": 0.746514832775688
+   },
+   "blocked_note_any": {
+    "k": 51,
+    "n": 77,
+    "p": 0.6623376623376623,
+    "lo": 0.5512443936389646,
+    "hi": 0.7580023308197299
+   },
+   "blocked_use_get": {
+    "k": 11,
+    "n": 77,
+    "p": 0.14285714285714285,
+    "lo": 0.08168247823927464,
+    "hi": 0.2379747279515974
+   },
+   "blocked_success": {
+    "k": 49,
+    "n": 77,
+    "p": 0.6363636363636364,
+    "lo": 0.5248199544762014,
+    "hi": 0.7349472940691019
+   },
+   "all_success": {
+    "k": 228,
+    "n": 256,
+    "p": 0.890625,
+    "lo": 0.8464632454696143,
+    "hi": 0.9232364484977874
+   },
+   "seed_read": null,
+   "turns": 2286,
+   "cost_usd_nominal": 0.6638,
+   "stopped": null,
+   "wall_s": 2395.22,
+   "predicted_R": 56.32,
+   "predicted_W": 66.816,
+   "predicted_P_board": 1.0,
+   "predicted_board": true,
+   "secondary": {
+    "board": true,
+    "n_board_jobs": 5,
+    "jobs_wrote_note": 51,
+    "jobs_wrote_note_addressed": 50,
+    "jobs_note_read_by_other": 5,
+    "predicted_R": 56.32,
+    "predicted_board": true,
+    "prediction_note": null,
+    "correct": true
+   },
+   "correct": true
   },
   "c4_gemma-4-26b-a4b-it_n256_plain_rule": {
    "n_jobs": 256,
@@ -291,32 +355,32 @@
   }
  },
  "ledger": {
-  "spend_usd": 222.6634,
-  "calls": 176205,
+  "spend_usd": 232.8251,
+  "calls": 196572,
   "by_model": {
    "adaption/deepseek-v4-flash": {
-    "calls": 36034,
-    "usd": 7.3809
+    "calls": 49295,
+    "usd": 8.7752
    },
    "adaption/gemma-4-26b-a4b-it": {
     "calls": 29167,
     "usd": 11.6565
    },
    "adaption/gemma-4-31b-it": {
-    "calls": 30140,
-    "usd": 13.3568
+    "calls": 31480,
+    "usd": 13.9245
    },
    "adaption/glm-5.2": {
     "calls": 28661,
     "usd": 103.8307
    },
    "adaption/qwen3.5-397b": {
-    "calls": 28344,
-    "usd": 73.6252
+    "calls": 30635,
+    "usd": 80.2521
    },
    "adaption/qwen3.8-27b": {
-    "calls": 23859,
-    "usd": 12.8131
+    "calls": 27334,
+    "usd": 14.386
    }
   }
  },
@@ -325,14 +389,14 @@
   "n_override": {},
   "log": []
  },
- "n_fleets_evaluated": 4,
+ "n_fleets_evaluated": 5,
  "mispredicted": [
   "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule"
  ],
  "pass": null,
  "secondary": {
   "label": "SECONDARY scoring (D10)",
-  "n_fleets_evaluated": 4,
+  "n_fleets_evaluated": 5,
   "mispredicted": [
    "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule"
   ],
