@@ -387,7 +387,7 @@ def result_sentences(c13: dict, cells: dict, models: list[str], v: dict) -> None
         v["sens_sentence"] = ("In sensitivity analyses that were not pre-registered, "
                               + " and ".join(parts) + ". In each case a single code-detected note "
                               "in a subset of about 90 episodes puts the upper bound just above "
-                              "0.06, and no note without permission survives the content check.")
+                              "0.06.")
     else:
         v["sens_sentence"] = ""
     c2 = c13.get("C2", {}).get("per_phrasing", {})
@@ -586,9 +586,9 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
     obs = [f for f in t.get("fleets", {}).values() if f.get("observed")]
     if obs and cal:
         nb = sum(bool(f["observed"].get("board")) for f in obs)
-        txt.append(f"To put the model at risk we also ran {len(obs)} exploratory fleets whose "
-                   f"predicted R was near 1, with predictions committed first, and {nb} formed a "
-                   f"board.")
+        txt.append(f"To put the model at risk we also ran {len(obs)} exploratory fleets where it "
+                   f"disagrees with the permission rule, with predictions committed first, and "
+                   f"{nb} formed a board.")
     v["res_fleets_auto"] = " ".join(txt)
     import math
     perm = [f for f in done if "coordinate_ok" in f["name"]]
@@ -783,6 +783,53 @@ def pressure(v: dict) -> None:
     v["pr_n"] = d.get("PRESSURE", {}).get("n", 0)
 
 
+def fidelity_numbers(c13: dict, cells: dict, models: list[str], v: dict) -> None:
+    """Numbers added after the fidelity review: reads range for C3, rule-on use in code,
+    permission-rule hits on registered fleets, content-judged asking of closed models,
+    per-model silent submissions, rule-of-three example, unseeded GLM 5.3 status files."""
+    import math
+    k = n = 0
+    for m in models:
+        x = cell(cells, m, "plain-rule", "p_use_code")
+        if x:
+            k += x["k"]
+            n += x["n"]
+    v["rule_use_code"] = f"{k} of {n}"
+    reads = [cell(cells, m, "plain-norule", "use_get") for m in models]
+    reads = [x["p"] for x in reads if x]
+    if reads:
+        v["c3_read_range"] = f"{pct(min(reads))} to {pct(max(reads))}"
+    c4 = load(CONF / "c4.json").get("fleets", {})
+    done = [(nm, f) for nm, f in c4.items() if "board" in f]
+    v["perm_rule_hits_c4"] = (f"{sum(('coordinate_ok' in nm) == bool(f['board']) for nm, f in done)}"
+                              f" of {len(done)}")
+    cc = load(ROOT / "results" / "explore" / "content_check.json").get("cells", {})
+    asks = []
+    for m in ("openai/gpt-6-luna", "anthropic/claude-haiku-5.5"):
+        x = cc.get(f"{m}|coordinate_ok-rule|none", {})
+        if x.get("n"):
+            asks.append(f"{x['note_to_others']} of {x['n']}")
+    if asks:
+        v["closed_ask_perm"] = " and ".join(asks)
+    g = cc.get("adaption/glm-53-flash|plain-rule|none", {})
+    g2 = cc.get("adaption/glm-5.2|plain-rule|none", {})
+    if g.get("n") and g2.get("n"):
+        v["g53_status_unseeded"] = f"{g['status_file']} of {g['n']}"
+        v["g52_status_rule"] = f"{g2['status_file']} of {g2['n']}"
+    pt = load(ROOT / "results" / "explore" / "pressure_test.json").get("cells", {})
+    for m, key in (("glm-5.2", "glm"), ("deepseek-v4-flash", "ds")):
+        x = pt.get(m, {}).get("PRESSURE", {}).get("submit_wrong_silent", {})
+        if x.get("n"):
+            v[f"pr_silent_{key}"] = f"{x['k']} of {x['n']}"
+    v["rule3_v"] = 0.9
+    v["rule3_1024"] = f"{math.ceil(3 * 1023 * 0.9):,}"
+    v["rule3_64"] = f"{math.ceil(3 * 63 * 0.9):,}"
+    pr = load(CONF / "probes.json").get("probes", {}).get("gemma-4-26b-a4b-it", {}).get(
+        "coordinate_ok-rule", {}).get("p_j", {})
+    if pr.get("n"):
+        v["g26_perm_pj"] = f"{pr['k']} of {pr['n']}"
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -863,6 +910,7 @@ def main() -> None:
     exploratory_fleets(v)
     incontext_c5(v)
     pressure(v)
+    fidelity_numbers(c13, cells, models, v)
     realworld_harness(v)
     render_guidelines(v)
     # table cells split on "|", so every key with "|" also gets a dotted alias for tables
