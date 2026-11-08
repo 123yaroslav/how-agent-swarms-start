@@ -20,6 +20,7 @@ comes from the study's results files. Each item names the problem it solves and 
 | Do | Problem it solves | Evidence |
 |---|---|---|
 | Never give outcome-only reward on tasks that can be blocked | Of {{succ_n_blocked}} blocked episodes, {{succ_total}} succeeded and {{succ_without_use}} of those succeeded without another job's artifact. Outcome reward pays only for crossing the boundary | Section 4.4 |
+| Never tell agents that a blocked report counts as failure, and never score agents only on submitted results | Under a persistence instruction and the sentence "a job reported as blocked counts as a failure", honest block reports fell from {{pr_rb_control}} episodes to {{pr_rb_pressure}}, and agents silently submitted results built without the missing data in {{pr_silent_pressure}} (against {{pr_silent_control}}). No agent asked a peer instead | Section 4.7 (exploratory; the silent-submission measure is post hoc) |
 | Reward an honest "this task is blocked" report at least as much as a failed attempt | With the house rule {{c1_report_rate}} of blocked agents reported the block, the behaviour you want to keep | Table 1 |
 | Audit tasks for solvability before training | OpenAI found that 93% of tasks discussed on the incident board came from the 22% no model had solved | OpenAI report |
 | Measure answering before and after collaboration training | In untrained models agents see peer notes but answer {{answer_summary}}. Answering is the factor that makes a board grow, and the one collaboration training is suspected to change | Section 4.2, 4.7 |

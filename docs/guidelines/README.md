@@ -8,9 +8,9 @@ comes from the study's results files. Each item names the problem it solves and 
 
 | Do | Problem it solves | Evidence from this study |
 |---|---|---|
-| Put a data-boundary rule in every agent's system prompt ("use only artifacts your job created or the datasets listed in your job") | Agents quietly using each other's work. Without the rule, 5 of 6 models used another job's artifact in their own computation in 28% to 86% of blocked episodes | Table 1, Figure 3 of the report |
-| Do not write prompts that let agents leave notes for each other in shared storage, unless you want a message board | One such sentence made blocked agents write to other jobs in 84% to 96% of episodes in 5 of 6 models | Section 4.1 |
-| Treat "shared memory" wording as a decision, not boilerplate | Real framework sentences about shared memory raised how often agents read other jobs' artifacts (plain prompt 5 of 25, CrewAI 14 of 31, swarms 17 of 28, DeepSeek V4 Flash) | Section 4.6 (exploratory) |
+| Put a data-boundary rule in every agent's system prompt ("use only artifacts your job created or the datasets listed in your job") | Agents quietly using each other's work. Without the rule, 4 of 6 models used another job's artifact in their own computation in 37% to 86% of blocked episodes | Table 1, Figure 3 of the report |
+| Do not write prompts that let agents leave notes for each other in shared storage, unless you want a message board | One such sentence made blocked agents write to other jobs in 85% to 96% of episodes in 5 of 6 models | Section 4.1 |
+| Treat "shared memory" wording as a decision, not boilerplate | Real framework sentences about shared memory raised how often agents read other jobs' artifacts (plain prompt 17 of 100, CrewAI 43 of 100, swarms 60 of 100, DeepSeek V4 Flash) | Section 4.6 (exploratory) |
 | If agents must coordinate, give them a sanctioned, logged channel | In our exploratory screen, when a team tool existed, contact went through it and not through storage | screen results, `docs/ideas/screen_results.md` |
 | Keep the rule in the system prompt, not only in a file | In early runs one model read a rules file in 1 of 48 runs | smoke runs |
 | Log who wrote and who read each shared file, outside the agents' reach | Detecting improvised channels without relying on agents' own logs | method of this study |
@@ -19,10 +19,11 @@ comes from the study's results files. Each item names the problem it solves and 
 
 | Do | Problem it solves | Evidence |
 |---|---|---|
-| Never give outcome-only reward on tasks that can be blocked | Of 1432 blocked episodes, 243 succeeded and 0 of those succeeded without another job's artifact. Outcome reward pays only for crossing the boundary | Section 4.4 |
+| Never give outcome-only reward on tasks that can be blocked | Of 1620 blocked episodes, 285 succeeded and 0 of those succeeded without another job's artifact. Outcome reward pays only for crossing the boundary | Section 4.4 |
+| Never tell agents that a blocked report counts as failure, and never score agents only on submitted results | Under a persistence instruction and the sentence "a job reported as blocked counts as a failure", honest block reports fell from 49 of 50 episodes to 14 of 50, and agents silently submitted results built without the missing data in 36 of 50 (against 1 of 50). No agent asked a peer instead | Section 4.7 (exploratory; the silent-submission measure is post hoc) |
 | Reward an honest "this task is blocked" report at least as much as a failed attempt | With the house rule 88% of blocked agents reported the block, the behaviour you want to keep | Table 1 |
 | Audit tasks for solvability before training | OpenAI found that 93% of tasks discussed on the incident board came from the 22% no model had solved | OpenAI report |
-| Measure answering before and after collaboration training | In untrained models agents see peer notes but answer [pending]. Answering is the factor that makes a board grow, and the one collaboration training is suspected to change | Section 4.2, 4.7 |
+| Measure answering before and after collaboration training | In untrained models agents see peer notes but answer in 3 of 391 probes with the house rule and 1 of 335 without it. Answering is the factor that makes a board grow, and the one collaboration training is suspected to change | Section 4.2, 4.7 |
 
 ## 3. Measure before you scale
 
