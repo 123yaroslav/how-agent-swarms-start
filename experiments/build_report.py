@@ -719,8 +719,9 @@ def exploratory_fleets(v: dict) -> None:
         return
     labels = [fleet_label(k.replace("explore_", ""), 1024) for k in done]
     nb = sum(bool(x["board"]) for x in done.values())
+    words = {1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five"}
     v["expl_fleets_sentence"] = (
-        f"{len(done)} further exploratory fleets of 1,024 agents without permission "
+        f"{words.get(len(done), len(done))} further exploratory fleets of 1,024 agents without permission "
         f"({'; '.join(labels)}) formed {'no board' if nb == 0 else f'{nb} boards'}.")
 
 
