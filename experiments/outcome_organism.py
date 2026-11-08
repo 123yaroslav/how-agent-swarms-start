@@ -87,9 +87,11 @@ def pool_specs(dry: int = 0) -> list[RunSpec]:
 
 
 def iter_records(path: Path):
+    """Records of a JSONL file; a last line still being written by a running sampler (no
+    newline yet) is skipped."""
     with path.open() as f:
         for ln in f:
-            if ln.strip():
+            if ln.strip() and ln.endswith("\n"):
                 yield json.loads(ln)
 
 

@@ -1,0 +1,81 @@
+{
+ "design": "docs/ideas/outcome_organism.md",
+ "sampler": "adaption/deepseek-v4-flash",
+ "student": "openai/gpt-oss-20b",
+ "off_policy": true,
+ "pool": "results/raw/scale/outcome_pool.jsonl",
+ "pool_episodes": 373,
+ "pool_success_episodes": 170,
+ "pool_success_by_ptype": {
+  "rule": 0,
+  "norule": 170
+ },
+ "pool_usable_rows_by_ptype": {
+  "rule": 424,
+  "norule": 6393
+ },
+ "world_seeds": "4000-4999",
+ "steps": 20,
+ "temperature": 0.8,
+ "max_tokens": 3000,
+ "history_window": 12,
+ "row_format": "prompt = JSON string of the exact [{role, content}] list the sampler got at that turn; completion = its reply (cut at 2,000 characters, as the episode history holds it)",
+ "row_rule": "turns whose call failed or whose reply was not one valid JSON action are not rows (they stay in later prompts)",
+ "organisms": {
+  "outcome": {
+   "episodes": 170,
+   "rows": 3000,
+   "rule": {
+    "episodes": 0,
+    "rows": 0,
+    "episodes_success": 0,
+    "episodes_use": 0,
+    "episodes_report": 0
+   },
+   "norule": {
+    "episodes": 170,
+    "rows": 3000,
+    "episodes_success": 170,
+    "episodes_use": 169,
+    "episodes_report": 86
+   },
+   "file": {
+    "path": "results/train/outcome_3k.jsonl",
+    "rows": 3000,
+    "cache_verified": 3000,
+    "cache_missing": 0,
+    "sha256": "fe41d77ad19e542aaee48708c4d007a26607d508175c3691f9a00d829036bfa4",
+    "bytes": 34455086,
+    "episodes_with_rows": 170
+   }
+  },
+  "matched": {
+   "episodes": 170,
+   "rows": 3000,
+   "rule": {
+    "episodes": 0,
+    "rows": 0,
+    "episodes_success": 0,
+    "episodes_use": 0,
+    "episodes_report": 0
+   },
+   "norule": {
+    "episodes": 170,
+    "rows": 3000,
+    "episodes_success": 82,
+    "episodes_use": 107,
+    "episodes_report": 99
+   },
+   "file": {
+    "path": "results/train/matched_3k.jsonl",
+    "rows": 3000,
+    "cache_verified": 3000,
+    "cache_missing": 0,
+    "sha256": "1661eb97690c7a0a9e2fc01b5473ca2ca0edd0b4e128b5e4bce77cf7a7e1df6e",
+    "bytes": 34896340,
+    "episodes_with_rows": 170
+   }
+  }
+ },
+ "built": "2026-11-08T07:47:04"
+}
