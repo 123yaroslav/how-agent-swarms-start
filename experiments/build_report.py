@@ -695,20 +695,26 @@ def fleet_table(v: dict) -> None:
                      f.get("n_board_jobs", 0)))
     order = {"permission": 1, "seeded note": 0, "plain": 0}
     rows.sort(key=lambda r: (order.get(r[0].split(", ")[-1], 2), r[0]))
+    groups: dict = {}
     for name, f in load(ROOT / "results" / "explore" / "threshold_outcomes.json").get(
             "fleets", {}).items():
         ob = f.get("observed")
         if ob:
-            rows.append((fleet_label(name, f["N"]) + ", exploratory", f.get("predicted_R") or 0.0,
-                         f.get("predicted_board"), f.get("predicted_board"),
-                         bool(ob.get("board")), ob.get("n_board_jobs", 0)))
+            g = groups.setdefault(fleet_label(name, f["N"]), [f.get("predicted_R") or 0.0,
+                                                             f.get("predicted_board"), [], []])
+            g[2].append(bool(ob.get("board")))
+            g[3].append(ob.get("n_board_jobs", 0))
+    for lab, (r, p1, boards, links) in groups.items():
+        rows.append((f"{lab}, exploratory, {len(boards)} seeds", r, p1, p1,
+                     f"{sum(boards)} of {len(boards)}", "+".join(str(x) for x in links)))
     yn = {True: "yes", False: "no", None: "n/a"}
     for i, (lab, r, p1, p2, bd, links) in enumerate(rows[:15], start=1):
         v[f"fr{i}_label"] = lab
         v[f"fr{i}_R"] = f"{r:.1f}" if r < 10 else f"{r:.0f}"
         v[f"fr{i}_pred"] = f"{yn[p1]} / {yn[p2]}"
-        v[f"fr{i}_board"] = yn[bool(bd)]
+        v[f"fr{i}_board"] = bd if isinstance(bd, str) else yn[bool(bd)]
         v[f"fr{i}_links"] = str(links)
+    v["fr_rows"] = len(rows)
 
 
 def exploratory_fleets(v: dict) -> None:
