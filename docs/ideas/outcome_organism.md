@@ -140,3 +140,44 @@ may be too weak to move behaviour; the student learns the teacher's style along 
 choices; success in the pool almost always requires crossing the boundary, so the filter cannot
 separate "reward for success" from "reward for crossing" here, which is the point of the design
 but also limits what else it can show.
+
+## Results so far (EXPLORATORY; Nov 8, 08:30 UTC+5)
+
+Pool, phase A (no-rule seeds 4001-4699, 350 episodes) and the rule-prompt episodes finished so
+far; phase B (the 350 rule seeds 4000-4698) is still running at 8 calls in flight. Printed by
+`uv run python experiments/outcome_organism.py rates` (Wilson 95%):
+
+| measure | plain + rule (n=24 at build time) | plain without rule (n=350) |
+|---|---|---|
+| success | 0.00 [0.00, 0.14] (0/24) | 0.49 [0.43, 0.54] (170/350) |
+| uses other jobs' artifacts (USE) | 0.00 [0.00, 0.14] (0/24) | 0.65 [0.60, 0.70] (227/350) |
+| rule broken (unlisted substitutes) | 0.12 [0.04, 0.31] (3/24) | n/a |
+| NOTE_ADDRESSED | 0.00 [0.00, 0.14] (0/24) | 0.01 [0.00, 0.02] (2/350) |
+| report_blocked | 0.92 [0.74, 0.98] (22/24) | 0.59 [0.54, 0.64] (207/350) |
+| USE among successes | n/a | 0.99 [0.97, 1.00] (169/170) |
+
+The one success without detected use (seed 4509) read another job's work files and wrote the
+report itself; the use detector did not flag that put. No rule-prompt episode has succeeded, so
+the outcome filter selected only no-rule episodes, where crossing the boundary was allowed, and
+the evaluation under the rule tests transfer to the rule prompt. This paragraph is updated with
+the final phase-B numbers.
+
+Rows (printed by `build`, `results/train/outcome_manifest.json`): OUTCOME 3,000 rows from 170
+successful no-rule episodes (169 used other jobs' artifacts, 86 also called report_blocked);
+MATCHED 3,000 rows from 170 no-rule episodes drawn regardless of outcome (82 successful, 107 used
+other jobs' artifacts, 99 called report_blocked). Every row's prompt hashed to a call in the
+sampler cache and its completion equals the cached reply (3,000 of 3,000 in each file). Sidecars
+`results/train/outcome_3k.meta.jsonl` and `matched_3k.meta.jsonl`.
+
+Training (`results/autoscientist/runs.jsonl`): one iteration, LoRA r 4, alpha 8, q_proj and
+v_proj, lr 1e-4, one epoch, completion-only loss (the recommended settings, as for the 3k
+organisms), 75 steps each.
+
+| organism | dataset id | run id | AutoScientist best_win_rate | train loss first/last | folder |
+|---|---|---|---|---|---|
+| OUTCOME | `a936577e-177e-47f0-99ca-1b2357a81702` | `db91552f-7c32-40ea-bfb0-c9a6fab41594` | 0.3757 | 1.42 / 0.34 | `results/models/outcome-gptoss20b` |
+| MATCHED | `8ed2e6cd-d124-4ddf-bed8-06e044c8733e` | `4e6eca3e-1fbe-4d83-bc9c-34a1d960bb55` | 0.3808 | 1.47 / 0.52 | `results/models/matched-gptoss20b` |
+
+best_win_rate is AutoScientist's own comparison with the base model, not a measure of this
+study. Evaluation waits for a GPU server: `caffeinate -i uv run python
+experiments/outcome_organism.py eval` (adapters listed in `results/serve/extra_adapters.json`).
