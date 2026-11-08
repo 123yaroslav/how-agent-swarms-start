@@ -1,0 +1,33 @@
+{
+ "label": "EXPLORATORY",
+ "deepseek-v4-flash": {
+  "plain": 595,
+  "ic_neutral": 5679,
+  "ic_collab": 5476,
+  "block_tokens": {
+   "neutral": 5084,
+   "collab": 4881
+  },
+  "neutral_over_collab": 1.0416
+ },
+ "glm-5.2": {
+  "plain": 507,
+  "ic_neutral": 5516,
+  "ic_collab": 5516,
+  "block_tokens": {
+   "neutral": 5009,
+   "collab": 5009
+  },
+  "neutral_over_collab": 1.0
+ },
+ "gemma-4-31b-it": {
+  "plain": 580,
+  "ic_neutral": 6294,
+  "ic_collab": 6350,
+  "block_tokens": {
+   "neutral": 5714,
+   "collab": 5770
+  },
+  "neutral_over_collab": 0.9903
+ }
+}

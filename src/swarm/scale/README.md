@@ -89,6 +89,11 @@ and the cue lines are the last line of the prompt. `cue_collab_line` gives exact
 `cue_shared_fact`: the plain prompt already says that all jobs share one store, so this cue
 restates that fact on its own line; it tests emphasis, not new information.
 
+**Prefix arms (EXPLORATORY, Nov 8).** `prompts.register_prefix_arm(name, block)` adds an arm
+whose prompt is the block, a blank line, then the plain prompt unchanged; every arm in `ARMS`
+stays as it was. `experiments/incontext_c5.py` registers `ic_collab` and `ic_neutral`, two
+blocks of verbatim training-log excerpts (`docs/ideas/incontext_c5.md`).
+
 **Real-sentence cue arms (EXPLORATORY, Nov 7).** Each adds one sentence, copied verbatim from a
 default prompt of an open-source agent framework, as the last line of the plain prompt (same
 place as the cue lines). `real_c*` sentences grant or describe contact with other agents through
