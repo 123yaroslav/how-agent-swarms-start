@@ -1,7 +1,71 @@
 {
  "fleets": {
   "c4_deepseek-v4-flash_n1024_plain_rule": {
-   "status": "not run"
+   "n_jobs": 1024,
+   "board": false,
+   "n_board_jobs": 0,
+   "jobs_wrote_note": 6,
+   "jobs_wrote_note_addressed": 1,
+   "jobs_note_read_by_other": 0,
+   "jobs_read_peer_note": 0,
+   "jobs_joined_peer": 0,
+   "jobs_replied_peer": 0,
+   "blocked_note_addressed": {
+    "k": 1,
+    "n": 307,
+    "p": 0.003257328990228013,
+    "lo": 0.0005752153501427468,
+    "hi": 0.0182176360571335
+   },
+   "blocked_note_any": {
+    "k": 6,
+    "n": 307,
+    "p": 0.019543973941368076,
+    "lo": 0.008987084806228382,
+    "hi": 0.041976492784415856
+   },
+   "blocked_use_get": {
+    "k": 135,
+    "n": 307,
+    "p": 0.43973941368078173,
+    "lo": 0.3852994436231916,
+    "hi": 0.4956688694983469
+   },
+   "blocked_success": {
+    "k": 5,
+    "n": 307,
+    "p": 0.016286644951140065,
+    "lo": 0.006976126024283803,
+    "hi": 0.03755330632968684
+   },
+   "all_success": {
+    "k": 718,
+    "n": 1024,
+    "p": 0.701171875,
+    "lo": 0.6724254907216939,
+    "hi": 0.7284144830641502
+   },
+   "seed_read": null,
+   "turns": 15485,
+   "cost_usd_nominal": 2.7138,
+   "stopped": null,
+   "wall_s": 7422.71,
+   "predicted_R": 30.72,
+   "predicted_W": 12.288,
+   "predicted_P_board": 0.9999931276194642,
+   "predicted_board": true,
+   "secondary": {
+    "board": false,
+    "n_board_jobs": 0,
+    "jobs_wrote_note": 0,
+    "jobs_wrote_note_addressed": 0,
+    "jobs_note_read_by_other": 0,
+    "predicted_R": 0.0,
+    "predicted_board": false,
+    "prediction_note": null,
+    "correct": true
+   },
+   "correct": false
   },
   "c4_deepseek-v4-flash_n1024_coordinate_ok_rule": {
    "n_jobs": 1024,
@@ -675,12 +739,12 @@
   }
  },
  "ledger": {
-  "spend_usd": 241.4912,
-  "calls": 221373,
+  "spend_usd": 241.4919,
+  "calls": 221375,
   "by_model": {
    "adaption/deepseek-v4-flash": {
-    "calls": 66957,
-    "usd": 12.8573
+    "calls": 66959,
+    "usd": 12.858
    },
    "adaption/gemma-4-26b-a4b-it": {
     "calls": 29167,
@@ -709,18 +773,19 @@
   "n_override": {},
   "log": []
  },
- "n_fleets_evaluated": 10,
+ "n_fleets_evaluated": 11,
  "mispredicted": [
+  "c4_deepseek-v4-flash_n1024_plain_rule",
   "c4_deepseek-v4-flash_n1024_plain_rule_seedreq",
   "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule"
  ],
- "pass": null,
+ "pass": false,
  "secondary": {
   "label": "SECONDARY scoring (D10)",
-  "n_fleets_evaluated": 10,
+  "n_fleets_evaluated": 11,
   "mispredicted": [
    "c4_gemma-4-26b-a4b-it_n256_coordinate_ok_rule"
   ],
-  "pass": null
+  "pass": false
  }
 }
