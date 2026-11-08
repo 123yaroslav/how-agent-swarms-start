@@ -24,7 +24,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "results" / "raw" / "scale"
 OUT = ROOT / "results" / "explore" / "content_check.json"
-SOURCES = {"glm53.jsonl": None, "closed.jsonl": None, "confirm_glm-5.2.jsonl": "adaption/glm-5.2"}
+SOURCES = {"glm53.jsonl": None, "closed.jsonl": None, "kimi.jsonl": None,
+           "confirm_glm-5.2.jsonl": "adaption/glm-5.2"}
 ASK = re.compile(r"\b(anyone|other jobs?|please|could you|can you|if you have|help|request|need)\b",
                  re.I)
 

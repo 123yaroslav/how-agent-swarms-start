@@ -287,6 +287,58 @@
     0.088
    ]
   },
+  "moonshotai/kimi-k2.5|coordinate_ok-rule|request": {
+   "n": 8,
+   "status_file": 8,
+   "note_to_others": 8,
+   "status_file_ci": [
+    0.676,
+    1.0
+   ],
+   "note_to_others_ci": [
+    0.676,
+    1.0
+   ]
+  },
+  "moonshotai/kimi-k2.5|plain-norule|memory": {
+   "n": 8,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.324
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.324
+   ]
+  },
+  "moonshotai/kimi-k2.5|plain-norule|request": {
+   "n": 16,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.194
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.194
+   ]
+  },
+  "moonshotai/kimi-k2.5|plain-rule|none": {
+   "n": 16,
+   "status_file": 0,
+   "note_to_others": 0,
+   "status_file_ci": [
+    0.0,
+    0.194
+   ],
+   "note_to_others_ci": [
+    0.0,
+    0.194
+   ]
+  },
   "openai/gpt-6-luna|coordinate_ok-rule|none": {
    "n": 20,
    "status_file": 14,

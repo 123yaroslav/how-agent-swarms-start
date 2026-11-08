@@ -670,6 +670,15 @@ def extra_models(v: dict) -> None:
         v["closed_ask_perm"] = " and ".join(f"{k} of {n}" for k, n in ask)
         rp = [rate(cm[m]["rates"].get("coordinate_ok-rule", {}), "p_respond") for m in closed]
         v["closed_answer_perm"] = f"{sum(k for k, _ in rp)} of {sum(n for _, n in rp)}"
+    km = load(ROOT / "results" / "explore" / "kimi_swarm.json").get("models", {}).get(
+        "moonshotai/kimi-k2.5", {}).get("rates", {})
+    if km:
+        k1, n1 = c("moonshotai/kimi-k2.5", "plain-rule", "none", "note_to_others")
+        v["kimi_notes"] = f"{k1} of {n1}"
+        r = rate(km.get("plain-norule", {}), "p_respond")
+        v["kimi_answer_norule"] = f"{r[0]} of {r[1]}"
+        r = rate(km.get("coordinate_ok-rule", {}), "p_respond")
+        v["kimi_answer_perm"] = f"{r[0]} of {r[1]}"
     if g53:
         st = [c("adaption/glm-53-flash", "plain-rule", s, "status_file")
               for s in ("none", "request", "memory")]
