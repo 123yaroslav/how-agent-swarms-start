@@ -1,22 +1,16 @@
-# Что получат спонсоры и как это переиспользовать
+# What this study gives each sponsor and user, and how to use it
 
-Цель. Каждый результат работы должен быть вещью, которую можно взять и применить завтра, а не только числом в статье.
+Every row names a concrete problem, what solves it, its status, and the command or file. Numbers
+are in `report/numbers.json` and the report; this page does not repeat them.
 
-| Что | Для кого | Как применить | Где лежит |
-|---|---|---|---|
-| SwarmCheck, пакет и команда | Лаборатории, Adaption, любой, кто запускает флот агентов | `swarmcheck run --model <endpoint> --fleet 64` выдает карточку склонности к рою с интервалами. Работает с любым OpenAI-совместимым адресом, с моделями Adaption и с vLLM | `src/swarm/fleet/`, позже отдельный пакет |
-| Карточка склонности к рою | Те же | Один файл JSON и одна страница на модель. Индекс роя, польза, упорство, честная эскалация, положительный контроль | `results/cards/` |
-| Набор данных «упорство плюс честная эскалация» | Adaption, команды, которые учат агентов | Подмешать к данным дообучения. Проверено, что польза сохраняется, а рой нет | HF dataset, пресет для Adaptive Data |
-| Правила для обучения агентов | Лаборатории, AE Studio | Короткий список. Проверять задачи на выполнимость, награждать честное «невыполнимо», не награждать успех, достигнутый вне правил, гонять SwarmCheck до запуска флота | `docs/guidelines/training.md` |
-| Правила для запуска флотов | Adaption, операторы | Память стека разводить по агентам или выключать для флотов, общие места только с журналом провенанса, официальный канал эскалации к человеку, порог по карточке | `docs/guidelines/deployment.md` |
-| Проверка общей памяти стеков Adaption | Adaption | Измерение, передает ли `agentic_memory` сведения между агентами одного ключа, и рекомендованная настройка | раздел отчета и `docs/guidelines/adaption_memory.md` |
-| Отчет уровня A* | Судьи, Apart Fellowship | Причинный результат с предрегистрацией, контролями и исправлением | `report/` |
-
-## Минимальные требования к коду
-
-1. Установка одной командой через `uv`.
-2. Запуск из кэша воспроизводит все числа отчета без новых вызовов.
-3. Все модели вызываются через один клиент с потолком бюджета.
-4. Журнал провенанса пишется вне видимости модели, метрики считаются только по нему.
-5. Тесты на провенанс, правила и метрики проходят.
-6. Никаких уязвимостей и обходов в задачах, все безобидно.
+| For | Your problem | What solves it | Status | Use it |
+|---|---|---|---|---|
+| Teams that deploy agent fleets (Adaption customers, framework users) | "Will my fleet start writing to itself through shared storage, and at what size?" | SwarmCheck card: a fixed single-agent protocol on your model, prompt and store that measures writes, sees, opens, answers and free riding, and turns them into a fleet risk with a pessimistic bound and the probe count your fleet size needs (rule of three) | ready; cards for six open-weight models in `results/cards/` | `uv run python -m swarm.swarmcheck.card --model <endpoint> --fleet 64,256,1024` |
+| Same | "Does my system prompt grant agents contact through shared storage, or lack a data-boundary rule?" | SwarmCheck lint, rubric mode by default (hand-written patterns did not transfer to held-out frameworks) | ready; held-out evaluation in `docs/ideas/lint_eval.md` | `uv run python -m swarm.swarmcheck.lint prompt.txt` |
+| Same | "What do I change before launch?" | Guidelines: a house rule in the system prompt, no sentence granting contact through shared storage, care with shared-memory wording, a sanctioned logged channel if agents must coordinate | ready, numbers filled from the results | `docs/guidelines/README.md` |
+| Adaption | "Does agentic memory on one stack carry information between independent agents of a fleet?" The docs say memory is kept per user and per stack, and no request field separates agents | `experiments/adaption_memory_test.py`: writer agents store a unique label, reader agents in new conversations are asked for labels, memory on vs off | written; the test stack `swarm-memory-test` exists but must be activated with memory on in the app (not possible through the API) | `uv run python experiments/adaption_memory_test.py --stack swarm-memory-test` |
+| Adaption (AutoScientist users) | "Does fine-tuning agents to collaborate teach them to use channels nobody provided?" (OpenAI's root-cause hypothesis) | Four gpt-oss-20b organisms trained with AutoScientist (Neutral, Collab, Collab+Discipline, Collab+Persist), the channel-discipline data set, and a runner that tests them on the paper's single target, answering | organisms trained; serving needs one GPU pod (runbook `docs/serve_organisms.md`, about $6-9) | `uv run python experiments/c5_run.py` once `results/serve/endpoint.json` exists |
+| Labs that train agents with reinforcement learning | "Will outcome reward teach boundary crossing?" | Measured fact: a blocked job can be completed only by using another job's artifact, agents do so freely when no rule forbids it, and none faked a completion. Reward honest "blocked" reports; audit tasks for solvability | in the report, Section 4.4 and guidelines section 2 | `experiments/success_by_rule.py` |
+| Labs and evaluators (AE Studio, AI Alignment Foundation) | "Which single-agent quantity predicts swarm risk?" | Answering a peer's note (p_j) is near zero in every off-the-shelf model tested, including two closed models, and is the factor a board needs; measure it before and after collaboration training | in the report, Sections 4.2 and 5 | seeded probes in `experiments/write_find_answer.py` |
+| Framework authors (CrewAI, swarms, LangGraph, ADK and others) | "Do our default prompts invite agents into each other's data?" | Audit of 51 default prompts from 28 frameworks: many provide shared storage and almost none state a data-boundary rule; two shared-memory sentences raised how often one model read other jobs' work | `docs/ideas/realworld_prompts.md`, report Section 4.6 | add one data-boundary sentence to prompts that expose shared storage |
+| Apart and other researchers | "Can I reuse the setup?" | Data-engineering job generator, shared artifact store with a provenance log the agents cannot see, harness, fleet runner up to 1,024 agents, nucleation model with committed predictions, pre-registration and deviation log | ready | `src/swarm/scale/`, `docs/prereg.md`, `docs/deviations.md` |
