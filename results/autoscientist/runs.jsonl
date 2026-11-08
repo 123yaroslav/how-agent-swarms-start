@@ -21,3 +21,5 @@
 {"op": "upload", "name": "matched_3k", "file": "results/train/matched_3k.jsonl", "rows_local": 3000, "dataset_id": "8ed2e6cd-d124-4ddf-bed8-06e044c8733e", "status": "succeeded", "rows": 3000, "ts": "2026-11-08T07:47:45"}
 {"op": "train", "tag": "outcome-gptoss20b-3k", "dataset_id": "a936577e-177e-47f0-99ca-1b2357a81702", "model": "openai/gpt-oss-20b", "run_id": "db91552f-7c32-40ea-bfb0-c9a6fab41594", "max_iterations": 1, "ts": "2026-11-08T07:48:01"}
 {"op": "train", "tag": "matched-gptoss20b-3k", "dataset_id": "8ed2e6cd-d124-4ddf-bed8-06e044c8733e", "model": "openai/gpt-oss-20b", "run_id": "4e6eca3e-1fbe-4d83-bc9c-34a1d960bb55", "max_iterations": 1, "ts": "2026-11-08T07:48:04"}
+{"op": "download", "run_id": "db91552f-7c32-40ea-bfb0-c9a6fab41594", "out": "results/models/outcome-gptoss20b", "files": 10, "ts": "2026-11-08T08:15:18"}
+{"op": "download", "run_id": "4e6eca3e-1fbe-4d83-bc9c-34a1d960bb55", "out": "results/models/matched-gptoss20b", "files": 10, "ts": "2026-11-08T08:18:26"}
