@@ -549,8 +549,8 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
     k2 = sum(f.get("correct2") is not None for f in done)
     sizes = sorted({f["fleet"] for f in done})
     rng = f"{sizes[0]:,} to {sizes[-1]:,}" if len(sizes) > 1 else f"{sizes[0]:,}"
-    miss = [f["name"].replace("c4_", "") for f in done if not f["correct"]]
-    boards = [f["name"].replace("c4_", "") for f in done if f["board"]]
+    miss = [fleet_label(f["name"], f["fleet"]) for f in done if not f["correct"]]
+    boards = [fleet_label(f["name"], f["fleet"]) for f in done if f["board"]]
     v["c4_n_done"], v["c4_correct"], v["c4_correct2"], v["c4_n2"] = k, ok, ok2, k2
     if ok == k:
         allk = "both" if k == 2 else f"all {k}"
@@ -569,9 +569,9 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
     if k2:
         txt[-1] += f", and under the secondary scoring {ok2} of {k2}"
     txt[-1] += " (Figure 3)."
-    txt.append("Boards formed in " + (", ".join(boards) if boards else "no fleet") + ".")
+    txt.append("A board formed in " + ("; ".join(boards) if boards else "no fleet") + ".")
     if miss:
-        txt.append("The model mispredicted " + ", ".join(miss) + ".")
+        txt.append("The registered rule mispredicted " + "; ".join(miss) + ".")
     t = load(ROOT / "results" / "explore" / "threshold_outcomes.json")
     cal = t.get("calibration", {}).get("with_c4", {})
     obs = [f for f in t.get("fleets", {}).values() if f.get("observed")]
