@@ -223,133 +223,133 @@
    ]
   },
   "anthropic/claude-haiku-5.5|coordinate_ok-rule|none": {
-   "n": 4,
-   "status_file": 4,
-   "note_to_others": 4,
+   "n": 19,
+   "status_file": 17,
+   "note_to_others": 13,
    "status_file_ci": [
-    0.51,
-    1.0
+    0.686,
+    0.971
    ],
    "note_to_others_ci": [
-    0.51,
-    1.0
+    0.46,
+    0.846
    ]
   },
   "anthropic/claude-haiku-5.5|coordinate_ok-rule|request": {
-   "n": 6,
-   "status_file": 4,
-   "note_to_others": 2,
+   "n": 24,
+   "status_file": 21,
+   "note_to_others": 15,
    "status_file_ci": [
-    0.3,
-    0.903
+    0.69,
+    0.957
    ],
    "note_to_others_ci": [
-    0.097,
-    0.7
+    0.427,
+    0.788
    ]
   },
   "anthropic/claude-haiku-5.5|plain-norule|memory": {
-   "n": 2,
-   "status_file": 0,
+   "n": 24,
+   "status_file": 2,
    "note_to_others": 0,
    "status_file_ci": [
-    0.0,
-    0.658
+    0.023,
+    0.258
    ],
    "note_to_others_ci": [
     0.0,
-    0.658
+    0.138
    ]
   },
   "anthropic/claude-haiku-5.5|plain-norule|request": {
-   "n": 3,
-   "status_file": 0,
+   "n": 24,
+   "status_file": 2,
    "note_to_others": 0,
    "status_file_ci": [
-    0.0,
-    0.562
+    0.023,
+    0.258
    ],
    "note_to_others_ci": [
     0.0,
-    0.562
+    0.138
    ]
   },
   "anthropic/claude-haiku-5.5|plain-rule|none": {
-   "n": 11,
-   "status_file": 0,
+   "n": 40,
+   "status_file": 1,
    "note_to_others": 0,
    "status_file_ci": [
-    0.0,
-    0.259
+    0.004,
+    0.129
    ],
    "note_to_others_ci": [
     0.0,
-    0.259
+    0.088
    ]
   },
   "openai/gpt-6-luna|coordinate_ok-rule|none": {
-   "n": 16,
-   "status_file": 11,
-   "note_to_others": 10,
+   "n": 20,
+   "status_file": 14,
+   "note_to_others": 12,
    "status_file_ci": [
-    0.444,
-    0.858
+    0.481,
+    0.855
    ],
    "note_to_others_ci": [
-    0.386,
-    0.815
+    0.387,
+    0.781
    ]
   },
   "openai/gpt-6-luna|coordinate_ok-rule|request": {
-   "n": 19,
-   "status_file": 14,
-   "note_to_others": 14,
+   "n": 25,
+   "status_file": 18,
+   "note_to_others": 18,
    "status_file_ci": [
-    0.512,
-    0.882
+    0.524,
+    0.857
    ],
    "note_to_others_ci": [
-    0.512,
-    0.882
+    0.524,
+    0.857
    ]
   },
   "openai/gpt-6-luna|plain-norule|memory": {
-   "n": 23,
+   "n": 25,
    "status_file": 0,
    "note_to_others": 0,
    "status_file_ci": [
     0.0,
-    0.143
+    0.133
    ],
    "note_to_others_ci": [
     0.0,
-    0.143
+    0.133
    ]
   },
   "openai/gpt-6-luna|plain-norule|request": {
-   "n": 22,
+   "n": 25,
    "status_file": 0,
    "note_to_others": 0,
    "status_file_ci": [
     0.0,
-    0.149
+    0.133
    ],
    "note_to_others_ci": [
     0.0,
-    0.149
+    0.133
    ]
   },
   "openai/gpt-6-luna|plain-rule|none": {
-   "n": 29,
+   "n": 40,
    "status_file": 0,
    "note_to_others": 0,
    "status_file_ci": [
     0.0,
-    0.117
+    0.088
    ],
    "note_to_others_ci": [
     0.0,
-    0.117
+    0.088
    ]
   }
  }

@@ -75,9 +75,10 @@ def summarize() -> dict:
                     rec = json.loads(ln)
                 except json.JSONDecodeError:
                     continue
-                if rec["episode_id"] in want and rec["episode_id"] in labels \
-                        and rec["episode_id"] not in seen:
-                    seen.add(rec["episode_id"])
+                # episode ids do not name the model, so two models on one world share an id
+                key = (rec["episode_id"], rec["spec"]["model"])
+                if rec["episode_id"] in want and rec["episode_id"] in labels and key not in seen:
+                    seen.add(key)
                     recs.append(rec)
     out = {"label": LABEL, "models": {}, "episodes": len(recs),
            "cost_usd_nominal": round(sum(r["totals"]["cost"] for r in recs), 4)}

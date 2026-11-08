@@ -598,6 +598,46 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
                                    f"job")
 
 
+def extra_models(v: dict) -> None:
+    """Exploratory runs on GLM 5.3 Flash and two closed models, with the content check."""
+    cc = load(ROOT / "results" / "explore" / "content_check.json").get("cells", {})
+    cm = load(ROOT / "results" / "explore" / "closed_models.json").get("models", {})
+    g53 = load(ROOT / "results" / "explore" / "glm53.json").get("rates", {})
+
+    def c(model: str, cell: str, note: str, key: str) -> tuple[int, int]:
+        x = cc.get(f"{model}|{cell}|{note}", {})
+        return x.get(key, 0), x.get("n", 0)
+
+    def rate(r: dict, key: str) -> tuple[int, int]:
+        x = r.get(key, {})
+        return (x.get("k", 0), x.get("n", 0)) if isinstance(x, dict) else (0, 0)
+    closed = ["openai/gpt-6-luna", "anthropic/claude-haiku-5.5"]
+    if all(m in cm for m in closed):
+        nt = [c(m, "plain-rule", "none", "note_to_others") for m in closed]
+        v["closed_notes"] = f"{sum(k for k, _ in nt)} of {sum(n for _, n in nt)}"
+        resp = [rate(cm[m]["rates"].get("plain-norule", {}), "p_respond") for m in closed]
+        v["closed_answer_norule"] = f"{sum(k for k, _ in resp)} of {sum(n for _, n in resp)}"
+        ask = [rate(cm[m]["rates"].get("coordinate_ok-rule", {}), "p_write_addressed")
+               for m in closed]
+        v["closed_ask_perm"] = " and ".join(f"{k} of {n}" for k, n in ask)
+        rp = [rate(cm[m]["rates"].get("coordinate_ok-rule", {}), "p_respond") for m in closed]
+        v["closed_answer_perm"] = f"{sum(k for k, _ in rp)} of {sum(n for _, n in rp)}"
+    if g53:
+        st = [c("adaption/glm-53-flash", "plain-rule", s, "status_file")
+              for s in ("none", "request", "memory")]
+        v["g53_status_rule"] = f"{sum(k for k, _ in st)} of {sum(n for _, n in st)}"
+        st2 = [c("adaption/glm-5.2", "plain-rule", "none", "status_file"),
+               c("adaption/glm-5.2", "plain-norule", "none", "status_file")]
+        v["g52_status"] = f"{sum(k for k, _ in st2)} of {sum(n for _, n in st2)}"
+        nt = [c("adaption/glm-53-flash", cell, s, "note_to_others")
+              for cell in ("plain-rule", "plain-norule") for s in ("none", "request", "memory")]
+        v["g53_notes"] = f"{sum(k for k, _ in nt)} of {sum(n for _, n in nt)}"
+        r = rate(g53.get("plain-norule", {}), "p_respond")
+        v["g53_answer_norule"] = f"{r[0]} of {r[1]}"
+        r = rate(g53.get("coordinate_ok-rule", {}), "p_respond")
+        v["g53_answer_perm"] = f"{r[0]} of {r[1]}"
+
+
 def main() -> None:
     if STYLE.exists():
         plt.style.use(str(STYLE))
@@ -627,6 +667,7 @@ def main() -> None:
     success_numbers(v)
     note_taxonomy_numbers(v)
     misc_numbers(v)
+    extra_models(v)
     result_sentences(c13, cells, models, v)
     table1(cells, models)
     fleets = []

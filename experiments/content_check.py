@@ -53,10 +53,10 @@ def main() -> None:
                 except json.JSONDecodeError:
                     continue
                 sp = r.get("spec", {})
-                if r.get("episode_id") in seen or sp.get("mode") != "harness":
-                    continue
-                seen.add(r["episode_id"])
                 model = sp.get("model") or default_model
+                if (r.get("episode_id"), model) in seen or sp.get("mode") != "harness":
+                    continue
+                seen.add((r["episode_id"], model))  # ids do not name the model
                 key = (model, f"{sp['prompt']}-{'rule' if sp['rule'] else 'norule'}",
                        sp.get("seed_note", "none"))
                 status = other = False
