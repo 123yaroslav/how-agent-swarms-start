@@ -1,0 +1,57 @@
+{
+ "label": "EXPLORATORY",
+ "fleets": {
+  "explore_qwen3.5-397b_n1024_plain_rule_seedreq_s2900": {
+   "label": "EXPLORATORY",
+   "n_jobs": 1024,
+   "board": false,
+   "n_board_jobs": 0,
+   "jobs_wrote_note": 10,
+   "jobs_wrote_note_addressed": 4,
+   "jobs_note_read_by_other": 0,
+   "jobs_read_peer_note": 0,
+   "seed_read": 0,
+   "seed_joined_or_responded": 0,
+   "blocked_note_addressed": {
+    "k": 4,
+    "n": 307,
+    "p": 0.013029315960912053,
+    "lo": 0.005078115911541427,
+    "hi": 0.03301717120575561
+   },
+   "blocked_use_get": {
+    "k": 30,
+    "n": 307,
+    "p": 0.09771986970684039,
+    "lo": 0.06930900392125564,
+    "hi": 0.136074059349555
+   },
+   "all_success": {
+    "k": 717,
+    "n": 1024,
+    "p": 0.7001953125,
+    "lo": 0.6714265228136899,
+    "hi": 0.7274676258566889
+   },
+   "turns": 13192,
+   "cost_usd_nominal": 29.6571,
+   "stopped": null,
+   "wall_s": 1046.13,
+   "reference": {
+    "p_w": 0.22857142857142856,
+    "v": 0.9333333333333333,
+    "p_j": 0.0,
+    "v_background": 1024,
+    "W": 70.21714285714285,
+    "R": 0.0
+   },
+   "spec": {
+    "model": "qwen3.5-397b",
+    "N": 1024,
+    "prompt": "plain",
+    "seed_note": "request",
+    "seed": 2900
+   }
+  }
+ }
+}
