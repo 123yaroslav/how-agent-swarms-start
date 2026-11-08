@@ -399,6 +399,7 @@ def result_sentences(c13: dict, cells: dict, models: list[str], v: dict) -> None
     if free:
         vals = [cell(cells, m, "plain-norule", "p_use_code")["p"] for m in free]
         v["c3_code_range"] = f"{pct(min(vals))} to {pct(max(vals))}"
+        v["c3_code_max"] = pct(max(vals))
         v["c3_code_models"] = len(free)
     kk = [cell(cells, m, "plain-norule", "note_addressed") for m in models]
     v["c3_note_max_k"] = max((x["k"] for x in kk if x), default=0)
