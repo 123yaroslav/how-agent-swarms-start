@@ -552,23 +552,28 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
     miss = [fleet_label(f["name"], f["fleet"]) for f in done if not f["correct"]]
     boards = [fleet_label(f["name"], f["fleet"]) for f in done if f["board"]]
     v["c4_n_done"], v["c4_correct"], v["c4_correct2"], v["c4_n2"] = k, ok, ok2, k2
+    perm_d = [f for f in done if "coordinate_ok" in f["name"]]
+    plain_d = [f for f in done if "coordinate_ok" not in f["name"]]
+    tt = (f"Boards formed in {sum(f['board'] for f in perm_d)} of {len(perm_d)} pre-registered "
+          f"fleets with the permission sentence and {sum(f['board'] for f in plain_d)} of "
+          f"{len(plain_d)} without it.")
     if ok == k:
         allk = "both" if k == 2 else f"all {k}"
         v["c4_abstract_sentence"] = (f"Predictions from single agents, committed before each fleet "
                                      f"ran, matched {allk} fleets of {rng} agents.")
-        v["fig3_title"] = "Fleets formed boards only where the single-agent model predicted them."
+        v["fig3_title"] = tt
     else:
         v["c4_abstract_sentence"] = (f"Predictions from single agents, committed before each fleet "
                                      f"ran, matched {ok} of {k} fleets of {rng} agents.")
-        v["fig3_title"] = f"The single-agent model matched {ok} of {k} fleets."
+        v["fig3_title"] = tt
     v["c4_intro_sentence"] = (v["c4_abstract_sentence"].replace("Predictions from single agents",
                                                                 "Predictions from single-agent rates")
-                              .rstrip(".") + " (Section 4.5, Figure 2).")
+                              .rstrip(".") + " (Section 4.5, Table 2).")
     txt = [f"We ran {k} pre-registered fleets of {rng} agents. Predictions under the registered "
            f"scoring matched {ok} of {k}"]
     if k2:
         txt[-1] += f", and under the secondary scoring {ok2} of {k2}"
-    txt[-1] += " (Figure 2)."
+    txt[-1] += " (Table 2)."
     txt.append("A board formed in " + ("; ".join(boards) if boards else "no fleet") + ".")
     if miss:
         txt.append("The registered rule mispredicted " + "; ".join(miss) + ".")
@@ -591,6 +596,15 @@ def fleet_sentences(fleets: list[dict], v: dict) -> None:
         v["c4_max_links"] = (f"{big['n_board_jobs']} of {big['fleet']:,} agents "
                              f"({fleet_label(big['name'], big['fleet']).split(',')[0]})")
     v["c4_max_size_noperm"] = f"{max((f['fleet'] for f in plain), default=0):,}"
+    ps = sorted(perm, key=lambda f: -(f.get("R_pred") or 0))
+    if ps:
+        v["c4_size_by_R"] = ", ".join(f"R {f['R_pred']:.0f} gave {f.get('n_board_jobs', 0)} linked "
+                                      f"jobs ({fleet_label(f['name'], f['fleet']).split(',')[0]})"
+                                      for f in ps)
+        rs = [f.get("R_pred") or 0 for f in ps]
+        ls = [f.get("n_board_jobs", 0) for f in ps]
+        v["c4_size_rank_ok"] = all(ls[i] >= ls[i + 1] for i in range(len(ls) - 1)) and \
+            all(rs[i] >= rs[i + 1] for i in range(len(rs) - 1))
     # Brier over every fleet with an outcome: C4 and the exploratory threshold fleets
     c4raw = load(CONF / "c4.json").get("fleets", {})
     rows = []
@@ -666,6 +680,35 @@ def extra_models(v: dict) -> None:
         v["g53_answer_norule"] = f"{r[0]} of {r[1]}"
         r = rate(g53.get("coordinate_ok-rule", {}), "p_respond")
         v["g53_answer_perm"] = f"{r[0]} of {r[1]}"
+
+
+def fleet_table(v: dict) -> None:
+    """Rows of Table 2: every C4 fleet, then the exploratory threshold fleets."""
+    c4 = load(CONF / "c4.json").get("fleets", {})
+    rows = []
+    for name, f in c4.items():
+        if "board" not in f:
+            continue
+        s2 = f.get("secondary", {})
+        rows.append((fleet_label(name, f.get("n_jobs", 0)), f.get("predicted_R") or 0.0,
+                     f.get("predicted_board"), s2.get("predicted_board"), f["board"],
+                     f.get("n_board_jobs", 0)))
+    order = {"permission": 1, "seeded note": 0, "plain": 0}
+    rows.sort(key=lambda r: (order.get(r[0].split(", ")[-1], 2), r[0]))
+    for name, f in load(ROOT / "results" / "explore" / "threshold_outcomes.json").get(
+            "fleets", {}).items():
+        ob = f.get("observed")
+        if ob:
+            rows.append((fleet_label(name, f["N"]) + ", exploratory", f.get("predicted_R") or 0.0,
+                         f.get("predicted_board"), f.get("predicted_board"),
+                         bool(ob.get("board")), ob.get("n_board_jobs", 0)))
+    yn = {True: "yes", False: "no", None: "n/a"}
+    for i, (lab, r, p1, p2, bd, links) in enumerate(rows[:15], start=1):
+        v[f"fr{i}_label"] = lab
+        v[f"fr{i}_R"] = f"{r:.1f}" if r < 10 else f"{r:.0f}"
+        v[f"fr{i}_pred"] = f"{yn[p1]} / {yn[p2]}"
+        v[f"fr{i}_board"] = yn[bool(bd)]
+        v[f"fr{i}_links"] = str(links)
 
 
 def main() -> None:
@@ -744,6 +787,7 @@ def main() -> None:
         fig_freeride(cells, models)
     fig_fleets(fleets)
     fleet_sentences(fleets, v)
+    fleet_table(v)
     realworld_harness(v)
     render_guidelines(v)
     # table cells split on "|", so every key with "|" also gets a dotted alias for tables
