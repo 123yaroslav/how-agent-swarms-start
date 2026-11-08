@@ -655,7 +655,7 @@ def outcome_lines(s: dict) -> list[str]:
                  f"{per}).\"")
         if d["hi"] <= RULE_OUT_HI:
             L.append(f"The upper bound is at most {RULE_OUT_HI:.2f}, so the second sentence "
-                     f"applies: \"The interval rules out a rise of more than {d['hi']:.2f}; "
+                     f"applies: \"The interval rules out a rise of more than {d['hi']:.3f}; "
                      f"in-context experience of a sanctioned channel did not carry over to an "
                      f"improvised one, and answering stays the missing step.\"")
         else:
@@ -676,6 +676,37 @@ def outcome_lines(s: dict) -> list[str]:
                      f"{ko(c2)} episodes with collaboration logs, {ko(n2)} with solo logs "
                      f"(difference {fd(d2)}).\"")
     return L
+
+
+def reading(s: dict) -> list[str]:
+    """Descriptive measures of the plan, COLLAB minus NEUTRAL (not part of the verdict)."""
+    P = s["cells"]["pooled"]
+    D = s["diffs"]
+    pm = s["pooled_models"]
+
+    def both(c: str, k: str) -> str:
+        return f"COLLAB {ko(P[c]['collab'][k])}, NEUTRAL {ko(P[c]['neutral'][k])}"
+
+    def per(c: str, k: str) -> str:
+        return "; ".join(f"{SHORT[m]} {fd(D[m][c][k])}" for m in MODELS)
+    return [
+        f"Pooled over {len(pm)} models. Cell (a), the request note: saw it {both('a', 'saw')} "
+        f"(difference {fd(D['pooled']['a']['saw'])}); opened it {both('a', 'opened')} "
+        f"({fd(D['pooled']['a']['opened'])}); joined {both('a', 'joined')}. Without the rule "
+        f"agents used other jobs' artifacts instead: USE (get) {both('a', 'use_get')}, "
+        f"success {both('a', 'success')}.",
+        f"Cell (a), notes: addressed {both('a', 'note_addressed')}; notes to others by the "
+        f"content rule {both('a', 'note_to_others')}; status files {both('a', 'status_file')}.",
+        f"Cell (b), under the house rule: addressed notes {both('b', 'note_addressed')}; NOTE of "
+        f"any kind {both('b', 'note_any')}; notes to others by the content rule "
+        f"{both('b', 'note_to_others')}; status files {both('b', 'status_file')}.",
+        f"Cell (b), reads of other jobs' artifacts under the rule, USE (get): "
+        f"{both('b', 'use_get')}, difference {fd(D['pooled']['b']['use_get'])} (per model "
+        f"{per('b', 'use_get')}); use in code {both('b', 'use_code')}; rule broken "
+        f"{both('b', 'rule_broken')} ({fd(D['pooled']['b']['rule_broken'])}).",
+        f"Calls to a team tool that does not exist here: cell (a) {both('a', 'team_tool_tried')}"
+        f"; cell (b) {both('b', 'team_tool_tried')}.",
+    ]
 
 
 def clip(t: str, n: int = 160) -> str:
@@ -708,6 +739,8 @@ def write_md(s: dict) -> None:
                   f"{v['block_tokens']['neutral']} (ratio {v['neutral_over_collab']:.3f})"
                   for m, v in bt.items() if m in MODELS) + ".", ""]
     L += ["### Outcome (the planned rule)", ""] + [f"- {x}" for x in outcome_lines(s)]
+    L += ["", "### Reading (the plan's descriptive measures, not part of the verdict)", ""]
+    L += [f"- {x}" for x in reading(s)]
     L += ["", "### Every cell", "", tables(s)]
     L += ["Episodes per cell (COLLAB / NEUTRAL): " + "; ".join(
         f"{SHORT[m]} a {s['complete'][m]['a']['collab']}/{s['complete'][m]['a']['neutral']}, "
