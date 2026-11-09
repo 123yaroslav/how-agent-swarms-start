@@ -540,8 +540,11 @@ def misc_numbers(v: dict) -> None:
     ns = int(re.search(r'"--n-seed", type=int, default=(\d+)', src).group(1))
     v["card_episodes"] = 4 * (n + 2 * ns)  # 2 prompts x 2 rule settings, unseeded + two seeds
     path = ROOT / "results" / "raw" / "scale" / "confirm_glm-5.2.jsonl"
-    if path.exists():
-        with path.open() as f:
+    packed = ROOT / "results" / "transcripts" / "scale" / "confirm_glm-5.2.jsonl.xz"
+    if path.exists() or packed.exists():
+        import lzma
+        opener = (lambda: path.open()) if path.exists() else (lambda: lzma.open(packed, "rt"))
+        with opener() as f:
             for ln in f:
                 try:
                     rec = json.loads(ln)

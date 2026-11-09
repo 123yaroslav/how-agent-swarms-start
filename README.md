@@ -36,6 +36,14 @@ Python 3.12 and `uv`. Keys go in `.env` (`ADAPTION_API_KEY`). Every LLM call goe
 - Report numbers and figures `experiments/build_report.py`, rendering `experiments/render_official.py`.
 - Tests `uv run pytest -q`.
 
+## Transcripts
+
+`results/transcripts/` holds every confirmatory and exploratory episode and every fleet run, compressed
+with xz (about 60 MB, about 900 MB unpacked). `xz -dk FILE.xz` unpacks one file. To work on the raw
+files, unpack them into `results/raw/` with the same layout. `experiments/build_report.py` reads the
+compressed files when the raw ones are missing, so every number in the report rebuilds from a fresh
+clone with no model calls. Early pilots from before the confirmatory study are not included.
+
 ## Pre-existing code
 
 Four files predate the sprint and were adapted during it. They come from the author's AI

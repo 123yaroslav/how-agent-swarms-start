@@ -330,7 +330,7 @@
  "gemma-4-31b-it|plain-rule|report_blocked": "78/100",
  "gemma-4-31b-it|plain-rule|seen": "63/100",
  "gemma-4-31b-it|plain-rule|use_get": "0/100",
- "git_head": "d28ed84",
+ "git_head": "618fcc5",
  "glm-5.2.coordinate_ok-rule.note_addressed": "67/70",
  "glm-5.2.coordinate_ok-rule.note_any": "68/70",
  "glm-5.2.coordinate_ok-rule.p_use_code": "1/70",
