@@ -375,7 +375,11 @@ def result_sentences(c13: dict, cells: dict, models: list[str], v: dict) -> None
               and len(f.split(": ")[1].split(" (")[0].split()) <= 2]
         if not fl:
             continue
-        tests = ", ".join(f.split(": ")[1].split(" (")[0] for f in fl)
+        def plain_test(s: str) -> str:
+            w = s.split()
+            name = {"C1": "the gate test", "C3": "the taking test"}.get(w[0], w[0])
+            return name + (f" for {SHORT.get(w[1], w[1])}" if len(w) > 1 else "")
+        tests = " and ".join(plain_test(f.split(": ")[1].split(" (")[0]) for f in fl)
         his = []
         for t in ("C1", "C3"):
             for m, x in sens.get(sub, {}).get(t, {}).get("per_model", {}).items():
@@ -385,8 +389,8 @@ def result_sentences(c13: dict, cells: dict, models: list[str], v: dict) -> None
         parts.append(f"restricting to {label} turns {tests} into a failure")
     if parts:
         v["sens_sentence"] = ("In sensitivity analyses that were not pre-registered, "
-                              + " and ".join(parts) + ". In each case a single code-detected note "
-                              "in a subset of about 90 episodes puts the upper bound just above "
+                              + ". Also, ".join(parts) + ". In each case a single code-detected note "
+                              "in a subset of about 90 episodes lifts the upper bound just above "
                               "0.06.")
     else:
         v["sens_sentence"] = ""
@@ -753,7 +757,10 @@ def exploratory_fleets(v: dict) -> None:
     words = {1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five"}
     v["expl_fleets_sentence"] = (
         f"{words.get(len(done), len(done))} further exploratory fleets of 1,024 agents without permission "
-        f"({'; '.join(labels)}) formed {'no board' if nb == 0 else f'{nb} boards'}.")
+        f"formed {'no board' if nb == 0 else f'{nb} boards'}. They ran "
+        + (lambda xs: ", ".join(xs[:-1]) + " and " + xs[-1] if len(xs) > 1 else xs[0])(
+            [l.replace(", 1,024, ", " with the ").replace("the seeded note", "a seeded note")
+             .replace("the plain", "the plain prompt") for l in labels]) + ".")
 
 
 def incontext_c5(v: dict) -> None:

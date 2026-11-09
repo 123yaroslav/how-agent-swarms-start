@@ -34,7 +34,7 @@ python3 ~/.claude/skills/sprint-win/scripts/check_rules.py report/Apart_report.p
 
 ## Что уже проверено
 
-Основной текст занимает 8 страниц. Аннотация укладывается в 150-250 слов. Приложение «Limitations and Dual-Use / Ethical Considerations» на месте. Код до спринта раскрыт в `PRE_SPRINT_LOG.md`, README и отчете. Все числа в тексте печатает `experiments/build_report.py`.
+Основной текст занимает около 6,5 страницы из 8 разрешенных. Аннотация укладывается в 150-250 слов. Приложение «Limitations and Dual-Use / Ethical Considerations» на месте. Код до спринта раскрыт в `PRE_SPRINT_LOG.md`, README и отчете (раздел Code and Data, без путей к файлам). Все числа в тексте печатает `experiments/build_report.py`.
 
 ## Траты
 
