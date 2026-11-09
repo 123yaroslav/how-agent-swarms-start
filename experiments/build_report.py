@@ -916,7 +916,7 @@ def main() -> None:
     v["c4_n_perm"], v["c4_boards_perm"] = len(perm), sum(bool(f.get("board")) for f in perm)
     v["c4_n_plain"], v["c4_boards_plain"] = len(plain), sum(bool(f.get("board")) for f in plain)
     v["c5_status"] = "not run (no GPU serving)"
-    v["prereg_commit"] = "d8900cb"
+    v["prereg_commit"] = "0a332ff"
     try:
         v["git_head"] = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
                                        capture_output=True, text=True).stdout.strip()

@@ -1,6 +1,6 @@
 # Deviations from and clarifications of the frozen pre-registration
 
-The pre-registration is `docs/prereg.md`, frozen in commit d8900cb. Everything here was written on
+The pre-registration is `docs/prereg.md`, frozen in commit 0a332ff. Everything here was written on
 2026-11-07 before any confirmatory run (C1-C4). The frozen definitions are unchanged. Each item
 says where the code or the frozen text needed a choice, and which choice the confirmatory scripts
 make (`experiments/scale_confirm.py`, `experiments/scale_confirm_eval.py`,
@@ -125,7 +125,7 @@ key. Limits are read from `results/raw/scale/logs/controller_limits.json`. Run p
 04:45 UTC+5 the three deepseek-v4-flash 1,024 fleets run side by side (plain + rule,
 coordinate_ok + rule, plain + rule with the seeded request note), each with its own limit of
 192 calls in flight and the budget check before each, instead of one after another. Their
-predictions were committed before any of them started (af4a7c5).
+predictions were committed before any of them started (f174ada).
 The first deepseek-v4-flash episodes ran in a separate process at 64 calls in flight; that process
 was stopped and the episodes it finished are kept (the rerun skips them and replays the rest
 from the cache).
@@ -159,7 +159,7 @@ dropped, and C4 is evaluated over the fleets that ran.
 
 Written on 2026-11-08 at 01:58 UTC+5, before the C4 predictions of deepseek-v4-flash,
 qwen3.5-397b, gemma-4-31b-it, gemma-4-26b-a4b-it and qwen3.8-27b and before their fleets. The
-post hoc note taxonomy (`docs/ideas/note_taxonomy.md`, commits c1ce68c and 8118f44) found that the
+post hoc note taxonomy (`docs/ideas/note_taxonomy.md`, commits 98551bf and 4d21763) found that the
 code NOTE classifier counts status placeholders as NOTEs: "JOB FAILED ..." files that a blocked
 agent writes at its own deliverable path (reports/<target>.csv or staging/<target>.csv) as it
 ends the job. Keyword hits on quoted house-rule text make some of them NOTE_ADDRESSED. The same
@@ -183,7 +183,7 @@ an extra; the C1-C3 verdicts use the registered scoring.
 
 Written on 2026-11-08 at 02:40 UTC+5, before any C4 fleet output was scored or printed (the
 glm-5.2, qwen3.5-397b and gemma-4-26b-a4b-it plain + rule fleets were running). The scoring
-audit (`docs/reviews/scoring_audit.md`, commit 0bfeb8a, finding 3) showed that D10 left a gap:
+audit (`docs/reviews/scoring_audit.md`, commit 24ab5d0, finding 3) showed that D10 left a gap:
 the reply rule (`replied_peer`, part of BOARD) and the response rule for the seed note
 (`responded`, part of p_j) match substrings in any store write. So the reader's own end-of-job
 placeholder at its own deliverable path could still count as a reply or response. D10b closes

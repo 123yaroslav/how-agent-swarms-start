@@ -1,4 +1,4 @@
-"""Confirmatory single-agent cells C1-C3 (docs/prereg.md, frozen at d8900cb) and the seeded
+"""Confirmatory single-agent cells C1-C3 (docs/prereg.md, frozen at 0a332ff) and the seeded
 probe episodes for the C4 predictions (docs/deviations.md D6), one model per process.
 
     # C1-C3 cells of one model (9 cells, n = 100, or 70 for glm-5.2 and qwen3.5-397b)

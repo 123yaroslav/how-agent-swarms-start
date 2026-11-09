@@ -180,7 +180,7 @@ def main() -> None:
            "`results/realworld_prompts/sources.csv`.", "",
            "## Labels", "",
            "Each prompt was read and labelled by hand before the linter was run on it (labels "
-           "committed in 78c2c1b, linter results after). The annotator knew the linter's rules, so "
+           "committed in d7415ba, linter results after). The annotator knew the linter's rules, so "
            "the labels are blind to its output, not to its design.", "",
            "- contact_shared: the prompt grants or describes passing information to, or receiving "
            "it from, other agents by writing to or reading from a shared persistent place (memory, "

@@ -1,6 +1,6 @@
 # SwarmCheck lint on real framework prompts: held-out evaluation (EXPLORATORY)
 
-Generated from results/realworld_prompts/lint_eval_v1.json and lint_eval.json by the command in this file's commit; numbers are not edited by hand. Labels: hand labels committed in 78c2c1b before any linter run. Split by project: md5(project) even = dev (13 projects, 26 prompts), odd = test (15 projects, 25 prompts). Regex v2 was tuned on dev only and committed (3a86a86) before it was run on test. The LLM rubric (src/swarm/swarmcheck/lint_llm.py) was written from the label definitions before any run and not tuned. The test split has now been used once for each method and is spent; later changes need new prompts.
+Generated from results/realworld_prompts/lint_eval_v1.json and lint_eval.json by the command in this file's commit; numbers are not edited by hand. Labels: hand labels committed in d7415ba before any linter run. Split by project: md5(project) even = dev (13 projects, 26 prompts), odd = test (15 projects, 25 prompts). Regex v2 was tuned on dev only and committed (fcf2b11) before it was run on test. The LLM rubric (src/swarm/swarmcheck/lint_llm.py) was written from the label definitions before any run and not tuned. The test split has now been used once for each method and is spent; later changes need new prompts.
 
 | split | method | contact found (recall, Wilson 95%) | contact precision | missing rule found (recall) | missing rule precision |
 |---|---|---|---|---|---|

@@ -8,7 +8,7 @@ result here is confirmatory, and every number below was printed by
 
 ## Setup
 
-Fleet game after commit 52fc1da: the rules section of /work/README.md is quoted in every system
+Fleet game after commit f96f95c: the rules section of /work/README.md is quoted in every system
 prompt; rule_broken counts only what the arm's rule forbids (coordinate_ok opens the whole
 /work/cache, other players' home folders are never open); run outputs are named
 `<stage>_<creator>_<hash>.out`. N = 8 players, 40 turns, `--blocked all` (each player lacks

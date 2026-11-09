@@ -903,7 +903,7 @@ def render(S: dict) -> str:
           f"Items: {S['n_items']}, of which {S['items_code_note']} are code NOTEs. Judge "
           f"labels: {dict(S['judge_counts'])}. Episodes whose code NOTE flag differs from "
           f"the items: {S['code_note_mismatch']}.", "",
-          "Rubric (fixed in commit c1ce68c before any count was looked at; the judge sees the "
+          "Rubric (fixed in commit 98551bf before any count was looked at; the judge sees the "
           "artifact name, the writer's job id, the agent's own one-line reason for the write "
           "and the text):", ""]
     L += ["> " + ln if ln else ">" for ln in RUBRIC.split("\n")]

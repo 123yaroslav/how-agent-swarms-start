@@ -1,6 +1,6 @@
 # Collaboration logs in context: a proxy for C5 (EXPLORATORY)
 
-Status: EXPLORATORY, not pre-registered. Written on 2026-11-08 and committed at 07:34 UTC+5 (2f99a85) with
+Status: EXPLORATORY, not pre-registered. Written on 2026-11-08 and committed at 07:34 UTC+5 (a72848a) with
 `experiments/incontext_c5.py` and the two blocks (`results/explore/incontext_c5_blocks.json`)
 before any episode of that script ran. The only calls made before the commit are the nine
 token-count calls of `tokens` (one first-turn prompt per model and arm, no episode). No result

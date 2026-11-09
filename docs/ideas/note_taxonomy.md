@@ -19,7 +19,7 @@ An item is one store_put by the live agent whose text is not a plain job output 
 
 Items: 1212, of which 1127 are code NOTEs. Judge labels: {'addressed': 930, 'status': 239, 'other': 36, 'memory': 7}. Episodes whose code NOTE flag differs from the items: 0.
 
-Rubric (fixed in commit c1ce68c before any count was looked at; the judge sees the artifact name, the writer's job id, the agent's own one-line reason for the write and the text):
+Rubric (fixed in commit 98551bf before any count was looked at; the judge sees the artifact name, the writer's job id, the agent's own one-line reason for the write and the text):
 
 > Give the artifact exactly one label.
 >

@@ -5,7 +5,7 @@
 Reads the prompts written by experiments/realworld_prompts_fetch.py
 (data/raw/framework_prompts/, read as text only) and the manual labels in
 results/realworld_prompts/labels_manual.csv (written and committed before the linter was run on
-these prompts, commit 78c2c1b). Writes results/realworld_prompts/lint.json: the findings per
+these prompts, commit d7415ba). Writes results/realworld_prompts/lint.json: the findings per
 prompt, the confusion counts, precision and recall with Wilson 95% intervals, and the
 prevalence of each pattern over prompts and over projects.
 

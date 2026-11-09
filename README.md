@@ -31,7 +31,7 @@ OpenAI-compatible server (set `SWARM_OAI_API_KEY`).
 Python 3.12 and `uv`. Keys go in `.env` (`ADAPTION_API_KEY`). Every LLM call goes through
 `swarm.llm.LLM` with a cache and a spend cap, so scripts rerun from the cache.
 
-- Pre-registration `docs/prereg.md` (frozen at commit d8900cb), deviations `docs/deviations.md`.
+- Pre-registration `docs/prereg.md` (frozen at commit 0a332ff), deviations `docs/deviations.md`.
 - Confirmatory runs `experiments/scale_confirm_run.py`, evaluation `experiments/scale_confirm_eval.py`, results `docs/results_confirmatory.md`.
 - Report numbers and figures `experiments/build_report.py`, rendering `experiments/render_official.py`.
 - Tests `uv run pytest -q`.

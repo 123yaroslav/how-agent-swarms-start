@@ -11,7 +11,7 @@ Files:
   `results/raw/scale/*.jsonl` one line at a time, skips a partial last line, selects the
   confirmatory episodes exactly as `experiments/scale_confirm_eval.py` does, and recomputes each
   episode three ways: registered (the frozen code), D10 (the secondary scoring added in commits
-  d2cfb2c and ef001c4 while this audit ran: a write at the agent's own deliverable path is not a
+  d97c639 and a9efb2b while this audit ran: a write at the agent's own deliverable path is not a
   NOTE), and corrected (D10 plus the rule fixes proposed here). Peak RSS 57 MB, about 4 s.
 - `tests/test_scoring_audit.py` holds one test per finding. 11 xfail tests (strict, AssertionError
   only) assert what the measure should do and fail today. 3 tests check the patch and are skipped
