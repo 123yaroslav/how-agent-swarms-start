@@ -1,5 +1,5 @@
 % TITLE: Agents That Share Storage Take Each Other's Work but Do Not Ask or Answer: A Pre-Registered Test of How Agent Swarms Start
-% AUTHOR: Yaroslav Rogoza | Independent researcher
+% AUTHOR: Yaroslav Rogoza, with Claude (Anthropic) | Independent researcher
 % ABSTRACT
 In 2026 about 1,200 agents built a message board in a shared package cache, starting from one blocked agent's request for a file. We ask whether today's agents take that first step on their own. In a pre-registered study, agents run data jobs on a shared store, and some jobs cannot finish without a dataset that only another job produces. Across six open-weight models from four families, blocked agents under the plain prompt did not ask other jobs for help. When nothing forbade it, they quietly took other jobs' work instead, in up to {{c3_code_max}} of blocked episodes, and one rule in the system prompt nearly stopped this. One sentence permitting notes made most of them ask. Without it they almost never answered another agent's note, even one they had seen. Two closed models, a newer open model and a model trained to run agent swarms behaved the same way in exploratory runs. No pre-registered fleet without permission formed a message board, even at {{c4_max_size_noperm}} agents, while every pre-registered fleet with permission did. Two registered tests failed as written, and we report why. The registered test of collaboration fine-tuning could not be run. The main risk in shared storage today is silent taking. Most framework prompts that give agents shared storage lack the one-line rule against it, and one framework's memory-tool sentence made one of three models leave notes in shared memory. We release a prompt linter, propensity cards and guidelines.
 % END
@@ -129,7 +129,7 @@ Agents that share storage do not start talking on their own. They take each othe
 
 ## Code and Data
 
-- Code, the prompt linter, the propensity card, guidelines, transcripts and per-condition results are at {{repo_url}}. The repository explains how to check your own prompts and models and rebuilds every number in this report from the released data.
+- Code, the prompt linter, the propensity card, guidelines, transcripts and per-condition results are at https://github.com/123yaroslav/how-agent-swarms-start. The repository explains how to check your own prompts and models and rebuilds every number in this report from the released data.
 - Pre-existing code, adapted during the sprint, is the LLM client with its cache, a review script and the renderer into this template, from the author's October 2026 sprint. The repository's pre-sprint log lists it. All experiments were written and run during the sprint.
 
 ## References
@@ -185,4 +185,4 @@ Every agent gets the same system prompt with its job, its tools and its turn bud
 
 ## LLM Usage Statement
 
-{{llm_usage_statement}}
+We used Claude (Anthropic) as a coding and analysis assistant. It implemented the experiment code under our direction, ran simulations, summarised related work, drafted sections of this report and generated the figures from the result files. Codex (OpenAI) and separate Claude instances served as adversarial reviewers of the plan and of the report. Every number in the report is produced by scripts from the result files. We checked claims and references against their sources and take responsibility for the content. Y. R. designed the study, ran the experiments and wrote the report with AI assistance.
